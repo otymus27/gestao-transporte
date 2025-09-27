@@ -1,0 +1,7 @@
+package com.br.sistema.entities.DTO;
+
+// dto para usuario logar alterar propria senha
+public record AlterarSenhaRequestDTO(
+        String senhaAtual,
+        String novaSenha
+) {}
