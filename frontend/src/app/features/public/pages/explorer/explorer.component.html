@@ -1,0 +1,110 @@
+<div class="explorer-container">
+  <!-- Cabeçalho -->
+  <header class="explorer-header">
+    <h2 class="explorer-title">Protocolos HRG - SES DF</h2>
+  </header>
+
+  <!-- Barra de Ações -->
+  <nav class="action-menu">
+    <button class="menu-button" (click)="voltar()" [disabled]="!pastaAtual">
+      <i class="fas fa-arrow-up"></i> Voltar
+    </button>
+    <button
+      class="menu-button"
+      (click)="navegarPara(-1)"
+      [disabled]="!pastaAtual"
+    >
+      <i class="fas fa-folder"></i> Raiz
+    </button>
+    <button class="menu-button" (click)="navegarParaHome()">
+      <i class="fas fa-home"></i> Home
+    </button>
+  </nav>
+
+  <!-- Conteúdo principal -->
+  <main class="explorer-content">
+    <!-- Lista de Pastas Raiz -->
+    <div
+      *ngIf="!loading && pastas.length > 0 && !pastaAtual"
+      class="card-container"
+    >
+      <div
+        class="card folder-card"
+        *ngFor="let pasta of pastas"
+        (click)="abrirPasta(pasta)"
+      >
+        <div class="icon">📁</div>
+        <div class="name" [title]="pasta.nome">{{ pasta.nome }}</div>
+      </div>
+    </div>
+
+    <!-- Subpastas e Arquivos -->
+    <div *ngIf="!loading && pastaAtual" class="card-container">
+      <div
+        class="card folder-card"
+        *ngFor="let sub of pastaAtual.subPastas"
+        (click)="abrirSubPasta(sub)"
+      >
+        <div class="icon">📁</div>
+        <div class="name" [title]="sub.nome">{{ sub.nome }}</div>
+      </div>
+
+      <div
+        class="card file-card"
+        *ngFor="let arquivo of arquivos"
+        (click)="abrirArquivo(arquivo)"
+      >
+        <div class="icon">
+          <img [src]="getIcon(arquivo)" alt="icone" class="file-icon" />
+        </div>
+        <div class="name" [title]="arquivo.nome">{{ arquivo.nome }}</div>
+        <div class="size">
+          {{ publicService.formatarTamanho(arquivo.tamanho) }}
+        </div>
+      </div>
+
+      <!-- Mensagem caso vazio -->
+      <p
+        *ngIf="pastaAtual.subPastas.length === 0 && arquivos.length === 0"
+        class="empty-message"
+      >
+        Nenhuma subpasta ou arquivo encontrado nesta pasta.
+      </p>
+    </div>
+
+    <!-- Estado vazio -->
+    <p
+      *ngIf="!loading && pastas.length === 0 && !pastaAtual"
+      class="empty-message"
+    >
+      Nenhuma pasta pública encontrada.
+    </p>
+  </main>
+
+  <!-- Modal de Arquivo -->
+  <div class="modal-backdrop" *ngIf="arquivoSelecionado">
+    <div class="modal-custom">
+      <h3>{{ arquivoSelecionado.nome }}</h3>
+      <p>O que deseja fazer?</p>
+      <div class="text-center">
+        <button
+          class="btn btn-primary me-2"
+          (click)="visualizarArquivo(arquivoSelecionado)"
+        >
+          <i class="fas fa-eye"></i> Abrir
+        </button>
+
+        <button
+          class="btn btn-success me-2"
+          (click)="baixarArquivo(arquivoSelecionado)"
+        >
+          <i class="fas fa-download"></i> Fazer Download
+        </button>
+
+        <button class="btn btn-secondary" (click)="fecharModal()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

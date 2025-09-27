@@ -1,0 +1,142 @@
+<div class="sidebar" [class.active]="isCollapsed">
+  <div class="header">
+    <button class="btn btn-transparent" (click)="toggle()">
+      <i class="bi bi-list"></i>
+    </button>
+  </div>
+  <ul class="nav flex-column">
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        routerLink="/admin/dashboard"
+        routerLinkActive="active"
+        (click)="hideAllSubmenus()"
+      >
+        <i class="bi bi-house-door"></i>
+        <span>Início</span>
+      </a>
+    </li>
+
+    <!-- Pastas - visível para ADMIN, GERENTE e BASIC -->
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isBasic()">
+      <a class="nav-link" (click)="toggleSubmenu('pastas')">
+        <i class="bi bi-bookmark"></i>
+        <span>Pastas</span>
+        <i
+          class="bi bi-chevron-down submenu-icon"
+          [class.rotated]="showPastasSubmenu"
+        ></i>
+      </a>
+      <ul class="submenu" *ngIf="showPastasSubmenu">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="/admin/pastas/gerenciar"
+            routerLinkActive="active"
+          >
+            <i class="bi bi-plus-circle"></i>
+            <span>Gerenciar</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Formulários - apenas ADMIN -->
+    <li class="nav-item" *ngIf="isAdmin()">
+      <a class="nav-link" (click)="toggleSubmenu('formularios')">
+        <i class="bi bi-files"></i>
+        <span>Formulários</span>
+        <i
+          class="bi bi-chevron-down submenu-icon"
+          [class.rotated]="showFormulariosSubmenu"
+        ></i>
+      </a>
+      <ul class="submenu" *ngIf="showFormulariosSubmenu">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="/admin/formularios"
+            routerLinkActive="active"
+          >
+            <i class="bi bi-folder2-open"></i>
+            <span>Gerenciar</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Usuários - apenas ADMIN -->
+    <li class="nav-item" *ngIf="isAdmin()">
+      <a class="nav-link" (click)="toggleSubmenu('usuarios')">
+        <i class="bi bi-person"></i>
+        <span>Usuários</span>
+        <i
+          class="bi bi-chevron-down submenu-icon"
+          [class.rotated]="showUsuariosSubmenu"
+        ></i>
+      </a>
+      <ul class="submenu" *ngIf="showUsuariosSubmenu">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="/admin/usuarios/gerenciar"
+            routerLinkActive="active"
+          >
+            <i class="bi bi-plus-circle"></i>
+            <span>Gerenciar</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Farmacia - apenas ADMIN -->
+    <li class="nav-item" *ngIf="isAdmin()">
+      <a class="nav-link" (click)="toggleSubmenu('farmacia')">
+        <i class="bi bi-person"></i>
+        <span>Farmácia</span>
+        <i
+          class="bi bi-chevron-down submenu-icon"
+          [class.rotated]="showFarmaciaSubmenu"
+        ></i>
+      </a>
+      <ul class="submenu" *ngIf="showFarmaciaSubmenu">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="/admin/farmacia"
+            routerLinkActive="active"
+          >
+            <i class="bi bi-plus-circle"></i>
+            <span>Gerenciar</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Perfil - todos logados -->
+    <li class="nav-item" *ngIf="isLogado()">
+      <a
+        class="nav-link"
+        routerLink="/admin/perfil/alterar-senha"
+        routerLinkActive="active"
+        (click)="hideAllSubmenus()"
+      >
+        <i class="bi bi-key"></i>
+        <span>Alterar Senha</span>
+      </a>
+    </li>
+
+    <!-- Sobre - todos logados -->
+    <li class="nav-item" *ngIf="isLogado()">
+      <a
+        class="nav-link"
+        routerLink="/admin/sobre"
+        routerLinkActive="active"
+        (click)="hideAllSubmenus()"
+      >
+        <i class="bi bi-info-circle"></i>
+        <span>Sobre</span>
+      </a>
+    </li>
+  </ul>
+</div>

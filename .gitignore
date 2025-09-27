@@ -1,0 +1,69 @@
+# ==============================
+# Java / Spring Boot / Maven / Gradle
+# ==============================
+
+# Compilados
+*.class
+*.war
+*.ear
+*.jar
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Logs
+*.log
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*.bak
+*.tmp
+*.DS_Store
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+
+# ==============================
+# Angular / Node
+# ==============================
+
+# dependências
+node_modules/
+
+# builds
+dist/
+tmp/
+out-tsc/
+
+# cache
+.npm/
+.cache/
+.angular/
+.angular/cache/
+
+# IDEs
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# SO
+Thumbs.db
+.DS_Store
+
+

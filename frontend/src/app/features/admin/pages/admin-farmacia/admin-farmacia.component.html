@@ -1,0 +1,33 @@
+<div class="card shadow-sm p-3">
+  <h2>💊 {{ pasta?.nomePasta }}</h2>
+  <p><small>Caminho: {{ pasta?.caminhoCompleto }}</small></p>
+
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Subpastas -->
+    <h5>Pastas</h5>
+    <ul class="list-group mb-3">
+      <li *ngFor="let sp of subPastas" class="list-group-item">
+        📁 {{ sp.nomePasta }}
+      </li>
+      <li *ngIf="subPastas.length === 0" class="list-group-item text-muted">
+        Nenhuma subpasta encontrada.
+      </li>
+    </ul>
+
+    <!-- Arquivos -->
+    <h5>Arquivos</h5>
+    <ul class="list-group">
+      <li *ngFor="let arq of arquivos" class="list-group-item">
+        📄 {{ arq.nome }} ({{ arq.tamanho }} KB)
+      </li>
+      <li *ngIf="arquivos.length === 0" class="list-group-item text-muted">
+        Nenhum arquivo encontrado.
+      </li>
+    </ul>
+  </div>
+</div>
+

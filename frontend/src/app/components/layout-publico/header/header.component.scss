@@ -1,0 +1,24 @@
+.main-header {
+  background: #717f96; // azul institucional
+  color: #fff;
+  padding: 2rem 1rem; // aumenta a altura
+  text-align: center;
+
+  .logo-img {
+    height: 80px; // aumenta o logo
+    width: auto;
+  }
+
+  h1 {
+    font-size: 2.2rem; // título maior
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 400;
+    opacity: 0.9;
+  }
+}

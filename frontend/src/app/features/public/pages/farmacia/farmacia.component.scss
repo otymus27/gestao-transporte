@@ -1,0 +1,264 @@
+.explorer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f6fa;
+  font-family: Arial, sans-serif;
+}
+
+.explorer-header {
+  padding: 1rem;
+  background: #34495e;
+  color: #fff;
+}
+
+.explorer-title {
+  margin: 0;
+}
+
+.action-menu {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  background: #ecf0f1;
+  border-bottom: 1px solid #dcdde1;
+}
+
+.menu-button {
+  background: #3498db;
+  border: none;
+  padding: 0.6rem 1rem;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.menu-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+.menu-button:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+/* Breadcrumb */
+.breadcrumb-container {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  background: #fff;
+  border-bottom: 1px solid #dcdde1;
+}
+.breadcrumb-link {
+  color: #2980b9;
+  cursor: pointer;
+  text-decoration: none;
+}
+.breadcrumb-link.active {
+  font-weight: bold;
+  color: #2c3e50;
+}
+.breadcrumb-separator {
+  margin: 0 0.3rem;
+  color: #7f8c8d;
+}
+
+/* Conteúdo Principal */
+.explorer-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #dcdde1;
+  border-radius: 8px;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.file-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.name {
+  font-size: 0.9rem;
+  word-break: break-word;
+  margin-bottom: 0.3rem;
+}
+.size {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+.empty-message {
+  margin-top: 2rem;
+  color: #7f8c8d;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(44, 62, 80, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 400px;
+  text-align: center;
+}
+.modal-actions {
+  margin: 1rem 0;
+}
+.modal-button {
+  padding: 0.6rem 1.2rem;
+  margin: 0.4rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.modal-button.open {
+  background: #27ae60;
+  color: #fff;
+}
+.modal-button.download {
+  background: #2980b9;
+  color: #fff;
+}
+.modal-button.cancel {
+  background: #e74c3c;
+  color: #fff;
+}
+.modal-button:hover {
+  opacity: 0.9;
+}
+
+/* Estilos unificados para todos os modais */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.modal-custom {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  width: 100%;
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out; /* Adiciona uma animação */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Título e seções */
+.modal-custom h3 {
+  font-weight: 600;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  color: #343a40;
+}
+
+/* Estilo para as listas */
+.list-group-scrollable {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.list-group-scrollable .list-group-item {
+  border: none;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  margin-bottom: 0.25rem;
+}
+
+.list-group-scrollable .list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Botões de ação */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+button {
+  position: relative;
+
+  .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 120%; /* acima do botão */
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+
+  &:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+}
