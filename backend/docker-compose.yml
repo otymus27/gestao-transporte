@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   api:
     build: .
@@ -6,26 +5,4 @@ services:
     env_file:
       - .env
     ports:
-      - "8082:8082"
-    volumes:
-      - ./storage:${STORAGE_PATH}
-    depends_on:
-      - mysql
-
-  mysql:
-    image: mysql:5.7
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-
-volumes:
-  mysql_data:
+      - "8080:8080"
