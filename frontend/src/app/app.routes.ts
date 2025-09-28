@@ -1,6 +1,6 @@
 // src/app/app.routes.ts
 import { Routes } from '@angular/router';
-import { Login } from './components/layout-admin/login/login';
+
 import { Principal } from './components/layout-admin/principal/principal';
 import { AuthGuard } from './guards/auth.guard';
 import { UsuarioComponent } from './components/usuario/usuario.component';
@@ -16,6 +16,7 @@ import { ExplorerFormPublicComponent } from './features/public/pages/formularios
 import { AdminFormularioComponent } from './features/admin/pages/admin-formulario/admin-formulario.component';
 import { FarmaciaExplorerPublicoComponent } from './features/public/pages/farmacia/farmacia.component';
 import { SobreComponent } from './components/layout-admin/sobre/sobre.component';
+import { Login } from './components/login/login';
 
 export const routes: Routes = [
   // --- Rotas Públicas ---
@@ -121,8 +122,8 @@ export const routes: Routes = [
         ],
       },
 
-       // 🔹 Página Sobre (admin)
-       {
+      // 🔹 Página Sobre (admin)
+      {
         path: 'sobre',
         component: SobreComponent,
         data: { roles: ['ADMIN', 'GERENTE', 'BASIC'] }, // todos os logados

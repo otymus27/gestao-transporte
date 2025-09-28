@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-
+import { AuthService } from '../../services/auth.service';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MdbFormsModule } from 'mdb-angular-ui-kit/forms';
 import { MdbRippleModule } from 'mdb-angular-ui-kit/ripple';
@@ -11,14 +11,15 @@ import { HttpErrorResponse } from '@angular/common/http';
   selector: 'app-login',
   standalone: true,
   imports: [
+    FormsModule,
     MdbFormsModule,
     CommonModule,
     MdbFormsModule,
     MdbRippleModule,
     RouterModule,
   ],
-  templateUrl: './../login/login.html',
-  styleUrl: './../login/login.scss',
+  templateUrl: './login.html',
+  styleUrl: './login.scss',
 })
 export class Login {
   // A propriedade 'credentials' já está em uso, vamos mantê-la

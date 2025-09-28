@@ -1,0 +1,53 @@
+.login-page {
+  min-height: 100vh;
+  background: url("/assets/ambulancia.jpg") no-repeat center center;
+  background-size: cover;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .background-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  .login-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .login-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .login-logo {
+    height: 60px;
+  }
+
+  .avatar-icon {
+    width: 60px;
+    height: 60px;
+    background: #1976d2;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .form-control {
+    background: #fff !important;
+    color: #000;
+  }
+
+  .input-group-text {
+    border-right: none;
+  }
+}

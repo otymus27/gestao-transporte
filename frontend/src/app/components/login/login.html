@@ -1,0 +1,105 @@
+<div class="login-page">
+  <!-- Overlay escuro -->
+  <div class="background-overlay"></div>
+
+  <!-- Conteúdo central -->
+  <div class="login-content">
+    <div class="login-card shadow-lg">
+      <div class="card-body p-4 p-md-5">
+        <!-- Logo e título -->
+        <div class="text-center mb-4">
+          <img src="assets/logo_sesdf.png" alt="Logo" class="login-logo mb-3" />
+          <h4 class="fw-bold text-dark">
+            Bem-vindo ao Sistema de Gestão de Solicitações
+          </h4>
+          <p class="text-muted">Faça login para continuar</p>
+        </div>
+
+        <!-- Ícone cadeado -->
+        <div class="text-center mb-4">
+          <div class="avatar-icon mx-auto">
+            <i class="fa fa-lock"></i>
+          </div>
+        </div>
+
+        <!-- Mensagem de erro global -->
+        <div *ngIf="errorMessage" class="alert alert-danger text-center mb-3">
+          {{ errorMessage }}
+        </div>
+
+        <!-- Formulário -->
+        <form (ngSubmit)="onSubmit()">
+          <!-- Usuário -->
+          <div class="form-outline mb-4">
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="fa fa-user"></i>
+              </span>
+              <input
+                type="text"
+                id="usuario"
+                class="form-control form-control-lg"
+                [(ngModel)]="credentials.username"
+                name="username"
+                placeholder="Digite seu usuário"
+                required
+              />
+            </div>
+            <div *ngIf="usernameError" class="text-danger small mt-1">
+              {{ usernameError }}
+            </div>
+          </div>
+
+          <!-- Senha -->
+          <div class="form-outline mb-4">
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="fa fa-lock"></i>
+              </span>
+              <input
+                type="password"
+                id="senha"
+                class="form-control form-control-lg"
+                [(ngModel)]="credentials.password"
+                name="password"
+                placeholder="Digite sua senha"
+                required
+              />
+            </div>
+            <div *ngIf="passwordError" class="text-danger small mt-1">
+              {{ passwordError }}
+            </div>
+          </div>
+
+          <!-- Botão de login -->
+          <div class="d-grid gap-2 mb-3">
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg"
+              [disabled]="loading"
+            >
+              <span
+                *ngIf="loading"
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              {{ loading ? 'Entrando...' : 'Entrar' }}
+            </button>
+          </div>
+
+          <!-- Links -->
+          <div class="text-center mb-3">
+            <a href="#" class="text-muted small">Esqueceu sua senha?</a>
+          </div>
+
+          <div class="d-grid gap-2">
+            <a routerLink="/" class="btn btn-outline-secondary btn-lg">
+              <i class="fa fa-home me-2"></i> Voltar para a página inicial
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
