@@ -32,12 +32,17 @@ public class Usuario implements UserDetails {
     @Column(name = "nome_completo", nullable = false, length = 150)
     private String nome;
 
+
+
     /**
      * Indica se a senha atual é provisória.
      * Usada para forçar o usuário a alterá-la no próximo login.
      */
     @Column(nullable = false)
     private boolean senhaProvisoria = false;
+
+    @Column(nullable = false)
+    private boolean ativo = true; // ✅ Campo para ativar ou desativar usuario
 
     @ManyToMany(fetch = FetchType.EAGER) // ✅ FetchType.EAGER para carregar as permissões imediatamente
     @JoinTable(
@@ -85,8 +90,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // Por padrão, retorne 'true' para indicar que a conta está habilitada.
-        return true;
+        return this.ativo;
     }
 
     /**

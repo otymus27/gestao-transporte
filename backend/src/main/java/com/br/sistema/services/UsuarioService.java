@@ -1,6 +1,7 @@
 package com.br.sistema.services;
 
 
+import com.br.sistema.entities.DTO.UsuarioDTO;
 import com.br.sistema.entities.DTO.UsuarioLogadoDTO;
 import com.br.sistema.entities.Role.Role;
 import com.br.sistema.entities.Usuario.Usuario;
@@ -115,9 +116,10 @@ public class UsuarioService {
         Usuario usuarioExistente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id " + id));
 
-        // Atualizar username e nome
+        // Atualizar campos
         usuarioExistente.setUsername(usuarioComNovosDados.getUsername());
         usuarioExistente.setNome(usuarioComNovosDados.getNome());
+        usuarioExistente.setAtivo(usuarioComNovosDados.isAtivo());
 
         // ✅ Atualizar roles
         if (usuarioComNovosDados.getRoles() != null) {
@@ -190,7 +192,7 @@ public class UsuarioService {
     }
 
 
-    // Listar todas as marcas com paginação
+    // Listar todas os usuarios com paginação
     public Page<Usuario> listar(Pageable pageable) {
         return usuarioRepository.findAll(pageable);
     }
@@ -204,5 +206,7 @@ public class UsuarioService {
     public Page<Usuario> buscarPorLogin(String username, Pageable pageable) {
         return usuarioRepository.findByUsernameContainingIgnoreCase(username,pageable);
     }
+
+
 
 }

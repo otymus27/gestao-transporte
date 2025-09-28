@@ -9,6 +9,7 @@ public record UsuarioResponseDTO(
         Long id,
         String username,
         String nome,
+        Boolean ativo,
         Set<RoleDto> roles
 ) {
     public record RoleDto(Long id, String nome) {}
@@ -24,6 +25,7 @@ public record UsuarioResponseDTO(
                 usuario.getId(),
                 usuario.getUsername(),
                 usuario.getNome(),
+                usuario.isAtivo(),
                 rolesDto
         );
     }

@@ -6,6 +6,7 @@ public record UsuarioCreateDTO(
         String username,
         String password,
         String nome,
+        Boolean ativo,
         Set<RoleIdDto> roles
 ) {
     public record RoleIdDto(Long id) {}

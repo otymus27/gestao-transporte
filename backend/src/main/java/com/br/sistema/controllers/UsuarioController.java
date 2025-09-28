@@ -1,6 +1,7 @@
 package com.br.sistema.controllers;
 
 import com.br.sistema.entities.DTO.UsuarioCreateDTO;
+import com.br.sistema.entities.DTO.UsuarioDTO;
 import com.br.sistema.entities.DTO.UsuarioLogadoDTO;
 import com.br.sistema.entities.DTO.UsuarioResponseDTO;
 import com.br.sistema.entities.Usuario.Usuario;
@@ -355,10 +356,6 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-
-
-
-
 
 
 }
