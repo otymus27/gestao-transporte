@@ -1,13 +1,16 @@
 package com.br.sistema.entities.Usuario;
 
 import com.br.sistema.entities.Role.Role;
+import com.br.sistema.entities.Solicitacao.Solicitacao;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -52,6 +55,9 @@ public class Usuario implements UserDetails {
     )
 
     private Set<Role> roles;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Solicitacao> solicitacoes = new ArrayList<>();
 
     // ✅ Métodos da interface UserDetails
 

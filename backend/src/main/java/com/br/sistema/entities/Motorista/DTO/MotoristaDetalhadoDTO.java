@@ -6,7 +6,7 @@ import com.br.sistema.entities.Solicitacao.Solicitacao;
 
 import java.util.List;
 
-public record MotoristaDTO(
+public record MotoristaDetalhadoDTO(
         Long id,
         String matricula,
         String nome,
@@ -15,14 +15,14 @@ public record MotoristaDTO(
 ) {
 
     // ✅ Método de conversão com opção de incluir solicitações
-    public static MotoristaDTO fromEntity(Motorista motorista, boolean incluirSolicitacoes) {
+    public static MotoristaDetalhadoDTO fromEntity(Motorista motorista, boolean incluirSolicitacoes) {
         List<SolicitacaoResumoDTO> solicitacoes = incluirSolicitacoes
                 ? motorista.getSolicitacoes().stream()
-                .map(MotoristaDTO::mapSolicitacaoResumo)
+                .map(MotoristaDetalhadoDTO::mapSolicitacaoResumo)
                 .toList()
                 : List.of();
 
-        return new MotoristaDTO(
+        return new MotoristaDetalhadoDTO(
                 motorista.getId(),
                 motorista.getMatricula(),
                 motorista.getNome(),

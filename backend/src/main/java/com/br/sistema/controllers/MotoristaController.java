@@ -1,7 +1,7 @@
 package com.br.sistema.controllers;
 
 import com.br.sistema.entities.Motorista.DTO.MotoristaRequestDTO;
-import com.br.sistema.entities.Motorista.DTO.MotoristaDTO;
+import com.br.sistema.entities.Motorista.DTO.MotoristaDetalhadoDTO;
 import com.br.sistema.entities.Usuario.Usuario;
 import com.br.sistema.exceptions.ErrorMessage;
 import com.br.sistema.services.MotoristaService;
@@ -9,29 +9,40 @@ import com.br.sistema.utils.AuthService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 
 
 @RestController
 @RequestMapping("/api/motorista")
-@RequiredArgsConstructor
 public class MotoristaController {
 
     private static final Logger logger = LoggerFactory.getLogger(MotoristaController.class);
 
+    @Autowired
     private final MotoristaService motoristaService;
     private final AuthService authService;
+
+    public MotoristaController(MotoristaService motoristaService, AuthService authService) {
+        this.motoristaService = motoristaService;
+        this.authService = authService;
+    }
 
     // ✅ Cadastrar motorista
     @PostMapping
@@ -43,7 +54,7 @@ public class MotoristaController {
         try {
             Usuario usuarioLogado = authService.getUsuarioLogado(authentication);
 
-            MotoristaDTO motoristaSalvo = motoristaService.cadastrar(dto, usuarioLogado);
+            MotoristaDetalhadoDTO motoristaSalvo = motoristaService.cadastrar(dto, usuarioLogado);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(motoristaSalvo);
 
@@ -97,7 +108,7 @@ public class MotoristaController {
         try {
             Usuario usuarioLogado = authService.getUsuarioLogado(authentication);
 
-            MotoristaDTO motoristaAtualizado = motoristaService.atualizar(id, dto, usuarioLogado);
+            MotoristaDetalhadoDTO motoristaAtualizado = motoristaService.atualizar(id, dto, usuarioLogado);
 
             return ResponseEntity.ok(motoristaAtualizado);
 
@@ -200,7 +211,7 @@ public class MotoristaController {
     @Transactional(readOnly = true)
     public ResponseEntity<?> buscarPorId(@PathVariable Long id, HttpServletRequest request) {
         try {
-            MotoristaDTO motorista = motoristaService.buscarPorId(id);
+            MotoristaDetalhadoDTO motorista = motoristaService.buscarPorId(id);
             return ResponseEntity.ok(motorista);
 
         } catch (EntityNotFoundException e) {
@@ -231,7 +242,7 @@ public class MotoristaController {
     @Transactional(readOnly = true)
     public ResponseEntity<?> buscarDetalhado(@PathVariable Long id, HttpServletRequest request) {
         try {
-            MotoristaDTO motorista = motoristaService.buscarDetalhado(id);
+            MotoristaDetalhadoDTO motorista = motoristaService.buscarDetalhado(id);
             return ResponseEntity.ok(motorista);
 
         } catch (EntityNotFoundException e) {
@@ -255,6 +266,69 @@ public class MotoristaController {
         }
     }
 
+    @GetMapping("/buscar")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> filtrar(@RequestParam(required = false) String nome,
+                                     @RequestParam(required = false) String matricula,
+                                     Pageable pageable,
+                                     HttpServletRequest request) {
+        try {
+            var motoristas = motoristaService.filtrar(nome, matricula, pageable);
+            return ResponseEntity.ok(motoristas);
+
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao filtrar motoristas", e);
+            ErrorMessage error = new ErrorMessage(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Erro interno no servidor",
+                    "Erro ao buscar motoristas.",
+                    request.getRequestURI()
+            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @GetMapping("/relatorio/excel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> exportarExcel(@RequestParam(required = false) String nome,
+                                                  @RequestParam(required = false) String matricula) throws IOException {
+        var stream = motoristaService.exportarExcel(nome, matricula);
+
+        InputStreamResource resource = new InputStreamResource(stream);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=motoristas.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(resource);
+    }
+
+    @GetMapping("/relatorio/csv")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> exportarCsv(@RequestParam(required = false) String nome,
+                                                @RequestParam(required = false) String matricula) {
+        var stream = motoristaService.exportarCsv(nome, matricula);
+
+        InputStreamResource resource = new InputStreamResource(stream);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=motoristas.csv")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(resource);
+    }
+
+    @GetMapping("/relatorio/pdf")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> exportarPdf(@RequestParam(required = false) String nome,
+                                                @RequestParam(required = false) String matricula) {
+        var stream = motoristaService.exportarPdf(nome, matricula);
+
+        InputStreamResource resource = new InputStreamResource(stream);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=motoristas.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(resource);
+    }
 
 
 

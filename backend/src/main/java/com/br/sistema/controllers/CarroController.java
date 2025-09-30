@@ -1,6 +1,6 @@
 package com.br.sistema.controllers;
 
-import com.br.sistema.entities.Carro.DTO.CarroDTO;
+import com.br.sistema.entities.Carro.DTO.CarroDetalhadoDTO;
 import com.br.sistema.entities.Carro.DTO.CarroRequestDTO;
 import com.br.sistema.entities.Usuario.Usuario;
 import com.br.sistema.exceptions.ErrorMessage;
@@ -14,7 +14,6 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,8 +22,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.time.Instant;
 
 @RestController
 @RequestMapping("/api/carros")
@@ -52,7 +52,7 @@ public class CarroController {
     ) {
         try {
             Usuario usuarioLogado = authService.getUsuarioLogado(authentication);
-            CarroDTO carroSalvo = carroService.cadastrar(dto, usuarioLogado);
+            CarroDetalhadoDTO carroSalvo = carroService.cadastrar(dto, usuarioLogado);
             return ResponseEntity.status(HttpStatus.CREATED).body(carroSalvo);
         } catch (EntityExistsException e) {
             ErrorMessage error = new ErrorMessage(
@@ -105,7 +105,7 @@ public class CarroController {
     ) {
         try {
             Usuario usuarioLogado = authService.getUsuarioLogado(authentication);
-            CarroDTO atualizado = carroService.atualizar(id, dto, usuarioLogado);
+            CarroDetalhadoDTO atualizado = carroService.atualizar(id, dto, usuarioLogado);
             return ResponseEntity.ok(atualizado);
         } catch (EntityNotFoundException e) {
             ErrorMessage error = new ErrorMessage(
@@ -140,8 +140,9 @@ public class CarroController {
     // ✅ Listar carros paginados (sem solicitações)
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
-    public ResponseEntity<Page<CarroDTO>> listar(Pageable pageable) {
-        Page<CarroDTO> carros = carroService.listar(pageable);
+    public ResponseEntity<Page<CarroDetalhadoDTO>> listar(@RequestParam(required = false) String filtro,
+                                                          Pageable pageable) {
+        var carros = carroService.listar(filtro, pageable);
         return ResponseEntity.ok(carros);
     }
 
@@ -153,7 +154,7 @@ public class CarroController {
             HttpServletRequest request
     ) {
         try {
-            CarroDTO carro = carroService.buscarPorId(id, true);
+            CarroDetalhadoDTO carro = carroService.buscarPorId(id, true);
             return ResponseEntity.ok(carro);
         } catch (EntityNotFoundException e) {
             ErrorMessage error = new ErrorMessage(
@@ -176,36 +177,6 @@ public class CarroController {
         }
     }
 
-    // ✅ Buscar carro por placa
-    @GetMapping("/buscarPorPlaca/{placa}")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
-    public ResponseEntity<?> buscarPorPlaca(
-            @PathVariable String placa,
-            HttpServletRequest request
-    ) {
-        try {
-            CarroDTO carro = carroService.buscarPorPlaca(placa, true);
-            return ResponseEntity.ok(carro);
-        } catch (EntityNotFoundException e) {
-            ErrorMessage error = new ErrorMessage(
-                    HttpStatus.NOT_FOUND.value(),
-                    "Registro não encontrado",
-                    e.getMessage(),
-                    request.getRequestURI()
-            );
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-
-        } catch (Exception e) {
-            logger.error("Erro inesperado ao buscar registro", e);
-            ErrorMessage error = new ErrorMessage(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Erro interno no servidor",
-                    "Erro ao buscar registro.",
-                    request.getRequestURI()
-            );
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-        }
-    }
 
     // ✅ Excluir carro
     @DeleteMapping("/{id}")
@@ -249,4 +220,88 @@ public class CarroController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<?> filtrar(@RequestParam(required = false) String placa,
+                                     @RequestParam(required = false) String marca,
+                                     @RequestParam(required = false) String modelo,
+                                     Pageable pageable,
+                                     HttpServletRequest request) {
+        try {
+            var carros = carroService.filtrar(placa, marca, modelo, pageable);
+            return ResponseEntity.ok(carros);
+
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao filtrar carros", e);
+            ErrorMessage error = new ErrorMessage(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Erro interno no servidor",
+                    "Erro ao buscar carros.",
+                    request.getRequestURI()
+            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    // ✅ Gerar relatório (sem paginação, mas aceita filtro)
+    @GetMapping("/relatorio")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    public ResponseEntity<?> gerarRelatorio(
+            @RequestParam(required = false) String filtro,
+            HttpServletRequest request
+    ) {
+        try {
+            var relatorio = carroService.gerarRelatorio(filtro);
+            return ResponseEntity.ok(relatorio);
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao gerar relatorio de carros", e);
+            ErrorMessage error = new ErrorMessage(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Erro interno no servidor",
+                    "Erro ao gerar relatorio de carros.",
+                    request.getRequestURI()
+            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    // ✅ Exportar Excel
+    @GetMapping("/relatorio/excel")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    public ResponseEntity<byte[]> exportarExcel(
+            @RequestParam(required = false) String filtro
+    ) throws IOException {
+        ByteArrayInputStream in = carroService.exportarExcel(filtro);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=relatorio_carros.xlsx")
+                .body(in.readAllBytes());
+    }
+
+    // ✅ Exportar CSV
+    @GetMapping("/relatorio/csv")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    public ResponseEntity<byte[]> exportarCsv(
+            @RequestParam(required = false) String filtro
+    ) throws IOException {
+        ByteArrayInputStream in = carroService.exportarCsv(filtro);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=relatorio_carros.csv")
+                .body(in.readAllBytes());
+    }
+
+    @GetMapping("/relatorio/pdf")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    public ResponseEntity<byte[]> exportarPdf(
+            @RequestParam(required = false) String filtro
+    ) throws IOException {
+        ByteArrayInputStream in = carroService.exportarPdf(filtro);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=relatorio_carros.pdf")
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(in.readAllBytes());
+    }
+
+
 }

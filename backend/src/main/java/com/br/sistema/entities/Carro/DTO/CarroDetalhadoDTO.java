@@ -6,7 +6,7 @@ import com.br.sistema.entities.Solicitacao.Solicitacao;
 
 import java.util.List;
 
-public record CarroDTO(
+public record CarroDetalhadoDTO(
         Long id,
         String marca,
         String modelo,
@@ -15,14 +15,14 @@ public record CarroDTO(
 ) {
 
     // ✅ Método de conversão com opção de incluir solicitações
-    public static CarroDTO fromEntity(Carro carro, boolean incluirSolicitacoes) {
+    public static CarroDetalhadoDTO fromEntity(Carro carro, boolean incluirSolicitacoes) {
         List<SolicitacaoResumoDTO> solicitacoes = incluirSolicitacoes
                 ? carro.getSolicitacoes().stream()
-                .map(CarroDTO::mapSolicitacaoResumo)
+                .map(CarroDetalhadoDTO::mapSolicitacaoResumo)
                 .toList()
                 : List.of();
 
-        return new CarroDTO(
+        return new CarroDetalhadoDTO(
                 carro.getId(),
                 carro.getMarca(),
                 carro.getModelo(),
