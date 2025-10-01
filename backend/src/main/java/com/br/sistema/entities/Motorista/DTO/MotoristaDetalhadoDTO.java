@@ -11,6 +11,7 @@ public record MotoristaDetalhadoDTO(
         String matricula,
         String nome,
         String telefone,
+        Boolean ativo,
         List<SolicitacaoResumoDTO> solicitacoes
 ) {
 
@@ -27,6 +28,7 @@ public record MotoristaDetalhadoDTO(
                 motorista.getMatricula(),
                 motorista.getNome(),
                 motorista.getTelefone(),
+                motorista.isAtivo(),
                 solicitacoes
         );
     }

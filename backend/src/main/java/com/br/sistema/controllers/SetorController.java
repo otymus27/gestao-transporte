@@ -5,13 +5,11 @@ import com.br.sistema.entities.Setor.DTO.SetorRequestDTO;
 import com.br.sistema.entities.Setor.DTO.SetorResponseDTO;
 import com.br.sistema.entities.Usuario.Usuario;
 import com.br.sistema.exceptions.ErrorMessage;
-import com.br.sistema.services.CarroService;
 import com.br.sistema.services.SetorService;
 import com.br.sistema.utils.AuthService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 
@@ -37,10 +33,6 @@ import java.nio.file.AccessDeniedException;
 public class SetorController {
 
     private static final Logger logger = LoggerFactory.getLogger(SetorController.class);
-
-
-
-
 
     @Autowired
     private final SetorService setorService;

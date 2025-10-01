@@ -5,6 +5,7 @@ import com.br.sistema.entities.Destino.Destino;
 import com.br.sistema.entities.Motorista.Motorista;
 import com.br.sistema.entities.Setor.Setor;
 import com.br.sistema.entities.Usuario.Usuario;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -39,6 +40,7 @@ public class Solicitacao {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_usuario", nullable = false)
+    @JsonBackReference
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.EAGER)

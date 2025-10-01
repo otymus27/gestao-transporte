@@ -4,6 +4,7 @@ public record MotoristaRelatorioDTO(
         Long id,
         String matricula,
         String nome,
-        String telefone
+        String telefone,
+        Boolean ativo
 ) {
 }

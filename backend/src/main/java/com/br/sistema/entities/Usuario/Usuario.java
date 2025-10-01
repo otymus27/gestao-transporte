@@ -2,6 +2,7 @@ package com.br.sistema.entities.Usuario;
 
 import com.br.sistema.entities.Role.Role;
 import com.br.sistema.entities.Solicitacao.Solicitacao;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,8 +36,6 @@ public class Usuario implements UserDetails {
     @Column(name = "nome_completo", nullable = false, length = 150)
     private String nome;
 
-
-
     /**
      * Indica se a senha atual é provisória.
      * Usada para forçar o usuário a alterá-la no próximo login.
@@ -57,6 +56,7 @@ public class Usuario implements UserDetails {
     private Set<Role> roles;
 
     @OneToMany(mappedBy = "usuario")
+    @JsonManagedReference
     private List<Solicitacao> solicitacoes = new ArrayList<>();
 
     // ✅ Métodos da interface UserDetails

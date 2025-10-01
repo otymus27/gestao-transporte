@@ -86,7 +86,7 @@ public class SolicitacaoController {
     // ✅ Atualizar solicitação
     @PatchMapping("/{id}")
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public ResponseEntity<?> atualizar(@PathVariable Long id,
                                        @Valid @RequestBody SolicitacaoRequestDTO dto,
                                        Authentication authentication,

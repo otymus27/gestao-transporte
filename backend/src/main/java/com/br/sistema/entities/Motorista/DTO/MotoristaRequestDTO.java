@@ -15,5 +15,7 @@ public record MotoristaRequestDTO(
 
         @NotBlank(message = "O telefone é obrigatório")
         @Size(max = 20, message = "O telefone deve ter no máximo 20 caracteres")
-        String telefone
+        String telefone,
+
+        Boolean ativo
 ) { }

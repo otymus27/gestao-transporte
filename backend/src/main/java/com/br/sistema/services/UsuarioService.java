@@ -1,6 +1,5 @@
 package com.br.sistema.services;
 
-
 import com.br.sistema.entities.DTO.UsuarioDTO;
 import com.br.sistema.entities.DTO.UsuarioLogadoDTO;
 import com.br.sistema.entities.Role.Role;
@@ -29,9 +28,7 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-    @Autowired
     private final RoleRepository roleRepository;
-    @Autowired
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioService(UsuarioRepository usuarioRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
@@ -142,8 +139,6 @@ public class UsuarioService {
         return usuarioRepository.save(usuarioExistente);
     }
 
-
-
     @Transactional(rollbackFor = Exception.class, noRollbackFor = {ResourceNotFoundException.class})
     public void excluir(Long id, Usuario usuarioLogado) throws AccessDeniedException {
         // Apenas admins podem excluir
@@ -174,8 +169,6 @@ public class UsuarioService {
         // 2️⃣ Busca usuário no banco
         Usuario usuario = usuarioRepository.findByUsername(login)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário autenticado não encontrado."));
-
-
 
         // 4️⃣ Mapeia roles para DTO
         Set<UsuarioLogadoDTO.RoleDto> rolesDto = usuario.getRoles().stream()

@@ -31,8 +31,12 @@ public class Motorista {
     @Column(nullable = false)
     private String telefone;
 
+    @Column(nullable = false)
+    private boolean ativo = true; // ✅ Campo para ativar ou desativar usuario
+
     //Relacionamento com Solicitacao - um motorista pode estar vinculado a várias solicitações
     @OneToMany(mappedBy = "motorista")
     @JsonIgnore
     private List<Solicitacao> solicitacoes;
+
 }

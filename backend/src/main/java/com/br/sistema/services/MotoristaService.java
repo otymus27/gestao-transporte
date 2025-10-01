@@ -10,7 +10,6 @@ import com.br.sistema.entities.Usuario.Usuario;
 import com.br.sistema.repositories.MotoristaRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -25,8 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -147,6 +144,7 @@ public class MotoristaService {
         motorista.setMatricula(dto.matricula().trim());
         motorista.setNome(dto.nome().trim());
         motorista.setTelefone(dto.telefone().trim());
+        motorista.setAtivo(dto.ativo());
 
         motoristaRepository.save(motorista);
 
@@ -196,6 +194,7 @@ public class MotoristaService {
                         m.getMatricula(),
                         m.getNome(),
                         m.getTelefone(),
+                        m.isAtivo(),
                         List.of() // vazio para não pesar na listagem
                 ))
                 .toList();
@@ -235,7 +234,8 @@ public class MotoristaService {
                         m.getId(),
                         m.getMatricula(),
                         m.getNome(),
-                        m.getTelefone()
+                        m.getTelefone(),
+                        m.isAtivo()
                 ))
                 .toList();
     }
@@ -253,6 +253,7 @@ public class MotoristaService {
             header.createCell(1).setCellValue("Matrícula");
             header.createCell(2).setCellValue("Nome");
             header.createCell(3).setCellValue("Telefone");
+            header.createCell(4).setCellValue("Ativo");
 
             // Dados
             int rowIdx = 1;
@@ -262,6 +263,7 @@ public class MotoristaService {
                 row.createCell(1).setCellValue(m.matricula());
                 row.createCell(2).setCellValue(m.nome());
                 row.createCell(3).setCellValue(m.telefone());
+                row.createCell(4).setCellValue(m.ativo());
             }
 
             workbook.write(out);
@@ -274,13 +276,15 @@ public class MotoristaService {
         List<MotoristaRelatorioDTO> motoristas = gerarRelatorio(nome, matricula);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("ID;Matrícula;Nome;Telefone\n");
+        sb.append("ID;Matrícula;Nome;Telefone;Ativo\n");
 
         for (MotoristaRelatorioDTO m : motoristas) {
             sb.append(m.id()).append(";")
                     .append(m.matricula()).append(";")
                     .append(m.nome()).append(";")
-                    .append(m.telefone()).append("\n");
+                    .append(m.telefone()).append(";")
+                    .append(m.ativo()).append("\n");
+
         }
 
         return new ByteArrayInputStream(sb.toString().getBytes());
@@ -298,8 +302,8 @@ public class MotoristaService {
             float rowHeight = 20;
 
             // colunas
-            String[] colunas = {"ID", "Matrícula", "Nome", "Telefone"};
-            float[] colWidths = {50, 100, 200, 150};
+            String[] colunas = {"ID", "Matrícula", "Nome", "Telefone","Ativo"};
+            float[] colWidths = {50, 100, 200, 150,50};
 
             int rowIndex = 0;
             int pageNumber = 1;
