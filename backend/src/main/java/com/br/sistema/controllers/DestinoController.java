@@ -13,8 +13,12 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -22,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 
 @RestController
@@ -221,5 +227,89 @@ public class DestinoController {
             );
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
+    }
+
+    // ✅ Exportar Excel
+    @GetMapping("/relatorio/excel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> exportarExcel(
+            @RequestParam(required = false) String filtro
+    ) throws IOException {
+        var stream = destinoService.exportarExcel(filtro);
+        InputStreamResource resource = new InputStreamResource(stream);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=destinos.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(resource);
+    }
+
+    // ✅ Exportar CSV
+    @GetMapping("/relatorio/csv")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> exportarCsv(
+            @RequestParam(required = false) String filtro
+    ) {
+        var stream = destinoService.exportarCsv(filtro);
+        InputStreamResource resource = new InputStreamResource(stream);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=destinos.csv")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(resource);
+    }
+
+    // ✅ Exportar PDF
+    @GetMapping("/relatorio/pdf")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> exportarPdf(
+            @RequestParam(required = false) String filtro
+    ) {
+        var stream = destinoService.exportarPdf(filtro);
+        InputStreamResource resource = new InputStreamResource(stream);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=destinos.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(resource);
+    }
+
+
+
+
+    @GetMapping("/relatorio")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> exportarRelatorio(
+            @RequestParam(required = false) String filtro,
+            @RequestParam(defaultValue = "pdf") String tipo // pdf | csv | excel
+    ) throws IOException {
+
+        InputStreamResource resource;
+        String filename;
+        MediaType mediaType;
+
+        switch (tipo.toLowerCase()) {
+            case "excel" -> {
+                resource = new InputStreamResource(destinoService.exportarExcel(filtro));
+                filename = "destinos.xlsx";
+                mediaType = MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            }
+            case "csv" -> {
+                resource = new InputStreamResource(destinoService.exportarCsv(filtro));
+                filename = "destinos.csv";
+                mediaType = MediaType.parseMediaType("text/csv");
+            }
+            case "pdf" -> {
+                resource = new InputStreamResource(destinoService.exportarPdf(filtro));
+                filename = "destinos.pdf";
+                mediaType = MediaType.APPLICATION_PDF;
+            }
+            default -> throw new IllegalArgumentException("Tipo de relatório inválido: " + tipo);
+        }
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(mediaType)
+                .body(resource);
     }
 }

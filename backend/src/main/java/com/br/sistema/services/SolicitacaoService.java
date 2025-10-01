@@ -16,12 +16,24 @@ import com.br.sistema.repositories.*;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
@@ -314,6 +326,237 @@ public class SolicitacaoService {
     public List<SolicitacaoPorStatusDTO> buscarPorStatus() {
         return solicitacaoRepository.buscarPorStatus();
     }
+
+// Método para gerar relatorio completo da lista
+// ✅ Gerar lista de DTOs com filtros aplicados
+@Transactional(readOnly = true)
+public List<SolicitacaoRelatorioDTO> gerarRelatorio(String filtro) {
+    return solicitacaoRepository.filtrarSemPaginacao(filtro).stream()
+            .map(s -> new SolicitacaoRelatorioDTO(
+                    s.getId(),
+                    s.getDataSolicitacao(),
+                    s.getStatus(),
+                    s.getCarro().getPlaca(),
+                    s.getMotorista().getNome(),
+                    s.getUsuario().getNome(),
+                    s.getSetor().getNome(),
+                    s.getDestino().getNome(),
+                    s.getKmInicial(),
+                    s.getKmFinal(),
+                    s.getHoraSaida(),
+                    s.getHoraChegada()
+            ))
+            .toList();
+}
+
+    // ✅ Exportar Excel
+    public ByteArrayInputStream exportarExcel(String filtro) throws IOException {
+        List<SolicitacaoRelatorioDTO> solicitacoes = gerarRelatorio(filtro);
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Solicitações");
+
+            // Cabeçalho
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("ID");
+            header.createCell(1).setCellValue("Data");
+            header.createCell(2).setCellValue("Status");
+            header.createCell(3).setCellValue("Carro");
+            header.createCell(4).setCellValue("Motorista");
+            header.createCell(5).setCellValue("Usuário");
+            header.createCell(6).setCellValue("Setor");
+            header.createCell(7).setCellValue("Destino");
+            header.createCell(8).setCellValue("Km Inicial");
+            header.createCell(9).setCellValue("Km Final");
+            header.createCell(10).setCellValue("Hora Saída");
+            header.createCell(11).setCellValue("Hora Chegada");
+
+            // Dados
+            int rowIdx = 1;
+            for (SolicitacaoRelatorioDTO s : solicitacoes) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(s.id());
+                row.createCell(1).setCellValue(s.dataSolicitacao() != null ? s.dataSolicitacao().toString() : "");
+                row.createCell(2).setCellValue(s.status());
+                row.createCell(3).setCellValue(s.carro());
+                row.createCell(4).setCellValue(s.motorista());
+                row.createCell(5).setCellValue(s.usuario());
+                row.createCell(6).setCellValue(s.setor());
+                row.createCell(7).setCellValue(s.destino());
+                row.createCell(8).setCellValue(s.kmInicial() != null ? s.kmInicial() : 0);
+                row.createCell(9).setCellValue(s.kmFinal() != null ? s.kmFinal() : 0);
+                row.createCell(10).setCellValue(s.horaSaida() != null ? s.horaSaida().toString() : "");
+                row.createCell(11).setCellValue(s.horaChegada() != null ? s.horaChegada().toString() : "");
+            }
+
+            workbook.write(out);
+            return new ByteArrayInputStream(out.toByteArray());
+        }
+    }
+
+    // ✅ Exportar CSV
+    public ByteArrayInputStream exportarCsv(String filtro) {
+        List<SolicitacaoRelatorioDTO> solicitacoes = gerarRelatorio(filtro);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID;Data;Status;Carro;Motorista;Usuário;Setor;Destino;Km Inicial;Km Final;Hora Saída;Hora Chegada\n");
+
+        for (SolicitacaoRelatorioDTO s : solicitacoes) {
+            sb.append(s.id()).append(";")
+                    .append(s.dataSolicitacao() != null ? s.dataSolicitacao() : "").append(";")
+                    .append(s.status()).append(";")
+                    .append(s.carro()).append(";")
+                    .append(s.motorista()).append(";")
+                    .append(s.usuario()).append(";")
+                    .append(s.setor()).append(";")
+                    .append(s.destino()).append(";")
+                    .append(s.kmInicial() != null ? s.kmInicial() : "").append(";")
+                    .append(s.kmFinal() != null ? s.kmFinal() : "").append(";")
+                    .append(s.horaSaida() != null ? s.horaSaida() : "").append(";")
+                    .append(s.horaChegada() != null ? s.horaChegada() : "").append("\n");
+        }
+
+        return new ByteArrayInputStream(sb.toString().getBytes());
+    }
+
+    // ✅ Exportar PDF
+    public ByteArrayInputStream exportarPdf(String filtro) {
+        List<SolicitacaoRelatorioDTO> solicitacoes = gerarRelatorio(filtro);
+
+        try (PDDocument document = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            // formato paisagem
+            PDRectangle pageSize = new PDRectangle(PDRectangle.A4.getHeight(), PDRectangle.A4.getWidth());
+            float margin = 40;
+            float yStart = pageSize.getUpperRightY() - margin;
+            float tableWidth = pageSize.getWidth() - 2 * margin;
+            float rowHeight = 18;
+
+            // colunas (ajustei largura agora que temos mais espaço)
+            String[] colunas = {"ID", "Data", "Status", "Carro", "Motorista", "Usuário", "Setor", "Destino", "Km Inicial", "Km Final", "Saída", "Chegada"};
+            float[] colWidths = {30, 60, 60, 70, 80, 80, 80, 80, 60, 60, 60, 60};
+
+            int rowIndex = 0;
+            int pageNumber = 1;
+
+            PDPage page = new PDPage(pageSize);
+            document.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+            float yPosition = yStart;
+
+            // título
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+            contentStream.beginText();
+            contentStream.newLineAtOffset(margin, yPosition);
+            contentStream.showText("Relatório de Solicitações");
+            contentStream.endText();
+
+            yPosition -= 30;
+
+            // cabeçalho
+            yPosition = desenharCabecalho(contentStream, margin, yPosition, tableWidth, rowHeight, colunas, colWidths);
+
+            // linhas
+            contentStream.setFont(PDType1Font.HELVETICA, 9);
+            for (SolicitacaoRelatorioDTO s : solicitacoes) {
+                float nextX = margin;
+
+                if (rowIndex % 2 == 0) {
+                    contentStream.setNonStrokingColor(245, 245, 245);
+                    contentStream.addRect(margin, yPosition - rowHeight, tableWidth, rowHeight);
+                    contentStream.fill();
+                    contentStream.setNonStrokingColor(0, 0, 0);
+                }
+
+                String[] valores = {
+                        String.valueOf(s.id()),
+                        s.dataSolicitacao() != null ? s.dataSolicitacao().toString() : "",
+                        s.status(),
+                        s.carro(),
+                        s.motorista(),
+                        s.usuario(),
+                        s.setor(),
+                        s.destino()
+                };
+
+                for (int i = 0; i < valores.length; i++) {
+                    contentStream.beginText();
+                    contentStream.newLineAtOffset(nextX + 2, yPosition - 12);
+                    contentStream.showText(valores[i] != null ? valores[i] : "");
+                    contentStream.endText();
+                    nextX += colWidths[i];
+                }
+
+                contentStream.addRect(margin, yPosition - rowHeight, tableWidth, rowHeight);
+                contentStream.stroke();
+
+                yPosition -= rowHeight;
+                rowIndex++;
+
+                if (yPosition <= margin + 40) {
+                    desenharRodape(contentStream, pageSize, margin, pageNumber++);
+                    contentStream.close();
+                    page = new PDPage(pageSize);
+                    document.addPage(page);
+                    contentStream = new PDPageContentStream(document, page);
+                    yPosition = yStart;
+                    yPosition = desenharCabecalho(contentStream, margin, yPosition, tableWidth, rowHeight, colunas, colWidths);
+                    contentStream.setFont(PDType1Font.HELVETICA, 10);
+                }
+            }
+
+            desenharRodape(contentStream, pageSize, margin, pageNumber);
+            contentStream.close();
+
+            document.save(out);
+            return new ByteArrayInputStream(out.toByteArray());
+
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao gerar PDF de Solicitações", e);
+        }
+    }
+
+    // ✅ Cabeçalho
+    private float desenharCabecalho(PDPageContentStream cs, float margin, float yPosition,
+                                    float tableWidth, float rowHeight, String[] colunas, float[] colWidths) throws IOException {
+        cs.setNonStrokingColor(200, 200, 200);
+        cs.addRect(margin, yPosition - rowHeight, tableWidth, rowHeight);
+        cs.fill();
+        cs.setNonStrokingColor(0, 0, 0);
+
+        cs.setFont(PDType1Font.HELVETICA_BOLD, 10);
+        float nextX = margin;
+        for (int i = 0; i < colunas.length; i++) {
+            cs.beginText();
+            cs.newLineAtOffset(nextX + 2, yPosition - 12);
+            cs.showText(colunas[i]);
+            cs.endText();
+            nextX += colWidths[i];
+        }
+
+        cs.addRect(margin, yPosition - rowHeight, tableWidth, rowHeight);
+        cs.stroke();
+
+        return yPosition - rowHeight;
+    }
+
+    // ✅ Rodapé
+    private void desenharRodape(PDPageContentStream cs, PDRectangle pageSize, float margin, int pageNumber) throws IOException {
+        cs.setFont(PDType1Font.HELVETICA_OBLIQUE, 8);
+
+        String dataHora = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        cs.beginText();
+        cs.newLineAtOffset(margin, margin - 15);
+        cs.showText("Gerado em: " + dataHora);
+        cs.endText();
+
+        cs.beginText();
+        cs.newLineAtOffset(pageSize.getWidth() - margin - 50, margin - 15);
+        cs.showText("Página " + pageNumber);
+        cs.endText();
+    }
+
 
 
 

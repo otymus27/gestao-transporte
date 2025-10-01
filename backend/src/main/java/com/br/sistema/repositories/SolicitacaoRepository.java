@@ -162,5 +162,26 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     """)
     List<SolicitacaoPorDiaDTO> buscarPorDatas(@Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
 
+    // Responsável pelos filtros para gerar o relatorio da lista
+    @Query("""
+        SELECT s FROM Solicitacao s
+        JOIN FETCH s.carro c
+        JOIN FETCH s.motorista m
+        JOIN FETCH s.usuario u
+        JOIN FETCH s.setor se
+        JOIN FETCH s.destino d
+        WHERE (:filtro IS NULL OR 
+              LOWER(c.marca) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+              LOWER(c.modelo) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+              LOWER(c.placa) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+              LOWER(m.nome) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+              LOWER(u.nome) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+              LOWER(se.nome) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+              LOWER(d.nome) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+              LOWER(s.status) LIKE LOWER(CONCAT('%', :filtro, '%'))
+        )
+    """)
+    List<Solicitacao> filtrarSemPaginacao(String filtro);
+
 
 }

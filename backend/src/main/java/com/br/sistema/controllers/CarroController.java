@@ -14,9 +14,13 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -245,63 +249,41 @@ public class CarroController {
 
     // ✅ Gerar relatório (sem paginação, mas aceita filtro)
     @GetMapping("/relatorio")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
-    public ResponseEntity<?> gerarRelatorio(
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Resource> exportarRelatorio(
             @RequestParam(required = false) String filtro,
-            HttpServletRequest request
-    ) {
-        try {
-            var relatorio = carroService.gerarRelatorio(filtro);
-            return ResponseEntity.ok(relatorio);
-        } catch (Exception e) {
-            logger.error("Erro inesperado ao gerar relatorio de carros", e);
-            ErrorMessage error = new ErrorMessage(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Erro interno no servidor",
-                    "Erro ao gerar relatorio de carros.",
-                    request.getRequestURI()
-            );
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            @RequestParam(defaultValue = "pdf") String tipo // pdf | csv | excel
+    ) throws IOException {
+
+        InputStreamResource resource;
+        String filename;
+        MediaType mediaType;
+
+        switch (tipo.toLowerCase()) {
+            case "excel" -> {
+                resource = new InputStreamResource(carroService.exportarExcel(filtro));
+                filename = "carros.xlsx";
+                mediaType = MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            }
+            case "csv" -> {
+                resource = new InputStreamResource(carroService.exportarCsv(filtro));
+                filename = "carros.csv";
+                mediaType = MediaType.parseMediaType("text/csv");
+            }
+            case "pdf" -> {
+                resource = new InputStreamResource(carroService.exportarPdf(filtro));
+                filename = "carros.pdf";
+                mediaType = MediaType.APPLICATION_PDF;
+            }
+            default -> throw new IllegalArgumentException("Tipo de relatório inválido: " + tipo);
         }
-    }
-
-    // ✅ Exportar Excel
-    @GetMapping("/relatorio/excel")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
-    public ResponseEntity<byte[]> exportarExcel(
-            @RequestParam(required = false) String filtro
-    ) throws IOException {
-        ByteArrayInputStream in = carroService.exportarExcel(filtro);
 
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=relatorio_carros.xlsx")
-                .body(in.readAllBytes());
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(mediaType)
+                .body(resource);
     }
 
-    // ✅ Exportar CSV
-    @GetMapping("/relatorio/csv")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
-    public ResponseEntity<byte[]> exportarCsv(
-            @RequestParam(required = false) String filtro
-    ) throws IOException {
-        ByteArrayInputStream in = carroService.exportarCsv(filtro);
-
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=relatorio_carros.csv")
-                .body(in.readAllBytes());
-    }
-
-    @GetMapping("/relatorio/pdf")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
-    public ResponseEntity<byte[]> exportarPdf(
-            @RequestParam(required = false) String filtro
-    ) throws IOException {
-        ByteArrayInputStream in = carroService.exportarPdf(filtro);
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=relatorio_carros.pdf")
-                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
-                .body(in.readAllBytes());
-    }
 
 
 }

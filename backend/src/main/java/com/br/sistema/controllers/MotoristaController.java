@@ -288,48 +288,42 @@ public class MotoristaController {
         }
     }
 
-    @GetMapping("/relatorio/excel")
+    @GetMapping("/relatorio")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Resource> exportarExcel(@RequestParam(required = false) String nome,
-                                                  @RequestParam(required = false) String matricula) throws IOException {
-        var stream = motoristaService.exportarExcel(nome, matricula);
+    public ResponseEntity<Resource> exportarRelatorio(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String matricula,
+            @RequestParam(defaultValue = "pdf") String tipo // pdf | csv | excel
+    ) throws IOException {
 
-        InputStreamResource resource = new InputStreamResource(stream);
+        InputStreamResource resource;
+        String filename;
+        MediaType mediaType;
+
+        switch (tipo.toLowerCase()) {
+            case "excel" -> {
+                resource = new InputStreamResource(motoristaService.exportarExcel(nome, matricula));
+                filename = "motoristas.xlsx";
+                mediaType = MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            }
+            case "csv" -> {
+                resource = new InputStreamResource(motoristaService.exportarCsv(nome, matricula));
+                filename = "motoristas.csv";
+                mediaType = MediaType.parseMediaType("text/csv");
+            }
+            case "pdf" -> {
+                resource = new InputStreamResource(motoristaService.exportarPdf(nome, matricula));
+                filename = "motoristas.pdf";
+                mediaType = MediaType.APPLICATION_PDF;
+            }
+            default -> throw new IllegalArgumentException("Tipo de relatório inválido: " + tipo);
+        }
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=motoristas.xlsx")
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(mediaType)
                 .body(resource);
     }
-
-    @GetMapping("/relatorio/csv")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Resource> exportarCsv(@RequestParam(required = false) String nome,
-                                                @RequestParam(required = false) String matricula) {
-        var stream = motoristaService.exportarCsv(nome, matricula);
-
-        InputStreamResource resource = new InputStreamResource(stream);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=motoristas.csv")
-                .contentType(MediaType.parseMediaType("text/csv"))
-                .body(resource);
-    }
-
-    @GetMapping("/relatorio/pdf")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Resource> exportarPdf(@RequestParam(required = false) String nome,
-                                                @RequestParam(required = false) String matricula) {
-        var stream = motoristaService.exportarPdf(nome, matricula);
-
-        InputStreamResource resource = new InputStreamResource(stream);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=motoristas.pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(resource);
-    }
-
 
 
 }
