@@ -1,6 +1,0 @@
-<div class="card" (click)="abrir.emit(pasta)">
-  <div class="icon">📂</div>
-  <div class="nome" [title]="pasta.nome">{{ pasta.nome }}</div>
-  <button (click)="editar.emit(pasta); $event.stopPropagation()">✏️</button>
-  <button (click)="excluir.emit(pasta.id); $event.stopPropagation()">🗑️</button>
-</div>

@@ -19,7 +19,7 @@ export class SidebarComponent {
   showPastasSubmenu = false;
   showFormulariosSubmenu = false;
   showUsuariosSubmenu = false;
-  showFarmaciaSubmenu = false;
+  showSetoresSubmenu = false;
 
   toggle() {
     this.isCollapsed = !this.isCollapsed;
@@ -38,8 +38,8 @@ export class SidebarComponent {
       this.showUsuariosSubmenu = !this.showUsuariosSubmenu;
       this.showPastasSubmenu = false;
       this.showFormulariosSubmenu = false;
-    }else if (submenu === 'farmacia') {
-      this.showFarmaciaSubmenu = !this.showFarmaciaSubmenu; // 🔹 controle do submenu Farmácia
+    } else if (submenu === 'setores') {
+      this.showSetoresSubmenu = !this.showSetoresSubmenu; // 🔹 controle do submenu
     }
   }
 
@@ -47,7 +47,7 @@ export class SidebarComponent {
     this.showPastasSubmenu = false;
     this.showFormulariosSubmenu = false;
     this.showUsuariosSubmenu = false;
-    this.showFarmaciaSubmenu = false; // 🔹 fecha também o submenu Farmácia
+    this.showSetoresSubmenu = false;
   }
 
   // Roles

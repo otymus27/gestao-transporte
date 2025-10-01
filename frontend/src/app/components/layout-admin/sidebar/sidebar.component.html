@@ -17,25 +17,34 @@
       </a>
     </li>
 
-    <!-- Pastas - visível para ADMIN, GERENTE e BASIC -->
-    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isBasic()">
-      <a class="nav-link" (click)="toggleSubmenu('pastas')">
-        <i class="bi bi-bookmark"></i>
-        <span>Pastas</span>
+    <!-- Submenu de Setores -->
+    <li class="nav-item">
+      <a
+        class="nav-link d-flex justify-content-between align-items-center"
+        (click)="toggleSubmenu('setores')"
+        [ngClass]="{ active: showSetoresSubmenu }"
+      >
+        <span><i class="bi bi-building me-2"></i> Setores</span>
         <i
-          class="bi bi-chevron-down submenu-icon"
-          [class.rotated]="showPastasSubmenu"
+          class="bi"
+          [ngClass]="{
+            'bi-chevron-down': !showSetoresSubmenu,
+            'bi-chevron-up': showSetoresSubmenu
+          }"
         ></i>
       </a>
-      <ul class="submenu" *ngIf="showPastasSubmenu">
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            routerLink="/admin/pastas/gerenciar"
-            routerLinkActive="active"
-          >
-            <i class="bi bi-plus-circle"></i>
-            <span>Gerenciar</span>
+      <ul
+        *ngIf="showSetoresSubmenu && (isAdmin() || isGerente())"
+        class="submenu list-unstyled ps-3"
+      >
+        <li>
+          <a class="nav-link" routerLink="/admin/setores/gerenciar">
+            <i class="bi bi-list-task me-1"></i> Gerenciar
+          </a>
+        </li>
+        <li *ngIf="isAdmin()">
+          <a class="nav-link" routerLink="/admin/setores/novo">
+            <i class="bi bi-plus-circle me-1"></i> Novo
           </a>
         </li>
       </ul>
@@ -80,30 +89,6 @@
           <a
             class="nav-link"
             routerLink="/admin/usuarios/gerenciar"
-            routerLinkActive="active"
-          >
-            <i class="bi bi-plus-circle"></i>
-            <span>Gerenciar</span>
-          </a>
-        </li>
-      </ul>
-    </li>
-
-    <!-- Farmacia - apenas ADMIN -->
-    <li class="nav-item" *ngIf="isAdmin()">
-      <a class="nav-link" (click)="toggleSubmenu('farmacia')">
-        <i class="bi bi-person"></i>
-        <span>Farmácia</span>
-        <i
-          class="bi bi-chevron-down submenu-icon"
-          [class.rotated]="showFarmaciaSubmenu"
-        ></i>
-      </a>
-      <ul class="submenu" *ngIf="showFarmaciaSubmenu">
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            routerLink="/admin/farmacia"
             routerLinkActive="active"
           >
             <i class="bi bi-plus-circle"></i>
