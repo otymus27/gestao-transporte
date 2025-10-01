@@ -15,39 +15,30 @@ export class SidebarComponent {
 
   isCollapsed = false;
 
-  // estados dos submenus
-  showPastasSubmenu = false;
-  showFormulariosSubmenu = false;
-  showUsuariosSubmenu = false;
-  showSetoresSubmenu = false;
+  // controla qual submenu está aberto
+  currentOpen: string | null = null;
 
   toggle() {
     this.isCollapsed = !this.isCollapsed;
   }
 
   toggleSubmenu(submenu: string) {
-    if (submenu === 'pastas') {
-      this.showPastasSubmenu = !this.showPastasSubmenu;
-      this.showFormulariosSubmenu = false;
-      this.showUsuariosSubmenu = false;
-    } else if (submenu === 'formularios') {
-      this.showFormulariosSubmenu = !this.showFormulariosSubmenu;
-      this.showPastasSubmenu = false;
-      this.showUsuariosSubmenu = false;
-    } else if (submenu === 'usuarios') {
-      this.showUsuariosSubmenu = !this.showUsuariosSubmenu;
-      this.showPastasSubmenu = false;
-      this.showFormulariosSubmenu = false;
-    } else if (submenu === 'setores') {
-      this.showSetoresSubmenu = !this.showSetoresSubmenu; // 🔹 controle do submenu
+    if (this.currentOpen === submenu) {
+      // se clicar no mesmo já aberto → fecha
+      this.currentOpen = null;
+    } else {
+      // abre o novo e fecha os outros
+      this.currentOpen = submenu;
     }
   }
 
+  isSubmenuOpen(submenu: string): boolean {
+    return this.currentOpen === submenu;
+  }
+
+  //fecha todos menus e submenus
   hideAllSubmenus() {
-    this.showPastasSubmenu = false;
-    this.showFormulariosSubmenu = false;
-    this.showUsuariosSubmenu = false;
-    this.showSetoresSubmenu = false;
+    this.currentOpen = null;
   }
 
   // Roles
@@ -55,14 +46,17 @@ export class SidebarComponent {
     const roles = this.authService.getLoggedInRoles();
     return roles.includes('ADMIN');
   }
+
   isGerente(): boolean {
     const roles = this.authService.getLoggedInRoles();
     return roles.includes('GERENTE');
   }
+
   isBasic(): boolean {
     const roles = this.authService.getLoggedInRoles();
     return roles.includes('BASIC');
   }
+
   isLogado(): boolean {
     const roles = this.authService.getLoggedInRoles();
     return roles.length > 0;

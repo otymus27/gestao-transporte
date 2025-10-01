@@ -12,6 +12,7 @@ import { AlterarSenhaComponent } from './components/alterar-senha/alterar-senha.
 import { SobreComponent } from './components/layout-admin/sobre/sobre.component';
 import { Login } from './components/login/login';
 import { SetorComponent } from './components/setor/setor.component';
+import { DestinoComponent } from './components/destino/destino.component';
 
 export const routes: Routes = [
   // --- Rotas Públicas ---
@@ -34,6 +35,28 @@ export const routes: Routes = [
       },
 
       // Carros
+
+      // 🔹 Destinos
+      {
+        path: 'destinos',
+        children: [
+          {
+            path: '',
+            component: DestinoComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
+          },
+          {
+            path: 'gerenciar',
+            component: DestinoComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
+          },
+          {
+            path: 'novo',
+            component: DestinoComponent,
+            data: { roles: ['ADMIN'] },
+          },
+        ],
+      },
 
       // 🔹 Setores
       {

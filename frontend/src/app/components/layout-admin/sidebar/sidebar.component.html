@@ -5,100 +5,202 @@
     </button>
   </div>
   <ul class="nav flex-column">
+    <!-- 🔹 Dashboard -->
     <li class="nav-item">
       <a
         class="nav-link"
         routerLink="/admin/dashboard"
         routerLinkActive="active"
-        (click)="hideAllSubmenus()"
       >
-        <i class="bi bi-house-door"></i>
-        <span>Início</span>
+        <i class="bi bi-speedometer2 me-2"></i> Dashboard
       </a>
     </li>
 
-    <!-- Submenu de Setores -->
-    <li class="nav-item">
-      <a
-        class="nav-link d-flex justify-content-between align-items-center"
-        (click)="toggleSubmenu('setores')"
-        [ngClass]="{ active: showSetoresSubmenu }"
-      >
-        <span><i class="bi bi-building me-2"></i> Setores</span>
+    <!-- 🔹 Usuários -->
+    <li class="nav-item" *ngIf="isAdmin()">
+      <a class="nav-link" (click)="toggleSubmenu('usuarios')">
+        <i class="bi bi-people-fill me-2"></i> Usuários
         <i
-          class="bi"
+          class="bi chevron"
           [ngClass]="{
-            'bi-chevron-down': !showSetoresSubmenu,
-            'bi-chevron-up': showSetoresSubmenu
+            'bi-chevron-down': !isSubmenuOpen('usuarios'),
+            'bi-chevron-up': isSubmenuOpen('usuarios')
           }"
         ></i>
       </a>
-      <ul
-        *ngIf="showSetoresSubmenu && (isAdmin() || isGerente())"
-        class="submenu list-unstyled ps-3"
-      >
+      <ul *ngIf="isSubmenuOpen('usuarios')" class="nav flex-column ms-3">
         <li>
-          <a class="nav-link" routerLink="/admin/setores/gerenciar">
-            <i class="bi bi-list-task me-1"></i> Gerenciar
-          </a>
-        </li>
-        <li *ngIf="isAdmin()">
-          <a class="nav-link" routerLink="/admin/setores/novo">
-            <i class="bi bi-plus-circle me-1"></i> Novo
-          </a>
-        </li>
-      </ul>
-    </li>
-
-    <!-- Formulários - apenas ADMIN -->
-    <li class="nav-item" *ngIf="isAdmin()">
-      <a class="nav-link" (click)="toggleSubmenu('formularios')">
-        <i class="bi bi-files"></i>
-        <span>Formulários</span>
-        <i
-          class="bi bi-chevron-down submenu-icon"
-          [class.rotated]="showFormulariosSubmenu"
-        ></i>
-      </a>
-      <ul class="submenu" *ngIf="showFormulariosSubmenu">
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            routerLink="/admin/formularios"
-            routerLinkActive="active"
-          >
-            <i class="bi bi-folder2-open"></i>
-            <span>Gerenciar</span>
-          </a>
-        </li>
-      </ul>
-    </li>
-
-    <!-- Usuários - apenas ADMIN -->
-    <li class="nav-item" *ngIf="isAdmin()">
-      <a class="nav-link" (click)="toggleSubmenu('usuarios')">
-        <i class="bi bi-person"></i>
-        <span>Usuários</span>
-        <i
-          class="bi bi-chevron-down submenu-icon"
-          [class.rotated]="showUsuariosSubmenu"
-        ></i>
-      </a>
-      <ul class="submenu" *ngIf="showUsuariosSubmenu">
-        <li class="nav-item">
           <a
             class="nav-link"
             routerLink="/admin/usuarios/gerenciar"
             routerLinkActive="active"
+            >Gerenciar</a
           >
-            <i class="bi bi-plus-circle"></i>
-            <span>Gerenciar</span>
-          </a>
         </li>
       </ul>
     </li>
 
-    <!-- Perfil - todos logados -->
+    <!-- 🔹 Setores -->
+    <li class="nav-item" *ngIf="isAdmin() || isGerente()">
+      <a class="nav-link" (click)="toggleSubmenu('setores')">
+        <i class="bi bi-building me-2"></i> Setores
+        <i
+          class="bi chevron"
+          [ngClass]="{
+            'bi-chevron-down': !isSubmenuOpen('setores'),
+            'bi-chevron-up': isSubmenuOpen('setores')
+          }"
+        ></i>
+      </a>
+      <ul *ngIf="isSubmenuOpen('setores')" class="nav flex-column ms-3">
+        <li>
+          <a
+            class="nav-link"
+            routerLink="/admin/setores/gerenciar"
+            routerLinkActive="active"
+            >Gerenciar</a
+          >
+        </li>
+        <li *ngIf="isAdmin()">
+          <a
+            class="nav-link"
+            routerLink="/admin/setores/novo"
+            routerLinkActive="active"
+            >Novo</a
+          >
+        </li>
+      </ul>
+    </li>
+
+    <!-- 🔹 Destinos -->
+    <li class="nav-item" *ngIf="isAdmin() || isGerente()">
+      <a class="nav-link" (click)="toggleSubmenu('destinos')">
+        <i class="bi bi-geo-alt-fill me-2"></i> Destinos
+        <i
+          class="bi chevron"
+          [ngClass]="{
+            'bi-chevron-down': !isSubmenuOpen('destinos'),
+            'bi-chevron-up': isSubmenuOpen('destinos')
+          }"
+        ></i>
+      </a>
+      <ul *ngIf="isSubmenuOpen('destinos')" class="nav flex-column ms-3">
+        <li>
+          <a
+            class="nav-link"
+            routerLink="/admin/destinos/gerenciar"
+            routerLinkActive="active"
+            >Gerenciar</a
+          >
+        </li>
+        <li *ngIf="isAdmin()">
+          <a
+            class="nav-link"
+            routerLink="/admin/destinos/novo"
+            routerLinkActive="active"
+            >Novo</a
+          >
+        </li>
+      </ul>
+    </li>
+
+    <!-- 🔹 Motoristas -->
+    <li class="nav-item" *ngIf="isAdmin() || isGerente()">
+      <a class="nav-link" (click)="toggleSubmenu('motoristas')">
+        <i class="bi bi-person-vcard me-2"></i> Motoristas
+        <i
+          class="bi chevron"
+          [ngClass]="{
+            'bi-chevron-down': !isSubmenuOpen('motoristas'),
+            'bi-chevron-up': isSubmenuOpen('motoristas')
+          }"
+        ></i>
+      </a>
+      <ul *ngIf="isSubmenuOpen('motoristas')" class="nav flex-column ms-3">
+        <li>
+          <a
+            class="nav-link"
+            routerLink="/admin/motoristas/gerenciar"
+            routerLinkActive="active"
+            >Gerenciar</a
+          >
+        </li>
+        <li *ngIf="isAdmin()">
+          <a
+            class="nav-link"
+            routerLink="/admin/motoristas/novo"
+            routerLinkActive="active"
+            >Novo</a
+          >
+        </li>
+      </ul>
+    </li>
+
+    <!-- 🔹 Carros -->
+    <li class="nav-item" *ngIf="isAdmin() || isGerente()">
+      <a class="nav-link" (click)="toggleSubmenu('carros')">
+        <i class="bi bi-car-front-fill me-2"></i> Carros
+        <i
+          class="bi chevron"
+          [ngClass]="{
+            'bi-chevron-down': !isSubmenuOpen('carros'),
+            'bi-chevron-up': isSubmenuOpen('carros')
+          }"
+        ></i>
+      </a>
+      <ul *ngIf="isSubmenuOpen('carros')" class="nav flex-column ms-3">
+        <li>
+          <a
+            class="nav-link"
+            routerLink="/admin/carros/gerenciar"
+            routerLinkActive="active"
+            >Gerenciar</a
+          >
+        </li>
+        <li *ngIf="isAdmin()">
+          <a
+            class="nav-link"
+            routerLink="/admin/carros/novo"
+            routerLinkActive="active"
+            >Novo</a
+          >
+        </li>
+      </ul>
+    </li>
+
+    <!-- 🔹 Solicitações -->
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isBasic()">
+      <a class="nav-link" (click)="toggleSubmenu('solicitacoes')">
+        <i class="bi bi-journal-text me-2"></i> Solicitações
+        <i
+          class="bi chevron"
+          [ngClass]="{
+            'bi-chevron-down': !isSubmenuOpen('solicitacoes'),
+            'bi-chevron-up': isSubmenuOpen('solicitacoes')
+          }"
+        ></i>
+      </a>
+      <ul *ngIf="isSubmenuOpen('solicitacoes')" class="nav flex-column ms-3">
+        <li *ngIf="isAdmin() || isGerente()">
+          <a
+            class="nav-link"
+            routerLink="/admin/solicitacoes/gerenciar"
+            routerLinkActive="active"
+            >Gerenciar</a
+          >
+        </li>
+        <li *ngIf="isAdmin() || isGerente() || isBasic()">
+          <a
+            class="nav-link"
+            routerLink="/admin/solicitacoes/novo"
+            routerLinkActive="active"
+            >Novo</a
+          >
+        </li>
+      </ul>
+    </li>
+
+    <!-- 🔹 Perfil - todos logados -->
     <li class="nav-item" *ngIf="isLogado()">
       <a
         class="nav-link"
@@ -106,12 +208,12 @@
         routerLinkActive="active"
         (click)="hideAllSubmenus()"
       >
-        <i class="bi bi-key"></i>
+        <i class="bi bi-key me-2"></i>
         <span>Alterar Senha</span>
       </a>
     </li>
 
-    <!-- Sobre - todos logados -->
+    <!-- 🔹 Sobre - todos logados -->
     <li class="nav-item" *ngIf="isLogado()">
       <a
         class="nav-link"
@@ -119,7 +221,7 @@
         routerLinkActive="active"
         (click)="hideAllSubmenus()"
       >
-        <i class="bi bi-info-circle"></i>
+        <i class="bi bi-info-circle me-2"></i>
         <span>Sobre</span>
       </a>
     </li>
