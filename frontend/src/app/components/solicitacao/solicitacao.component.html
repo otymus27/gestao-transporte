@@ -1,0 +1,240 @@
+<div class="container">
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded">
+        <h1>Gerenciamento de Solicitações</h1>
+        <button class="btn btn-primary btn-rounded btn-shadow me-2" (click)="cadastrarModal()">
+          <i class="bi bi-plus-circle me-1"></i> Nova Solicitação
+        </button>
+      </div>
+
+      <!-- Barra de pesquisa -->
+      <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div class="d-flex flex-grow-1 me-2 gap-2">
+          <input type="text" class="form-control" placeholder="Filtrar por status"
+                 [(ngModel)]="filtroStatus" (keyup.enter)="aplicarFiltros()" />
+        </div>
+        <button class="btn btn-primary ms-2" (click)="aplicarFiltros()">
+          <i class="bi bi-search"></i> Pesquisar
+        </button>
+        <button class="btn btn-secondary ms-2" (click)="limparFiltros()">Limpar</button>
+      </div>
+
+      <!-- Tabela -->
+      <table class="table table-striped mt-3">
+        <thead>
+          <tr>
+            <th (click)="ordenarPor('id')" style="cursor: pointer">ID</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Carro</th>
+            <th>Motorista</th>
+            <th>Usuário</th>
+            <th>Setor</th>
+            <th>Destino</th>
+            <th>Km Inicial</th>
+            <th>Km Final</th>
+            <th>Saída</th>
+            <th>Chegada</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (sol of lista; track sol.id) {
+          <tr>
+            <td>{{ sol.id }}</td>
+            <td>{{ sol.status }}</td>
+            <td>{{ sol.dataSolicitacao | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ sol.carroPlaca }}</td>
+            <td>{{ sol.motoristaNome }}</td>
+            <td>{{ sol.usuarioNome }}</td>
+            <td>{{ sol.setorNome }}</td>
+            <td>{{ sol.destinoNome }}</td>
+            <td>{{ sol.kmInicial }}</td>
+            <td>{{ sol.kmFinal }}</td>
+            <td>{{ sol.horaSaida }}</td>
+            <td>{{ sol.horaChegada }}</td>
+            <td>
+              <button class="btn btn-warning btn-sm me-1" (click)="editarModal(sol)">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="excluir(sol)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="13" class="text-center">Nenhuma solicitação encontrada.</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Paginação -->
+      <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap bg-light text-black p-3 rounded">
+        <div class="me-3">
+          <small>
+            Página <strong>{{ page + 1 }}</strong> de <strong>{{ totalPages }}</strong> —
+            Total: <strong>{{ totalElements }}</strong>
+          </small>
+        </div>
+        <nav>
+          <ul class="pagination mb-0">
+            <li class="page-item" [class.disabled]="page === 0">
+              <button class="page-link" (click)="paginaAnterior()" [disabled]="page === 0">‹</button>
+            </li>
+            <li *ngFor="let p of [].constructor(totalPages); let i = index"
+                class="page-item" [class.active]="i === page">
+              <button class="page-link" (click)="irParaPagina(i)">{{ i + 1 }}</button>
+            </li>
+            <li class="page-item" [class.disabled]="page + 1 >= totalPages">
+              <button class="page-link" (click)="proximaPagina()" [disabled]="page + 1 >= totalPages">›</button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Cadastro/Edição -->
+<ng-template #modalSolicitacaoDetalhe>
+  <div class="modal-header bg-primary text-white">
+    <h5 class="modal-title">
+      {{ registroSelecionado.id > 0 ? "Editar Solicitação" : "Nova Solicitação" }}
+    </h5>
+    <button type="button" class="btn-close" (click)="cancelarModal()"></button>
+  </div>
+
+  <div class="modal-body">
+    <form #solForm="ngForm">
+      <div class="mb-3">
+        <label class="form-label fw-bold">Status</label>
+        <input mdbInput [(ngModel)]="registroSelecionado.status" name="status"
+               required class="form-control" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">Data Solicitação</label>
+        <input type="datetime-local" mdbInput [(ngModel)]="registroSelecionado.dataSolicitacao"
+               name="dataSolicitacao" class="form-control" />
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label class="form-label fw-bold">Carro</label>
+          <select class="form-select" [(ngModel)]="registroSelecionado.carroId" name="carroId" required>
+            <option [ngValue]="null">Selecione...</option>
+            <option *ngFor="let c of carros" [ngValue]="c.id">{{ c.placa }} - {{ c.marca }} {{ c.modelo }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label class="form-label fw-bold">Motorista</label>
+          <select class="form-select" [(ngModel)]="registroSelecionado.motoristaId" name="motoristaId" required>
+            <option [ngValue]="null">Selecione...</option>
+            <option *ngFor="let m of motoristas" [ngValue]="m.id">{{ m.nome }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col">
+          <label class="form-label fw-bold">Usuário</label>
+          <select class="form-select" [(ngModel)]="registroSelecionado.usuarioId" name="usuarioId" required>
+            <option [ngValue]="null">Selecione...</option>
+            <option *ngFor="let u of usuarios" [ngValue]="u.id">{{ u.nome }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label class="form-label fw-bold">Setor</label>
+          <select class="form-select" [(ngModel)]="registroSelecionado.setorId" name="setorId" required>
+            <option [ngValue]="null">Selecione...</option>
+            <option *ngFor="let s of setores" [ngValue]="s.id">{{ s.nome }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col">
+          <label class="form-label fw-bold">Destino</label>
+          <select class="form-select" [(ngModel)]="registroSelecionado.destinoId" name="destinoId" required>
+            <option [ngValue]="null">Selecione...</option>
+            <option *ngFor="let d of destinos" [ngValue]="d.id">{{ d.nome }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col">
+          <label class="form-label fw-bold">Km Inicial</label>
+          <input type="number" mdbInput [(ngModel)]="registroSelecionado.kmInicial"
+                 name="kmInicial" class="form-control" />
+        </div>
+        <div class="col">
+          <label class="form-label fw-bold">Km Final</label>
+          <input type="number" mdbInput [(ngModel)]="registroSelecionado.kmFinal"
+                 name="kmFinal" class="form-control" />
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col">
+          <label class="form-label fw-bold">Hora Saída</label>
+          <input type="time" mdbInput [(ngModel)]="registroSelecionado.horaSaida"
+                 name="horaSaida" class="form-control" />
+        </div>
+        <div class="col">
+          <label class="form-label fw-bold">Hora Chegada</label>
+          <input type="time" mdbInput [(ngModel)]="registroSelecionado.horaChegada"
+                 name="horaChegada" class="form-control" />
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer bg-light">
+    <button class="btn btn-primary" (click)="salvarSolicitacao(registroSelecionado)">Salvar</button>
+    <button type="button" class="btn btn-secondary" (click)="cancelarModal()">Cancelar</button>
+  </div>
+</ng-template>
+
+<!-- Modal de Exclusão -->
+<ng-template #modalConfirmacaoExclusao>
+  <div class="modal-header bg-danger text-white">
+    <h5 class="modal-title">Excluir Solicitação</h5>
+    <button type="button" class="btn-close" (click)="cancelarModal()"></button>
+  </div>
+  <div class="modal-body">
+    Tem certeza que deseja excluir a solicitação <strong>#{{ registroSelecionado?.id }}</strong>?
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancelarModal()">Cancelar</button>
+    <button type="button" class="btn btn-danger" (click)="excluirConfirmado()">Excluir</button>
+  </div>
+</ng-template>
+
+
+<!-- Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  @for (toast of toastService.messages$ | async; track toast) {
+  <div
+    class="toast show mb-2"
+    [ngClass]="{
+      'bg-success': toast.type === 'success',
+      'bg-danger': toast.type === 'danger',
+      'bg-info': toast.type === 'info',      
+    }"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    <div class="toast-header border-0 bg-transparent text-white">
+      <strong class="me-auto text-capitalize">{{ toast.type }}</strong>
+    </div>
+    <div class="toast-body text-white">
+      {{ toast.message }}
+    </div>
+  </div>
+  }
+</div>

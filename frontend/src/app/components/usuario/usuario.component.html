@@ -77,6 +77,7 @@
               ></i>
             </th>
             <th>Roles</th>
+            <th>Status</th> <!-- ✅ Coluna Ativo -->
             <th>Ação</th>
           </tr>
         </thead>
@@ -90,6 +91,12 @@
               @for (role of usuario.roles; track role) {
               <span class="badge bg-info me-1">{{ role.nome }}</span>
               }
+            </td>
+
+            <td>
+              <span class="badge" [ngClass]="usuario.ativo ? 'bg-success' : 'bg-danger'">
+                {{ usuario.ativo ? 'Ativo' : 'Inativo' }}
+              </span>
             </td>
 
           
@@ -237,6 +244,18 @@
         class="text-danger text-center"
       >
         A senha é obrigatória para novos usuários.
+      </div>
+
+      <!-- ✅ Campo Ativo -->
+      <div class="d-flex align-items-center mb-3">
+        <label class="me-2 fw-bold" style="width: 120px">Ativo:</label>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="ativoUsuario"
+            [(ngModel)]="registroSelecionado.ativo" name="ativo" />
+          <label class="form-check-label" for="ativoUsuario">
+            {{ registroSelecionado.ativo ? "Sim" : "Não" }}
+          </label>
+        </div>
       </div>
 
       <!-- Seção de Roles -->

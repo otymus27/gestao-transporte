@@ -13,6 +13,9 @@ import { SobreComponent } from './components/layout-admin/sobre/sobre.component'
 import { Login } from './components/login/login';
 import { SetorComponent } from './components/setor/setor.component';
 import { DestinoComponent } from './components/destino/destino.component';
+import { CarroComponent } from './components/carro/carro.component';
+import { MotoristaComponent } from './components/motorista/motorista.component';
+import { SolicitacaoComponent } from './components/solicitacao/solicitacao.component';
 
 export const routes: Routes = [
   // --- Rotas Públicas ---
@@ -34,7 +37,27 @@ export const routes: Routes = [
         // acessível para qualquer usuário logado
       },
 
-      // Carros
+      // 🔹 Carros
+      {
+        path: 'carros',
+        children: [
+          {
+            path: '',
+            component: CarroComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
+          },
+          {
+            path: 'gerenciar',
+            component: CarroComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
+          },
+          {
+            path: 'novo',
+            component: CarroComponent,
+            data: { roles: ['ADMIN'] },
+          },
+        ],
+      },
 
       // 🔹 Destinos
       {
@@ -58,6 +81,28 @@ export const routes: Routes = [
         ],
       },
 
+      // 🔹 Motoristas
+      {
+        path: 'motoristas',
+        children: [
+          {
+            path: '',
+            component: MotoristaComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
+          },
+          {
+            path: 'gerenciar',
+            component: MotoristaComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
+          },
+          {
+            path: 'novo',
+            component: MotoristaComponent,
+            data: { roles: ['ADMIN'] },
+          },
+        ],
+      },
+
       // 🔹 Setores
       {
         path: 'setores',
@@ -76,6 +121,28 @@ export const routes: Routes = [
             path: 'novo',
             component: SetorComponent,
             data: { roles: ['ADMIN'] },
+          },
+        ],
+      },
+
+      // 🔹 Solicitações
+      {
+        path: 'solicitacoes',
+        children: [
+          {
+            path: '',
+            component: SolicitacaoComponent,
+            data: { roles: ['ADMIN', 'GERENTE', 'BASIC'] },
+          },
+          {
+            path: 'gerenciar',
+            component: SolicitacaoComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
+          },
+          {
+            path: 'novo',
+            component: SolicitacaoComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
           },
         ],
       },

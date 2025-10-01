@@ -154,6 +154,7 @@ export class UsuarioComponent {
       username: '',
       nome: '',
       password: '',
+      ativo: true, // ✅ Sempre inicia ativo por padrão
       roles: [], // Inicializa com um array vazio de objetos Role
     };
     this.editingPassword = true; // ✅ Senha sempre editável para novo registro
@@ -184,6 +185,7 @@ export class UsuarioComponent {
       nome: usuario.nome,
       roles: rolesSelecionados, // Atribui as roles completas
       password: '', // ✅ Importante: Limpar a senha ao editar para não enviar vazia acidentalmente
+      ativo: usuario.ativo, // ✅ Mantém o valor do backend
     };
     this.editingPassword = false; // ✅ Senha desabilitada por padrão na edição
     this.modalRef = this.modalService.open(this.modalUserDetalhe);
@@ -244,6 +246,7 @@ export class UsuarioComponent {
       username: usuario.username,
       nome: usuario.nome,
       password: usuario.password,
+      ativo: usuario.ativo, // ✅ Inclui no envio para backend
       roles: usuario.roles,
     };
 
@@ -285,6 +288,7 @@ export class UsuarioComponent {
         username: usuario.username,
         nome: usuario.nome,
         roles: this.rolesDisponiveis as Role[], // Envia roles como objetos Role
+        ativo: usuario.ativo, // ✅ Inclui no update também
       };
 
       // ✅ Apenas inclui a senha no DTO se a edição de senha foi habilitada E o campo não estiver vazio

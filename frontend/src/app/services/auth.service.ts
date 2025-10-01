@@ -141,9 +141,11 @@ export class AuthService {
         console.log('✅ Roles salvas:', roles);
       },
       error: (err) => {
-        console.error('Erro ao buscar usuário logado:', err);
-        this.clearSession();
-      },
+        console.error('⚠️ Erro ao buscar usuário logado:', err);
+        if (err.status === 401 || err.status === 403) {
+          this.clearSession();
+        }
+      }
     });
   }
 
