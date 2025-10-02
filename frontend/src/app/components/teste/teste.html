@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Preview - Solicitações com Modal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet"/>
+
+  <style>
+    /* ======== CARD + LISTAGEM ======== */
+    .container { margin-top: 20px; }
+    .card { border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: none; }
+    .card-body { padding: 20px; }
+    .card-body h1 { font-size: 1.6rem; font-weight: 600; margin: 0; }
+
+    /* Botões */
+    .btn-rounded { border-radius: 25px; }
+    .btn-shadow { box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+    .btn-primary { background: #0d6efd; border: none; }
+    .btn-primary:hover { background: #0b5ed7; }
+    .btn-warning, .btn-danger { color: #fff; }
+
+    /* Inputs */
+    input.form-control { border-radius: 8px; transition: all 0.2s ease-in-out; }
+    input.form-control:focus { border-color: #0d6efd; box-shadow: 0 0 6px rgba(13,110,253,0.4); }
+
+    /* Tabela */
+    .table { font-size: 0.9rem; border-radius: 8px; overflow: hidden; }
+    .table thead th { background: #f8f9fa; font-weight: 600; padding: 12px; }
+    .table tbody tr:hover { background: #f1f3f5; }
+    .table td { vertical-align: middle; }
+
+    /* Paginação */
+    .pagination .page-link { border-radius: 6px; margin: 0 2px; color: #0d6efd; }
+    .pagination .page-item.active .page-link { background: #0d6efd; border-color: #0d6efd; color: #fff; }
+
+    /* ======== MODAL ======== */
+    .modal-content { border-radius: 12px; border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .modal-header { border-bottom: 1px solid #e9ecef; }
+    .modal-footer { border-top: 1px solid #e9ecef; }
+    .modal-title { font-weight: 600; }
+    .modal-body label { font-weight: 500; margin-bottom: 4px; font-size: 0.9rem; }
+    .modal-body .form-control { border-radius: 8px; padding: 10px 12px; }
+
+    /* Autocomplete Mock */
+    .autocomplete { position: relative; }
+    .autocomplete .panel {
+      position: absolute; left: 0; right: 0; top: calc(100% + 4px);
+      background: #fff; border: 1px solid #ddd; border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-height: 200px; overflow: auto; z-index: 1056;
+    }
+    .autocomplete .option { padding: 8px 12px; cursor: pointer; }
+    .autocomplete .option:hover { background: #f1f1f1; }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .card-body h1 { font-size: 1.3rem; }
+      .d-flex { flex-direction: column !important; align-items: stretch !important; gap: 10px; }
+      .pagination { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="card-body">
+      <!-- Cabeçalho -->
+      <div class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded">
+        <h1>Gerenciamento de Solicitações</h1>
+        <button class="btn btn-primary btn-rounded btn-shadow me-2" data-bs-toggle="modal" data-bs-target="#modalSolicitacao">
+          <i class="bi bi-plus-circle me-1"></i> Nova Solicitação
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div class="d-flex flex-grow-1 me-2 gap-2">
+          <input type="text" class="form-control" placeholder="Filtrar por status"/>
+        </div>
+        <button class="btn btn-primary ms-2"><i class="bi bi-search"></i> Pesquisar</button>
+        <button class="btn btn-secondary ms-2">Limpar</button>
+      </div>
+
+      <!-- Tabela -->
+      <table class="table table-striped mt-3">
+        <thead>
+          <tr>
+            <th>ID</th><th>Status</th><th>Data</th><th>Carro</th><th>Motorista</th><th>Usuário</th><th>Setor</th><th>Destino</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>101</td><td>PENDENTE</td><td>02/10/2025 14:30</td>
+            <td>ABC-1234</td><td>João Silva</td><td>Ana Paula</td><td>TI</td><td>Hospital Central</td>
+            <td>
+              <button class="btn btn-warning btn-sm me-1"><i class="bi bi-pencil-square"></i></button>
+              <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginação -->
+      <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap bg-light text-black p-3 rounded">
+        <div class="me-3"><small>Página <strong>1</strong> de <strong>10</strong> — Total: <strong>95</strong></small></div>
+        <nav>
+          <ul class="pagination mb-0">
+            <li class="page-item disabled"><button class="page-link">‹</button></li>
+            <li class="page-item active"><button class="page-link">1</button></li>
+            <li class="page-item"><button class="page-link">2</button></li>
+            <li class="page-item"><button class="page-link">›</button></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Solicitação -->
+<div class="modal fade" id="modalSolicitacao" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nova Solicitação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <!-- Motorista -->
+          <div class="mb-3 autocomplete">
+            <label>Motorista</label>
+            <input type="text" class="form-control" placeholder="Digite o nome do motorista" value="Jo">
+            <!-- Mock painel de opções -->
+            <div class="panel">
+              <div class="option">João da Silva</div>
+              <div class="option">Jonas Pereira</div>
+              <div class="option">Josefa Alves</div>
+            </div>
+          </div>
+
+          <!-- Carro -->
+          <div class="mb-3 autocomplete">
+            <label>Carro</label>
+            <input type="text" class="form-control" placeholder="Digite a placa" value="ABC">
+            <div class="panel">
+              <div class="option">ABC-1234 — Toyota Corolla</div>
+              <div class="option">ABC-5678 — Fiat Uno</div>
+            </div>
+          </div>
+
+          <!-- Setor -->
+          <div class="mb-3 autocomplete">
+            <label>Setor</label>
+            <input type="text" class="form-control" placeholder="Digite o setor" value="TI">
+            <div class="panel">
+              <div class="option">Tecnologia da Informação</div>
+              <div class="option">Telecomunicações</div>
+            </div>
+          </div>
+
+          <!-- Destino -->
+          <div class="mb-3 autocomplete">
+            <label>Destino</label>
+            <input type="text" class="form-control" placeholder="Digite o destino" value="Hos">
+            <div class="panel">
+              <div class="option">Hospital Central</div>
+              <div class="option">Hospital Infantil</div>
+            </div>
+          </div>
+
+          <!-- Data -->
+          <div class="mb-3">
+            <label>Data da Solicitação</label>
+            <input type="datetime-local" class="form-control" value="2025-10-02T14:30">
+          </div>
+
+          <!-- Status -->
+          <div class="mb-3">
+            <label>Status</label>
+            <input type="text" class="form-control" placeholder="PENDENTE / EM ANDAMENTO / CONCLUÍDO" value="PENDENTE">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

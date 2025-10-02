@@ -1,9 +1,13 @@
 <div class="container">
   <div class="card">
     <div class="card-body">
+      <!-- Cabeçalho -->
       <div class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded">
         <h1>Gerenciamento de Solicitações</h1>
-        <button class="btn btn-primary btn-rounded btn-shadow me-2" (click)="cadastrarModal()">
+        <button
+          class="btn btn-primary btn-rounded btn-shadow me-2"
+          (click)="abrirModalAbertura()"
+        >
           <i class="bi bi-plus-circle me-1"></i> Nova Solicitação
         </button>
       </div>
@@ -11,31 +15,71 @@
       <!-- Barra de pesquisa -->
       <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div class="d-flex flex-grow-1 me-2 gap-2">
-          <input type="text" class="form-control" placeholder="Filtrar por status"
-                 [(ngModel)]="filtroStatus" (keyup.enter)="aplicarFiltros()" />
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Filtrar por ID"
+            [(ngModel)]="filtroId"
+            (keyup.enter)="aplicarFiltros()"
+          />      
+          
+
+          <!-- Filtro por Login do Usuário -->
+            <input
+            type="text"
+            class="form-control w-auto"
+            placeholder="Filtrar por login do usuário"
+            [(ngModel)]="filtroUsuarioLogin"
+            (keyup.enter)="aplicarFiltros()"
+          />
+        
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Filtrar por Status"
+            [(ngModel)]="filtroStatus"
+            (keyup.enter)="aplicarFiltros()"
+          />
         </div>
+        
         <button class="btn btn-primary ms-2" (click)="aplicarFiltros()">
           <i class="bi bi-search"></i> Pesquisar
         </button>
-        <button class="btn btn-secondary ms-2" (click)="limparFiltros()">Limpar</button>
+        <button class="btn btn-secondary ms-2" (click)="limparFiltros()">
+          Limpar
+        </button>
+
+        <!-- 📌 Botão toggle -->
+        <button
+          class="btn ms-2"
+          [ngClass]="mostrarSomentePendentes ? 'btn-outline-warning' : 'btn-outline-dark'"
+          (click)="alternarFiltroPendentes()"
+        >
+          <i class="bi" [ngClass]="mostrarSomentePendentes ? 'bi-hourglass-split' : 'bi-list'"></i>
+          {{ mostrarSomentePendentes ? 'Somente Pendentes' : 'Todas Solicitações' }}
+        </button>
       </div>
 
       <!-- Tabela -->
       <table class="table table-striped mt-3">
         <thead>
           <tr>
-            <th (click)="ordenarPor('id')" style="cursor: pointer">ID</th>
-            <th>Status</th>
-            <th>Data</th>
+            <th (click)="ordenarPor('id')" style="cursor:pointer;">ID</th>
+            <th (click)="ordenarPor('status')" style="cursor:pointer;">
+              Status
+              <i *ngIf="colunaOrdenada === 'status'" class="bi"
+                 [ngClass]="{ 'bi-caret-up-fill': ordem === 'asc', 'bi-caret-down-fill': ordem === 'desc' }"></i>
+            </th>
+            <th (click)="ordenarPor('dataSolicitacao')" style="cursor:pointer;">
+              Data
+              <i *ngIf="colunaOrdenada === 'dataSolicitacao'" class="bi"
+                 [ngClass]="{ 'bi-caret-up-fill': ordem === 'asc', 'bi-caret-down-fill': ordem === 'desc' }"></i>
+            </th>
             <th>Carro</th>
             <th>Motorista</th>
             <th>Usuário</th>
             <th>Setor</th>
             <th>Destino</th>
-            <th>Km Inicial</th>
-            <th>Km Final</th>
-            <th>Saída</th>
-            <th>Chegada</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -43,29 +87,50 @@
           @for (sol of lista; track sol.id) {
           <tr>
             <td>{{ sol.id }}</td>
-            <td>{{ sol.status }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.bg-danger]="sol.status === 'PENDENTE'"
+                [class.bg-info]="sol.status === 'EM_ANDAMENTO'"
+                [class.bg-success]="sol.status === 'CONCLUIDO'"
+                [class.bg-secondary]="sol.status === 'CANCELADO'"
+              >
+                {{ sol.status }}
+              </span>
+            </td>
             <td>{{ sol.dataSolicitacao | date: 'dd/MM/yyyy HH:mm' }}</td>
             <td>{{ sol.carroPlaca }}</td>
             <td>{{ sol.motoristaNome }}</td>
             <td>{{ sol.usuarioNome }}</td>
             <td>{{ sol.setorNome }}</td>
             <td>{{ sol.destinoNome }}</td>
-            <td>{{ sol.kmInicial }}</td>
-            <td>{{ sol.kmFinal }}</td>
-            <td>{{ sol.horaSaida }}</td>
-            <td>{{ sol.horaChegada }}</td>
             <td>
-              <button class="btn btn-warning btn-sm me-1" (click)="editarModal(sol)">
+              <button
+                *ngIf="sol.status === 'PENDENTE' || sol.status === 'EM_ANDAMENTO'"
+                class="btn btn-success btn-sm me-1"
+                (click)="abrirModalFechamento(sol)"
+              >
+                <i class="bi bi-check-circle"></i>
+              </button>
+              <button
+                class="btn btn-warning btn-sm me-1"
+                (click)="editarModal(sol)"
+              >
                 <i class="bi bi-pencil-square"></i>
               </button>
-              <button class="btn btn-danger btn-sm" (click)="excluir(sol)">
+              <button
+                class="btn btn-danger btn-sm"
+                (click)="excluir(sol)"
+              >
                 <i class="bi bi-trash"></i>
               </button>
             </td>
           </tr>
           } @empty {
           <tr>
-            <td colspan="13" class="text-center">Nenhuma solicitação encontrada.</td>
+            <td colspan="9" class="text-center">
+              Nenhuma solicitação encontrada.
+            </td>
           </tr>
           }
         </tbody>
@@ -75,8 +140,9 @@
       <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap bg-light text-black p-3 rounded">
         <div class="me-3">
           <small>
-            Página <strong>{{ page + 1 }}</strong> de <strong>{{ totalPages }}</strong> —
-            Total: <strong>{{ totalElements }}</strong>
+            Página <strong>{{ page + 1 }}</strong> de
+            <strong>{{ totalPages }}</strong> — Total:
+            <strong>{{ totalElements }}</strong>
           </small>
         </div>
         <nav>
@@ -84,9 +150,14 @@
             <li class="page-item" [class.disabled]="page === 0">
               <button class="page-link" (click)="paginaAnterior()" [disabled]="page === 0">‹</button>
             </li>
-            <li *ngFor="let p of [].constructor(totalPages); let i = index"
-                class="page-item" [class.active]="i === page">
-              <button class="page-link" (click)="irParaPagina(i)">{{ i + 1 }}</button>
+            <li
+              *ngFor="let p of [].constructor(totalPages); let i = index"
+              class="page-item"
+              [class.active]="i === page"
+            >
+              <button class="page-link" (click)="irParaPagina(i)">
+                {{ i + 1 }}
+              </button>
             </li>
             <li class="page-item" [class.disabled]="page + 1 >= totalPages">
               <button class="page-link" (click)="proximaPagina()" [disabled]="page + 1 >= totalPages">›</button>
@@ -98,139 +169,226 @@
   </div>
 </div>
 
-<!-- Modal de Cadastro/Edição -->
-<ng-template #modalSolicitacaoDetalhe>
-  <div class="modal-header bg-primary text-white">
+<!-- 📌 Modal de Abertura -->
+<ng-template #modalSolicitacaoAbertura>
+  <div class="modal-header">
     <h5 class="modal-title">
-      {{ registroSelecionado.id > 0 ? "Editar Solicitação" : "Nova Solicitação" }}
+      {{ registroSelecionado?.id ? 'Editar Solicitação' : 'Nova Solicitação' }}
     </h5>
     <button type="button" class="btn-close" (click)="cancelarModal()"></button>
   </div>
-
   <div class="modal-body">
-    <form #solForm="ngForm">
-      <div class="mb-3">
-        <label class="form-label fw-bold">Status</label>
-        <input mdbInput [(ngModel)]="registroSelecionado.status" name="status"
-               required class="form-control" />
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label fw-bold">Data Solicitação</label>
-        <input type="datetime-local" mdbInput [(ngModel)]="registroSelecionado.dataSolicitacao"
-               name="dataSolicitacao" class="form-control" />
-      </div>
-
-     
-      <!-- Campo Motorista --> 
-      <div class="mb-3 autocomplete-container">
-        <label class="form-label fw-bold">Motorista:</label>
+    <form>
+      <!-- Motorista -->
+      <div class="mb-3 autocomplete">
+        <label>Motorista</label>
         <input
           type="text"
           class="form-control"
-          placeholder="Digite o nome do motorista"
           [(ngModel)]="motoristaNome"
+          [ngModelOptions]="{ standalone: true }"
           (input)="buscarMotoristas(motoristaNome)"
         />
-        <div class="autocomplete-dropdown" *ngIf="motoristas.length > 0">
-          <div
-            class="autocomplete-item"
-            *ngFor="let m of motoristas"
-            (click)="selecionarMotorista(m)"
-          >
+        <div *ngIf="motoristas.length > 0" class="panel">
+          <div class="option" *ngFor="let m of motoristas" (click)="selecionarMotorista(m)">
             {{ m.nome }}
           </div>
         </div>
       </div>
 
-
-
-      <div class="row mt-2">
-        <div class="col">
-          <label class="form-label fw-bold">Usuário</label>
-          <select class="form-select" [(ngModel)]="registroSelecionado.usuarioId" name="usuarioId" required>
-            <option [ngValue]="null">Selecione...</option>
-            <option *ngFor="let u of usuarios" [ngValue]="u.id">{{ u.nome }}</option>
-          </select>
-        </div>
-        <div class="col">
-          <label class="form-label fw-bold">Setor</label>
-          <select class="form-select" [(ngModel)]="registroSelecionado.setorId" name="setorId" required>
-            <option [ngValue]="null">Selecione...</option>
-            <option *ngFor="let s of setores" [ngValue]="s.id">{{ s.nome }}</option>
-          </select>
+      <!-- Carro -->
+      <div class="mb-3 autocomplete">
+        <label>Carro</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="carroPlaca"
+          [ngModelOptions]="{ standalone: true }"
+          (input)="buscarCarros(carroPlaca)"
+        />
+        <div *ngIf="carros.length > 0" class="panel">
+          <div class="option" *ngFor="let c of carros" (click)="selecionarCarro(c)">
+            {{ c.placa }} — {{ c.marca }} {{ c.modelo }}
+          </div>
         </div>
       </div>
 
-      <div class="row mt-2">
-        <div class="col">
-          <label class="form-label fw-bold">Destino</label>
-          <select class="form-select" [(ngModel)]="registroSelecionado.destinoId" name="destinoId" required>
-            <option [ngValue]="null">Selecione...</option>
-            <option *ngFor="let d of destinos" [ngValue]="d.id">{{ d.nome }}</option>
-          </select>
+      <!-- Setor -->
+      <div class="mb-3 autocomplete">
+        <label>Setor</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="setorNome"
+          [ngModelOptions]="{ standalone: true }"
+          (input)="buscarSetores(setorNome)"
+        />
+        <div *ngIf="setores.length > 0" class="panel">
+          <div class="option" *ngFor="let s of setores" (click)="selecionarSetor(s)">
+            {{ s.nome }}
+          </div>
         </div>
       </div>
 
-      <div class="row mt-3">
-        <div class="col">
-          <label class="form-label fw-bold">Km Inicial</label>
-          <input type="number" mdbInput [(ngModel)]="registroSelecionado.kmInicial"
-                 name="kmInicial" class="form-control" />
-        </div>
-        <div class="col">
-          <label class="form-label fw-bold">Km Final</label>
-          <input type="number" mdbInput [(ngModel)]="registroSelecionado.kmFinal"
-                 name="kmFinal" class="form-control" />
+      <!-- Destino -->
+      <div class="mb-3 autocomplete">
+        <label>Destino</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="destinoNome"
+          [ngModelOptions]="{ standalone: true }"
+          (input)="buscarDestinos(destinoNome)"
+        />
+        <div *ngIf="destinos.length > 0" class="panel">
+          <div class="option" *ngFor="let d of destinos" (click)="selecionarDestino(d)">
+            {{ d.nome }}
+          </div>
         </div>
       </div>
 
-      <div class="row mt-3">
-        <div class="col">
-          <label class="form-label fw-bold">Hora Saída</label>
-          <input type="time" mdbInput [(ngModel)]="registroSelecionado.horaSaida"
-                 name="horaSaida" class="form-control" />
-        </div>
-        <div class="col">
-          <label class="form-label fw-bold">Hora Chegada</label>
-          <input type="time" mdbInput [(ngModel)]="registroSelecionado.horaChegada"
-                 name="horaChegada" class="form-control" />
-        </div>
+      <!-- Data -->
+      <div class="mb-3">
+        <label>Data da Solicitação</label>
+        <input
+          type="datetime-local"
+          class="form-control"
+          [(ngModel)]="registroSelecionado.dataSolicitacao"
+          [ngModelOptions]="{ standalone: true }"
+        />
+      </div>
+
+      <!-- Status -->
+      <div class="mb-3">
+        <label>Status</label>
+        <select
+          *ngIf="isAdmin"
+          class="form-select"
+          [(ngModel)]="registroSelecionado.status"
+          [ngModelOptions]="{ standalone: true }"
+        >
+          <option *ngFor="let s of statusOptions" [ngValue]="s">{{ s }}</option>
+        </select>
+        <input
+          *ngIf="!isAdmin"
+          type="text"
+          class="form-control"
+          [(ngModel)]="registroSelecionado.status"
+          [ngModelOptions]="{ standalone: true }"
+          readonly
+        />
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="cancelarModal()">Cancelar</button>
+    <button class="btn btn-primary" (click)="salvarSolicitacao(registroSelecionado)">Salvar</button>
+  </div>
+</ng-template>
+
+<!-- 📌 Modal de Fechamento -->
+<ng-template #modalSolicitacaoFechamento>
+  <div class="modal-header bg-success text-white">
+    <h5 class="modal-title fw-bold">Fechar Solicitação</h5>
+    <button type="button" class="btn-close" (click)="cancelarModal()"></button>
+  </div>
+
+  <div class="modal-body">
+    <form>
+      <!-- Km Inicial -->
+      <div class="mb-3">
+        <label class="form-label">Km Inicial</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="registroSelecionado.kmInicial"
+          [ngModelOptions]="{ standalone: true }"
+        />
+      </div>
+
+      <!-- Km Final -->
+      <div class="mb-3">
+        <label class="form-label">Km Final</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="registroSelecionado.kmFinal"
+          [ngModelOptions]="{ standalone: true }"
+        />
+      </div>
+
+      <!-- Hora Saída -->
+      <div class="mb-3">
+        <label class="form-label">Hora de Saída</label>
+        <input
+          type="time"
+          class="form-control"
+          [(ngModel)]="registroSelecionado.horaSaida"
+          [ngModelOptions]="{ standalone: true }"
+        />
+      </div>
+
+      <!-- Hora Chegada -->
+      <div class="mb-3">
+        <label class="form-label">Hora de Chegada</label>
+        <input
+          type="time"
+          class="form-control"
+          [(ngModel)]="registroSelecionado.horaChegada"
+          [ngModelOptions]="{ standalone: true }"
+        />
       </div>
     </form>
   </div>
 
-  <div class="modal-footer bg-light">
-    <button class="btn btn-primary" (click)="salvarSolicitacao(registroSelecionado)">Salvar</button>
-    <button type="button" class="btn btn-secondary" (click)="cancelarModal()">Cancelar</button>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancelarModal()">
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="btn btn-success"
+      (click)="fecharSolicitacao(registroSelecionado)"
+    >
+      Concluir
+    </button>
   </div>
 </ng-template>
 
-<!-- Modal de Exclusão -->
+
+<!-- Modal de Confirmação de Exclusão -->
 <ng-template #modalConfirmacaoExclusao>
   <div class="modal-header bg-danger text-white">
-    <h5 class="modal-title">Excluir Solicitação</h5>
+    <h5 class="modal-title fw-bold">Confirmação de Exclusão</h5>
     <button type="button" class="btn-close" (click)="cancelarModal()"></button>
   </div>
+
   <div class="modal-body">
-    Tem certeza que deseja excluir a solicitação <strong>#{{ registroSelecionado?.id }}</strong>?
+    <p>
+      Tem certeza que deseja excluir a solicitação
+      <strong>{{ registroSelecionado.id }}</strong>?
+    </p>
   </div>
+
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="cancelarModal()">Cancelar</button>
-    <button type="button" class="btn btn-danger" (click)="excluirConfirmado()">Excluir</button>
+    <button type="button" class="btn btn-secondary" (click)="cancelarModal()">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-danger" (click)="excluirConfirmado()">
+      Excluir
+    </button>
   </div>
 </ng-template>
-
 
 <!-- Toasts -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   @for (toast of toastService.messages$ | async; track toast) {
   <div
-    class="toast show mb-2"
+    class="toast show"
     [ngClass]="{
       'bg-success': toast.type === 'success',
       'bg-danger': toast.type === 'danger',
-      'bg-info': toast.type === 'info',      
+      'bg-info': toast.type === 'info'
     }"
     role="alert"
     aria-live="assertive"
@@ -245,3 +403,4 @@
   </div>
   }
 </div>
+

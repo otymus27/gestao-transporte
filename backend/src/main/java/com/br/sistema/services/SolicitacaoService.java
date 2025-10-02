@@ -199,12 +199,25 @@ public class SolicitacaoService {
                 s.getId(),
                 s.getDataSolicitacao(),
                 s.getStatus(),
+
+                s.getCarro().getId(),
                 s.getCarro().getPlaca(),
                 s.getCarro().getModelo(),
+
+                s.getMotorista().getId(),
                 s.getMotorista().getNome(),
+
+                s.getUsuario().getId(),
                 s.getUsuario().getNome(),
+                s.getUsuario().getUsername(),
+
+                s.getSetor().getId(),
                 s.getSetor().getNome(),
+
+
+                s.getDestino().getId(),
                 s.getDestino().getNome(),
+
                 s.getKmInicial(),
                 s.getKmFinal(),
                 s.getHoraSaida(),
@@ -275,15 +288,20 @@ public class SolicitacaoService {
     // ✅ Filtro genérico por múltiplos parâmetros
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> filtrarGenerico(
+            Long id,
             String status,
             Long motoristaId,
             Long carroId,
             Long setorId,
-            Long usuarioId,
+            String username,
             Long destinoId,
             Pageable pageable
     ) {
+
         // Caso só um filtro seja usado, direcionamos pro repository certo
+        if (id != null) {
+            return solicitacaoRepository.findById(id, pageable).map(this::toResponseDTO);
+        }
         if (status != null) {
             return solicitacaoRepository.findByStatus(status, pageable).map(this::toResponseDTO);
         }
@@ -296,9 +314,10 @@ public class SolicitacaoService {
         if (setorId != null) {
             return solicitacaoRepository.findBySetor_Id(setorId, pageable).map(this::toResponseDTO);
         }
-        if (usuarioId != null) {
-            return solicitacaoRepository.findByUsuario_Id(usuarioId, pageable).map(this::toResponseDTO);
+        if (username != null) {
+            return solicitacaoRepository.findByUsernameContainingIgnoreCase(username, pageable).map(this::toResponseDTO);
         }
+
         if (destinoId != null) {
             return solicitacaoRepository.findByDestino_Id(destinoId, pageable).map(this::toResponseDTO);
         }

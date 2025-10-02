@@ -1,5 +1,6 @@
 package com.br.sistema.repositories;
 
+import aj.org.objectweb.asm.commons.Remapper;
 import com.br.sistema.entities.DTO.SolicitacaoPorDiaDTO;
 import com.br.sistema.entities.Dashboard.DTO.RankingItemDTO;
 import com.br.sistema.entities.Motorista.DTO.SolicitacaoPorMotoristaDTO;
@@ -7,6 +8,7 @@ import com.br.sistema.entities.Setor.DTO.SolicitacaoPorSetorDTO;
 import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoPorStatusDTO;
 import com.br.sistema.entities.Solicitacao.Solicitacao;
 import com.br.sistema.entities.Usuario.DTO.SolicitacaoPorUsuarioDTO;
+import com.br.sistema.entities.Usuario.Usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,6 +39,15 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
 
     // 🔍 Buscar por destino (id)
     Page<Solicitacao> findByDestino_Id(Long destinoId, Pageable pageable);
+
+    // 🔍 Buscar por solicitação (id)
+    Page<Solicitacao> findById(Long id, Pageable pageable);
+
+    @Query("SELECT s FROM Solicitacao s WHERE LOWER(s.usuario.nome) LIKE LOWER(CONCAT('%', :nome, '%'))")
+    Page<Solicitacao> findByUsuarioNomeContainingIgnoreCase(@Param("nome") String nome, Pageable pageable);
+
+    @Query("SELECT s FROM Solicitacao s WHERE LOWER(s.usuario.username) LIKE LOWER(CONCAT('%', :username, '%'))")
+    Page<Solicitacao> findByUsernameContainingIgnoreCase(@Param("username") String username, Pageable pageable);
 
 
     long countByStatus(String status);
@@ -181,7 +192,8 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
               LOWER(s.status) LIKE LOWER(CONCAT('%', :filtro, '%'))
         )
     """)
-    List<Solicitacao> filtrarSemPaginacao(String filtro);
 
+
+    List<Solicitacao> filtrarSemPaginacao(String filtro);
 
 }

@@ -1,9 +1,15 @@
 /**
+ * Status possíveis para a solicitação
+ */
+export type StatusSolicitacao = 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'CANCELADO';
+
+/**
  * Estrutura base exigida pelo backend para Solicitação
  */
 export interface SolicitacaoBase {
-  dataSolicitacao: string;   // formato ISO ou yyyy-MM-ddTHH:mm
-  status: string;
+  // 📌 Etapa de abertura
+  dataSolicitacao: string;        // formato ISO ou yyyy-MM-ddTHH:mm
+  status: StatusSolicitacao;
 
   carroId?: number | null;
   motoristaId?: number | null;
@@ -11,10 +17,11 @@ export interface SolicitacaoBase {
   setorId?: number | null;
   destinoId?: number | null;
 
+  // 📌 Etapa de fechamento (só obrigatórios ao concluir)
   kmInicial?: number | null;
   kmFinal?: number | null;
-  horaSaida?: string | null;    // HH:mm
-  horaChegada?: string | null;  // HH:mm
+  horaSaida?: string | null;      // formato HH:mm
+  horaChegada?: string | null;    // formato HH:mm
 }
 
 /**
@@ -28,8 +35,9 @@ export interface SolicitacaoRequest extends SolicitacaoBase {}
 export interface SolicitacaoResponse extends SolicitacaoBase {
   id: number;
 
-  // Campos adicionais para exibição
+  // Campos adicionais para exibição (não são enviados ao backend)
   carroPlaca?: string;
+  carroModelo?: string;
   motoristaNome?: string;
   usuarioNome?: string;
   setorNome?: string;
@@ -68,8 +76,8 @@ export function toSolicitacaoRequest(s: Solicitacao): SolicitacaoRequest {
 export function novaSolicitacao(): Solicitacao {
   return {
     id: 0,
-    status: '',
-    dataSolicitacao: new Date().toISOString().slice(0, 16), // para input datetime-local
+    status: 'PENDENTE',   // 👈 sempre começa pendente
+    dataSolicitacao: new Date().toISOString().slice(0, 16), // compatível com datetime-local
 
     carroId: null,
     motoristaId: null,

@@ -48,6 +48,8 @@ export class AuthService {
   );
   loggedInFullName$ = this._loggedInFullName.asObservable(); // ✅ observable para o header
 
+  private readonly USERID_KEY = 'logged_userid';
+
   // Injetando o HttpClient no construtor
   constructor() {}
 
@@ -61,7 +63,7 @@ export class AuthService {
     localStorage.setItem(this.TOKEN_KEY, token);
     this.extractUserInfoFromToken(token); // ✅ Extrai e armazena info do usuário
     this._isLoggedIn.next(true);
-    this.carregarUsuarioLogado()
+    this.carregarUsuarioLogado();
     console.log('Token salvo:', token);
   }
 
@@ -118,7 +120,6 @@ export class AuthService {
     return roles.length > 0 ? roles[0] : null;
   }
 
-
   // ✅ Chama o endpoint /usuario/logado
   private carregarUsuarioLogado(): void {
     this.http.get<any>(`${this.API_URL}/usuario/logado`).subscribe({
@@ -132,6 +133,8 @@ export class AuthService {
         localStorage.setItem(this.USERNAME_KEY, usuario.username);
         localStorage.setItem(this.ROLES_KEY, JSON.stringify(roles));
         localStorage.setItem(this.FULLNAME_KEY, usuario.nomeCompleto);
+        // 👇 armazena o ID também
+        localStorage.setItem(this.USERID_KEY, usuario.id.toString());
 
         this._loggedInUsername.next(usuario.username);
         this._loggedInRoles.next(roles);
@@ -145,10 +148,15 @@ export class AuthService {
         if (err.status === 401 || err.status === 403) {
           this.clearSession();
         }
-      }
+      },
     });
   }
 
+  // 👇 novo método público para pegar o id do usuario do token
+  getUsuarioId(): number | null {
+    const id = localStorage.getItem(this.USERID_KEY);
+    return id ? parseInt(id, 10) : null;
+  }
 
   private clearSession(): void {
     localStorage.removeItem(this.TOKEN_KEY);
@@ -204,25 +212,31 @@ export class AuthService {
   // Limpa o token e todas as informações do usuário do localStorage e redireciona para o login
   logout(): void {
     const token = this.getToken();
-  
+
     if (token) {
-      this.http.post(`${this.API_URL}/logout`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).subscribe({
-        next: () => {
-          console.log('Logout registrado no backend');
-          this.clearSession();
-          this.router.navigate(['/login']);
-        },
-        error: (err) => {
-          console.error('Erro ao chamar logout no backend:', err);
-          // Mesmo se der erro, limpa localmente
-          this.clearSession();
-          this.router.navigate(['/login']);
-        }
-      });
+      this.http
+        .post(
+          `${this.API_URL}/logout`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .subscribe({
+          next: () => {
+            console.log('Logout registrado no backend');
+            this.clearSession();
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            console.error('Erro ao chamar logout no backend:', err);
+            // Mesmo se der erro, limpa localmente
+            this.clearSession();
+            this.router.navigate(['/login']);
+          },
+        });
     } else {
       // Caso não tenha token, só limpa local
       this.clearSession();

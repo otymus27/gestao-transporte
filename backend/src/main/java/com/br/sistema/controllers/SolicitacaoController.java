@@ -337,18 +337,19 @@ public class SolicitacaoController {
     @GetMapping("/buscar")
     @Transactional(readOnly = true)
     public ResponseEntity<?> filtrarGenerico(
+            @RequestParam(required = false) Long id,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long motoristaId,
             @RequestParam(required = false) Long carroId,
             @RequestParam(required = false) Long setorId,
-            @RequestParam(required = false) Long usuarioId,
+            @RequestParam(required = false) String username,
             @RequestParam(required = false) Long destinoId,
             Pageable pageable,
             HttpServletRequest request
     ) {
         try {
             var solicitacoes = solicitacaoService.filtrarGenerico(
-                    status, motoristaId, carroId, setorId, usuarioId, destinoId, pageable
+                    id,status, motoristaId, carroId, setorId, username, destinoId, pageable
             );
             return ResponseEntity.ok(solicitacoes);
         } catch (Exception e) {

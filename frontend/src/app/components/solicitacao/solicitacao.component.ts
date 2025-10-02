@@ -1,6 +1,8 @@
-import { CommonModule } from '@angular/common';
 import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
+// MDB Angular
 import { MdbFormsModule } from 'mdb-angular-ui-kit/forms';
 import {
   MdbModalModule,
@@ -8,10 +10,14 @@ import {
   MdbModalService,
 } from 'mdb-angular-ui-kit/modal';
 
+import { AuthService } from '../../services/auth.service';
+
+// Models e Services
 import { ToastService } from '../../services/toast.service';
 import { Paginacao } from '../../models/paginacao';
 import {
   Solicitacao,
+  StatusSolicitacao,
   novaSolicitacao,
   toSolicitacaoRequest,
 } from '../../models/solicitacao';
@@ -42,6 +48,14 @@ import { DestinoService } from '../../services/destino.service';
 export class SolicitacaoComponent {
   lista: Solicitacao[] = [];
   registroSelecionado!: Solicitacao;
+  statusOptions: StatusSolicitacao[] = [
+    'PENDENTE',
+    'EM_ANDAMENTO',
+    'CONCLUIDO',
+    'CANCELADO',
+  ];
+
+  isAdmin = false;
 
   // Paginação
   page = 0;
@@ -51,6 +65,8 @@ export class SolicitacaoComponent {
 
   // Filtro
   filtroStatus: string = '';
+  filtroId: string = '';
+  filtroUsuarioLogin: string = '';
 
   // Ordenação
   colunaOrdenada: keyof Solicitacao = 'id';
@@ -65,48 +81,63 @@ export class SolicitacaoComponent {
   destinoService = inject(DestinoService);
   modalService = inject(MdbModalService);
   toastService = inject(ToastService);
+  authService = inject(AuthService);
 
-  // Listas para selects
+  // Listas
   carros: Carro[] = [];
   motoristas: Motorista[] = [];
   usuarios: Usuario[] = [];
   setores: Setor[] = [];
   destinos: Destino[] = [];
 
+  // Campos exibidos no formulário
+  motoristaNome = '';
+  carroPlaca = '';
+  setorNome = '';
+  destinoNome = '';
+
   // Modais
-  @ViewChild('modalSolicitacaoDetalhe')
-  modalSolicitacaoDetalhe!: TemplateRef<any>;
-  modalRef!: MdbModalRef<any>;
+  @ViewChild('modalSolicitacaoAbertura')
+  modalSolicitacaoAbertura!: TemplateRef<any>;
+
+  @ViewChild('modalSolicitacaoFechamento')
+  modalSolicitacaoFechamento!: TemplateRef<any>;
 
   @ViewChild('modalConfirmacaoExclusao')
   modalConfirmacaoExclusao!: TemplateRef<any>;
 
+  modalRef!: MdbModalRef<any>;
+
   constructor() {
     this.listar();
     this.carregarCombos();
+
+    // ✅ Detecta se o logado é admin
+    const roles = this.authService.getLoggedInRoles();
+    this.isAdmin = roles.includes('ADMIN');
   }
 
   carregarCombos() {
-    this.carroService
-      .listar(0, 100)
-      .subscribe((res) => (this.carros = res.content));
-    this.motoristaService
-      .listar(0, 100)
-      .subscribe((res) => (this.motoristas = res.content));
     this.usuarioService
       .listar(0, 100)
       .subscribe((res) => (this.usuarios = res.content));
-    this.setorService
-      .listar(0, 100)
-      .subscribe((res) => (this.setores = res.content));
-    this.destinoService
-      .listar(0, 100)
-      .subscribe((res) => (this.destinos = res.content));
+  }
+
+  // 📌 Flag de filtro rápido
+  mostrarSomentePendentes = false;
+
+  alternarFiltroPendentes() {
+    this.mostrarSomentePendentes = !this.mostrarSomentePendentes;
+    this.page = 0; // sempre volta pra primeira página
+    if (this.mostrarSomentePendentes) {
+      this.filtroStatus = 'PENDENTE';
+    } else {
+      this.filtroStatus = '';
+    }
+    this.listar();
   }
 
   // --- Motorista ---
-  motoristaNome = '';
-
   buscarMotoristas(query: string) {
     if (!query.trim()) {
       this.motoristas = [];
@@ -117,45 +148,100 @@ export class SolicitacaoComponent {
       error: () => this.toastService.showError('Erro ao buscar motoristas!'),
     });
   }
-
   selecionarMotorista(m: Motorista) {
     this.registroSelecionado.motoristaId = m.id!;
     this.motoristaNome = m.nome;
-    this.motoristas = []; // fecha dropdown
+    this.motoristas = [];
   }
 
-  // 📌 Listar
-  listar() {
-    if (this.filtroStatus?.trim()) {
-      this.solicitacaoService
-        .filtrarPorStatus(this.filtroStatus, this.page, this.size)
-        .subscribe({
-          next: (resposta: Paginacao<Solicitacao>) => {
-            this.lista = resposta.content;
-            this.page = resposta.number;
-            this.totalPages = resposta.totalPages;
-            this.totalElements = resposta.totalElements;
-          },
-          error: () =>
-            this.toastService.showError('Erro ao buscar solicitações!'),
-        });
-    } else {
-      this.solicitacaoService
-        .listar(this.page, this.size, this.colunaOrdenada, this.ordem)
-        .subscribe({
-          next: (resposta: Paginacao<Solicitacao>) => {
-            this.lista = resposta.content;
-            this.page = resposta.number;
-            this.totalPages = resposta.totalPages;
-            this.totalElements = resposta.totalElements;
-          },
-          error: () =>
-            this.toastService.showError('Erro ao listar solicitações!'),
-        });
+  // --- Carro ---
+  buscarCarros(query: string) {
+    if (!query.trim()) {
+      this.carros = [];
+      return;
     }
+    this.carroService.filtrar(query).subscribe({
+      next: (res) => (this.carros = res.content),
+      error: () => this.toastService.showError('Erro ao buscar carros!'),
+    });
+  }
+  selecionarCarro(c: Carro) {
+    this.registroSelecionado.carroId = c.id!;
+    this.carroPlaca = c.placa;
+    this.carros = [];
   }
 
-  // 📌 Métodos de paginação
+  // --- Setor ---
+  buscarSetores(query: string) {
+    if (!query.trim()) {
+      this.setores = [];
+      return;
+    }
+    this.setorService.filtrarPorNome(query).subscribe({
+      next: (res) => (this.setores = res.content),
+      error: () => this.toastService.showError('Erro ao buscar setores!'),
+    });
+  }
+  selecionarSetor(s: Setor) {
+    this.registroSelecionado.setorId = s.id!;
+    this.setorNome = s.nome;
+    this.setores = [];
+  }
+
+  // --- Destino ---
+  buscarDestinos(query: string) {
+    if (!query.trim()) {
+      this.destinos = [];
+      return;
+    }
+    this.destinoService.filtrarPorNome(query).subscribe({
+      next: (res) => (this.destinos = res.content),
+      error: () => this.toastService.showError('Erro ao buscar destinos!'),
+    });
+  }
+  selecionarDestino(d: Destino) {
+    this.registroSelecionado.destinoId = d.id!;
+    this.destinoNome = d.nome;
+    this.destinos = [];
+  }
+
+  // 📌 Listar com filtros
+  listar() {
+    const filtros: any = {};
+
+    if (this.filtroId && this.filtroId.trim() !== '') {
+      filtros.id = +this.filtroId;
+    }
+    if (this.filtroUsuarioLogin && this.filtroUsuarioLogin.trim() !== '') {
+      filtros.usuarioLogin = this.filtroUsuarioLogin;
+    }
+    if (this.filtroStatus && this.filtroStatus.trim() !== '') {
+      filtros.status = this.filtroStatus;
+    }
+
+    const service$ =
+      Object.keys(filtros).length > 0
+        ? this.solicitacaoService.filtrarGenerico(filtros, this.page, this.size)
+        : this.solicitacaoService.listar(
+            this.page,
+            this.size,
+            this.colunaOrdenada,
+            this.ordem
+          );
+
+    service$.subscribe({
+      next: (res: Paginacao<Solicitacao>) => {
+        this.lista = res.content;
+        this.page = res.number;
+        this.totalPages = res.totalPages;
+        this.totalElements = res.totalElements;
+      },
+      error: () =>
+        this.toastService.showError('Erro ao carregar solicitações!'),
+    });
+  }
+
+  // 📌 Paginação
   irParaPagina(p: number) {
     this.page = p;
     this.listar();
@@ -194,70 +280,97 @@ export class SolicitacaoComponent {
     this.listar();
   }
 
-  // 📌 Modal de cadastro
-  cadastrarModal() {
+  // 📌 Modal de Abertura
+  abrirModalAbertura() {
     this.registroSelecionado = novaSolicitacao();
-    this.modalRef = this.modalService.open(this.modalSolicitacaoDetalhe);
+    this.registroSelecionado.usuarioId = this.authService.getUsuarioId();
+    this.registroSelecionado.status = 'PENDENTE'; // ✅ já seta como PENDENTE
+
+    this.motoristaNome = '';
+    this.carroPlaca = '';
+    this.setorNome = '';
+    this.destinoNome = '';
+
+    this.modalRef = this.modalService.open(this.modalSolicitacaoAbertura);
   }
 
-  // 📌 Modal de edição
+  // 📌 Modal de Fechamento ou Edição
+  abrirModalFechamento(solicitacao: Solicitacao) {
+    this.registroSelecionado = { ...solicitacao };
+
+    if (!this.isAdmin) {
+      this.registroSelecionado.status = 'CONCLUIDO';
+    }
+
+    this.motoristaNome = solicitacao.motoristaNome ?? '';
+    this.carroPlaca = solicitacao.carroPlaca ?? '';
+    this.setorNome = solicitacao.setorNome ?? '';
+    this.destinoNome = solicitacao.destinoNome ?? '';
+
+    this.modalRef = this.modalService.open(this.modalSolicitacaoFechamento);
+  }
+  // 📌 Modal de Edição (se você quiser manter separado de fechamento)
   editarModal(solicitacao: Solicitacao) {
     this.registroSelecionado = {
       ...solicitacao,
-      carroId: solicitacao.carroId ?? (solicitacao as any).carro?.id ?? null,
-      motoristaId:
-        solicitacao.motoristaId ?? (solicitacao as any).motorista?.id ?? null,
-      usuarioId:
-        solicitacao.usuarioId ?? (solicitacao as any).usuario?.id ?? null,
-      setorId: solicitacao.setorId ?? (solicitacao as any).setor?.id ?? null,
-      destinoId:
-        solicitacao.destinoId ?? (solicitacao as any).destino?.id ?? null,
       dataSolicitacao: solicitacao.dataSolicitacao
         ? this.formatarDataParaInput(solicitacao.dataSolicitacao)
         : new Date().toISOString().slice(0, 16),
     };
-    this.modalRef = this.modalService.open(this.modalSolicitacaoDetalhe);
+
+    // ✅ Aqui também preenche
+    this.motoristaNome = solicitacao.motoristaNome ?? '';
+    this.carroPlaca = solicitacao.carroPlaca ?? '';
+    this.setorNome = solicitacao.setorNome ?? '';
+    this.destinoNome = solicitacao.destinoNome ?? '';
+
+    this.modalRef = this.modalService.open(this.modalSolicitacaoAbertura);
   }
 
   cancelarModal() {
     this.modalRef.close();
   }
 
-  // 📌 Salvar
+  // 📌 Salvar Abertura
   salvarSolicitacao(solicitacao: Solicitacao) {
-    if (!solicitacao.status?.trim()) {
-      this.toastService.showError('O campo status é obrigatório.');
-      return;
-    }
-
     const payload = toSolicitacaoRequest(solicitacao);
     const isNovo = !solicitacao.id || solicitacao.id <= 0;
 
-    if (isNovo) {
-      this.solicitacaoService.cadastrar(payload).subscribe({
-        next: () => {
-          this.toastService.showSuccess('Solicitação cadastrada com sucesso!');
-          this.listar();
-          this.modalRef.close();
-        },
-        error: (err: ErrorMessage) =>
-          this.toastService.showError(
-            `Erro (${err.status} - ${err.error}): ${err.message}`
-          ),
-      });
-    } else {
-      this.solicitacaoService.atualizar(solicitacao.id, payload).subscribe({
-        next: () => {
-          this.toastService.showSuccess('Solicitação atualizada com sucesso!');
-          this.listar();
-          this.modalRef.close();
-        },
-        error: (err: ErrorMessage) =>
-          this.toastService.showError(
-            `Erro (${err.status} - ${err.error}): ${err.message}`
-          ),
-      });
-    }
+    const acao = isNovo
+      ? this.solicitacaoService.cadastrar(payload)
+      : this.solicitacaoService.atualizar(solicitacao.id, payload);
+
+    acao.subscribe({
+      next: () => {
+        this.toastService.showSuccess(
+          `Solicitação ${isNovo ? 'aberta' : 'atualizada'} com sucesso!`
+        );
+        this.listar();
+        this.modalRef.close();
+      },
+      error: (err: ErrorMessage) =>
+        this.toastService.showError(
+          `Erro (${err.status} - ${err.error}): ${err.message}`
+        ),
+    });
+  }
+
+  // 📌 Salvar Fechamento
+  fecharSolicitacao(solicitacao: Solicitacao) {
+    const payload = toSolicitacaoRequest(solicitacao);
+    payload.status = 'CONCLUIDO';
+
+    this.solicitacaoService.atualizar(solicitacao.id, payload).subscribe({
+      next: () => {
+        this.toastService.showSuccess('Solicitação concluída com sucesso!');
+        this.listar();
+        this.modalRef.close();
+      },
+      error: (err: ErrorMessage) =>
+        this.toastService.showError(
+          `Erro (${err.status} - ${err.error}): ${err.message}`
+        ),
+    });
   }
 
   // 📌 Excluir
@@ -279,7 +392,7 @@ export class SolicitacaoComponent {
     });
   }
 
-  /** Converte string ISO para formato datetime-local (yyyy-MM-ddTHH:mm) */
+  /** Converte string ISO para datetime-local (yyyy-MM-ddTHH:mm) */
   private formatarDataParaInput(data: string | Date): string {
     const d = new Date(data);
     const pad = (n: number) => n.toString().padStart(2, '0');

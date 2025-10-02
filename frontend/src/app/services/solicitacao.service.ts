@@ -84,12 +84,15 @@ export class SolicitacaoService {
 
   filtrarGenerico(
     filtros: {
+      id?: number;
       status?: string;
       motoristaId?: number;
       carroId?: number;
       setorId?: number;
       usuarioId?: number;
       destinoId?: number;
+      usuarioNome?: string;
+      username?: string;
     },
     page = 0,
     size = 5

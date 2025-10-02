@@ -7,12 +7,29 @@ public record SolicitacaoResponseDTO(
         Long id,
         LocalDate dataSolicitacao,
         String status,
+
+        // Carro
+        Long carroId,
         String carroPlaca,
         String carroModelo,
+
+        // Motorista
+        Long motoristaId,
         String motoristaNome,
-        String usuarioNome,
+
+        // Usuário
+        Long usuarioId,
+        String usuarioNome,   // ✅ exibição
+        String username,  // ✅ identificador do usuário
+
+        // Setor
+        Long setorId,
         String setorNome,
+
+        // Destino
+        Long destinoId,
         String destinoNome,
+
         Integer kmInicial,
         Integer kmFinal,
         LocalTime horaSaida,
