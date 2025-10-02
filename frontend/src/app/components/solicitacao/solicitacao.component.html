@@ -121,22 +121,29 @@
                name="dataSolicitacao" class="form-control" />
       </div>
 
-      <div class="row">
-        <div class="col">
-          <label class="form-label fw-bold">Carro</label>
-          <select class="form-select" [(ngModel)]="registroSelecionado.carroId" name="carroId" required>
-            <option [ngValue]="null">Selecione...</option>
-            <option *ngFor="let c of carros" [ngValue]="c.id">{{ c.placa }} - {{ c.marca }} {{ c.modelo }}</option>
-          </select>
-        </div>
-        <div class="col">
-          <label class="form-label fw-bold">Motorista</label>
-          <select class="form-select" [(ngModel)]="registroSelecionado.motoristaId" name="motoristaId" required>
-            <option [ngValue]="null">Selecione...</option>
-            <option *ngFor="let m of motoristas" [ngValue]="m.id">{{ m.nome }}</option>
-          </select>
+     
+      <!-- Campo Motorista --> 
+      <div class="mb-3 autocomplete-container">
+        <label class="form-label fw-bold">Motorista:</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Digite o nome do motorista"
+          [(ngModel)]="motoristaNome"
+          (input)="buscarMotoristas(motoristaNome)"
+        />
+        <div class="autocomplete-dropdown" *ngIf="motoristas.length > 0">
+          <div
+            class="autocomplete-item"
+            *ngFor="let m of motoristas"
+            (click)="selecionarMotorista(m)"
+          >
+            {{ m.nome }}
+          </div>
         </div>
       </div>
+
+
 
       <div class="row mt-2">
         <div class="col">

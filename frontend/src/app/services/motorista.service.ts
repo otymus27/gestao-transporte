@@ -72,6 +72,27 @@ export class MotoristaService {
   }
 
   /**
+   * Buscar motoristas filtrando por nome (paginado).
+   */
+  filtrarPorNome(
+    nome: string,
+    page: number = 0,
+    size: number = 10,
+    sortField: keyof Motorista = 'nome',
+    sortDirection: 'asc' | 'desc' = 'asc'
+  ): Observable<Paginacao<Motorista>> {
+    let params = new HttpParams()
+      .set('nome', nome)
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', `${sortField},${sortDirection}`);
+
+    return this.http
+      .get<Paginacao<Motorista>>(`${this.API_URL}/buscar`, { params })
+      .pipe(catchError(this.tratarErro));
+  }
+
+  /**
    * Buscar motorista por ID.
    */
   buscarPorId(id: number): Observable<Motorista> {

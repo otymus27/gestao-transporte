@@ -104,6 +104,26 @@ export class SolicitacaoComponent {
       .subscribe((res) => (this.destinos = res.content));
   }
 
+  // --- Motorista ---
+  motoristaNome = '';
+
+  buscarMotoristas(query: string) {
+    if (!query.trim()) {
+      this.motoristas = [];
+      return;
+    }
+    this.motoristaService.filtrarPorNome(query).subscribe({
+      next: (res) => (this.motoristas = res.content),
+      error: () => this.toastService.showError('Erro ao buscar motoristas!'),
+    });
+  }
+
+  selecionarMotorista(m: Motorista) {
+    this.registroSelecionado.motoristaId = m.id!;
+    this.motoristaNome = m.nome;
+    this.motoristas = []; // fecha dropdown
+  }
+
   // 📌 Listar
   listar() {
     if (this.filtroStatus?.trim()) {
