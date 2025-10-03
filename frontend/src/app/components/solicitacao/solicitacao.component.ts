@@ -64,9 +64,10 @@ export class SolicitacaoComponent {
   totalElements = 0;
 
   // Filtro
-  filtroStatus: string = '';
-  filtroId: string = '';
-  filtroUsuarioLogin: string = '';
+  filtroId: number | null = null;
+  filtroUsuarioNome = '';
+  filtroUsuarioLogin = '';
+  filtroStatus = '';
 
   // Ordenação
   colunaOrdenada: keyof Solicitacao = 'id';
@@ -125,6 +126,17 @@ export class SolicitacaoComponent {
 
   // 📌 Flag de filtro rápido
   mostrarSomentePendentes = false;
+
+  /** Garante que só um filtro fica ativo por vez */
+  usarFiltro(chave: 'id' | 'usuarioNome' | 'usuarioLogin' | 'status') {
+    if (chave !== 'id') this.filtroId = null;
+    if (chave !== 'usuarioNome') this.filtroUsuarioNome = '';
+    if (chave !== 'usuarioLogin') this.filtroUsuarioLogin = '';
+    if (chave !== 'status') this.filtroStatus = '';
+
+    // se o usuário começou a digitar login/nome/id, desliga o atalho de pendentes
+    if (chave !== 'status') this.mostrarSomentePendentes = false;
+  }
 
   alternarFiltroPendentes() {
     this.mostrarSomentePendentes = !this.mostrarSomentePendentes;
@@ -206,28 +218,44 @@ export class SolicitacaoComponent {
   }
 
   // 📌 Listar com filtros
+  // 📌 Listar — UM filtro por vez, com precedência: ID > Login > Nome > Status
   listar() {
-    const filtros: any = {};
+    this.page = Math.max(0, this.page);
 
-    if (this.filtroId && this.filtroId.trim() !== '') {
-      filtros.id = +this.filtroId;
-    }
-    if (this.filtroUsuarioLogin && this.filtroUsuarioLogin.trim() !== '') {
-      filtros.usuarioLogin = this.filtroUsuarioLogin;
-    }
-    if (this.filtroStatus && this.filtroStatus.trim() !== '') {
-      filtros.status = this.filtroStatus;
-    }
+    let service$;
 
-    const service$ =
-      Object.keys(filtros).length > 0
-        ? this.solicitacaoService.filtrarGenerico(filtros, this.page, this.size)
-        : this.solicitacaoService.listar(
-            this.page,
-            this.size,
-            this.colunaOrdenada,
-            this.ordem
-          );
+    if (this.filtroId !== null && this.filtroId !== undefined) {
+      service$ = this.solicitacaoService.filtrarGenerico(
+        { id: this.filtroId },
+        this.page,
+        this.size
+      );
+    } else if (this.filtroUsuarioLogin.trim()) {
+      service$ = this.solicitacaoService.filtrarGenerico(
+        { username: this.filtroUsuarioLogin.trim() },
+        this.page,
+        this.size
+      );
+    } else if (this.filtroUsuarioNome.trim()) {
+      service$ = this.solicitacaoService.filtrarGenerico(
+        { usuarioNome: this.filtroUsuarioNome.trim() },
+        this.page,
+        this.size
+      );
+    } else if (this.filtroStatus.trim()) {
+      service$ = this.solicitacaoService.filtrarGenerico(
+        { status: this.filtroStatus.trim() },
+        this.page,
+        this.size
+      );
+    } else {
+      service$ = this.solicitacaoService.listar(
+        this.page,
+        this.size,
+        this.colunaOrdenada,
+        this.ordem
+      );
+    }
 
     service$.subscribe({
       next: (res: Paginacao<Solicitacao>) => {
@@ -259,14 +287,20 @@ export class SolicitacaoComponent {
     }
   }
 
-  // 📌 Filtros
+  // 📌 Aplicar / Limpar
   aplicarFiltros() {
     this.page = 0;
     this.listar();
   }
+
   limparFiltros() {
+    this.filtroId = null;
+    this.filtroUsuarioNome = '';
+    this.filtroUsuarioLogin = '';
     this.filtroStatus = '';
-    this.aplicarFiltros();
+    this.mostrarSomentePendentes = false;
+    this.page = 0;
+    this.listar();
   }
 
   // 📌 Ordenação
