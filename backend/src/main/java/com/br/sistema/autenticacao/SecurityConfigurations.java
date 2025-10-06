@@ -127,6 +127,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll() // ✅ corrigido
                         .requestMatchers(HttpMethod.GET, "/api/publico/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/privado/pastas/download").authenticated()
+                        .requestMatchers("/actuator/prometheus").permitAll()  // 🔓 Libera acesso para monitoramento via prometheus e grafana
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
