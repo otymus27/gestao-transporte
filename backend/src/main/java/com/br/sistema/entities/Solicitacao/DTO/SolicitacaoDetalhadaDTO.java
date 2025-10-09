@@ -25,4 +25,5 @@ public record SolicitacaoDetalhadaDTO(
         Integer kmFinal,
         LocalTime horaSaida,
         LocalTime horaChegada
+
 ) {}

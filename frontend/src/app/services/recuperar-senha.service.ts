@@ -18,7 +18,7 @@ export class RecuperarSenhaService {
   private http = inject(HttpClient);
 
   // URL base da API (poderia ser movida para environment.ts)
-  private readonly API_URL = environment.apiUrl + '/api/recuperar';
+  private readonly API_URL = environment.apiUrl + '/recuperar';
 
   // Endpoint para o ADMIN
   // ✅ Método que gera uma senha provisória com base no ID

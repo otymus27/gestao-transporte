@@ -61,13 +61,14 @@
             >Gerenciar</a
           >
         </li>
-        <li *ngIf="isAdmin()">
+        <li *ngIf="isAdmin()" class="nav-item">
           <a
+            routerLink="/admin/setores/relatorio"
             class="nav-link"
-            routerLink="/admin/setores/novo"
             routerLinkActive="active"
-            >Novo</a
           >
+            <i class="bi bi-file-earmark-bar-graph"></i> Relatórios
+          </a>
         </li>
       </ul>
     </li>
@@ -93,13 +94,14 @@
             >Gerenciar</a
           >
         </li>
-        <li *ngIf="isAdmin()">
+        <li *ngIf="isAdmin()" class="nav-item">
           <a
+            routerLink="/admin/destinos/relatorio"
             class="nav-link"
-            routerLink="/admin/destinos/novo"
             routerLinkActive="active"
-            >Novo</a
           >
+            <i class="bi bi-file-earmark-bar-graph"></i> Relatórios
+          </a>
         </li>
       </ul>
     </li>
@@ -125,13 +127,14 @@
             >Gerenciar</a
           >
         </li>
-        <li *ngIf="isAdmin()">
+        <li *ngIf="isAdmin()" class="nav-item">
           <a
+            routerLink="/admin/motoristas/relatorio"
             class="nav-link"
-            routerLink="/admin/motoristas/novo"
             routerLinkActive="active"
-            >Novo</a
           >
+            <i class="bi bi-file-earmark-bar-graph"></i> Relatórios
+          </a>
         </li>
       </ul>
     </li>
@@ -157,13 +160,15 @@
             >Gerenciar</a
           >
         </li>
-        <li *ngIf="isAdmin()">
+
+        <li *ngIf="isAdmin()" class="nav-item">
           <a
+            routerLink="/admin/carros/relatorio"
             class="nav-link"
-            routerLink="/admin/carros/novo"
             routerLinkActive="active"
-            >Novo</a
           >
+            <i class="bi bi-file-earmark-bar-graph"></i> Relatório de Carros
+          </a>
         </li>
       </ul>
     </li>
@@ -189,13 +194,14 @@
             >Gerenciar</a
           >
         </li>
-        <li *ngIf="isAdmin() || isGerente() || isBasic()">
+        <li *ngIf="isAdmin()" class="nav-item">
           <a
+            routerLink="/admin/solicitacoes/relatorio"
             class="nav-link"
-            routerLink="/admin/solicitacoes/novo"
             routerLinkActive="active"
-            >Novo</a
           >
+            <i class="bi bi-file-earmark-bar-graph"></i> Relatórios
+          </a>
         </li>
       </ul>
     </li>

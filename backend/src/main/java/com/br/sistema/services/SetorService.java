@@ -1,5 +1,6 @@
 package com.br.sistema.services;
 
+import com.br.sistema.entities.Destino.DTO.DestinoDetalhadoDTO;
 import com.br.sistema.entities.Setor.DTO.SetorRelatorioDTO;
 import com.br.sistema.entities.Setor.Setor;
 import com.br.sistema.entities.Setor.DTO.SetorDetalhadoDTO;
@@ -14,6 +15,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 
@@ -125,9 +128,9 @@ public class SetorService {
 
     // ✅ Filtro por nome
     @Transactional(readOnly = true)
-    public Page<SetorResponseDTO> filtrarPorNome(String nome, Pageable pageable) {
-        return setorRepository.findByNomeContainingIgnoreCase(nome.trim(), pageable)
-                .map(s -> new SetorResponseDTO(s.getId(), s.getNome()));
+    public Page<SetorDetalhadoDTO> filtrar(String nome, Pageable pageable) {
+        return setorRepository.filtrar(nome, pageable)
+                .map(s -> SetorDetalhadoDTO.fromEntity(s, false)); // 🚘 DTO simples para carro
     }
 
 
@@ -234,6 +237,22 @@ public class SetorService {
             document.addPage(page);
             PDPageContentStream contentStream = new PDPageContentStream(document, page);
             float yPosition = yStart;
+
+            // 🔹 Carrega a imagem da logo
+            InputStream logoStream = getClass().getResourceAsStream("/static/images/logo_hrg.png");
+            if (logoStream != null) {
+                PDImageXObject logo = PDImageXObject.createFromByteArray(document, logoStream.readAllBytes(), "logo");
+
+                float logoWidth = 83;   // largura desejada
+                float logoHeight = 23;  // altura desejada
+                float logoX = margin;   // canto esquerdo da página
+                float logoY = yStart -10 ; // topo da página
+
+                // desenha a logo
+                contentStream.drawImage(logo, logoX, logoY, logoWidth, logoHeight);
+            } else {
+                System.err.println("⚠️ Logo não encontrada em /images/logo_hrg.png");
+            }
 
             // título
             contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);

@@ -17,5 +17,12 @@ public record SolicitacaoRelatorioDTO(
         LocalTime horaSaida,
         LocalTime horaChegada
 ) {
+    // ✅ Campo calculado (tratando nulos)
+    public String getKmTotal() {
+        if (kmInicial == null || kmFinal == null) {
+            return "-"; // Exibe um traço quando a solicitação está pendente ou incompleta
+        }
+        return String.valueOf(kmFinal - kmInicial);
+    }
 }
 

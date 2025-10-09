@@ -205,16 +205,13 @@ public class SetorController {
         }
     }
 
-    // ✅ Filtrar setores por parte do nome (paginado)
     @GetMapping("/buscar")
-    @Transactional(readOnly = true)
-    public ResponseEntity<?> filtrarPorNome(@RequestParam String nome,
-                                            Pageable pageable,
-                                            HttpServletRequest request) {
+    public ResponseEntity<?> filtrar(@RequestParam(required = false) String nome,
+                                     Pageable pageable,
+                                     HttpServletRequest request) {
         try {
-            var setores = setorService.filtrarPorNome(nome, pageable);
+            var setores = setorService.filtrar(nome, pageable);
             return ResponseEntity.ok(setores);
-
         } catch (Exception e) {
             logger.error("Erro inesperado ao filtrar setores por nome", e);
             ErrorMessage error = new ErrorMessage(
@@ -227,41 +224,43 @@ public class SetorController {
         }
     }
 
-    @GetMapping("/relatorio/excel")
+    // ✅ Gerar relatório (sem paginação, mas aceita filtro)
+    @GetMapping("/relatorio")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Resource> exportarExcel(@RequestParam(required = false) String filtro) throws IOException {
-        var stream = setorService.exportarExcel(filtro);
-        InputStreamResource resource = new InputStreamResource(stream);
+    public ResponseEntity<Resource> exportarRelatorio(
+            @RequestParam(required = false) String filtro,
+            @RequestParam(defaultValue = "pdf") String tipo // pdf | csv | excel
+    ) throws IOException {
+
+        InputStreamResource resource;
+        String filename;
+        MediaType mediaType;
+
+        switch (tipo.toLowerCase()) {
+            case "excel" -> {
+                resource = new InputStreamResource(setorService.exportarExcel(filtro));
+                filename = "carros.xlsx";
+                mediaType = MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            }
+            case "csv" -> {
+                resource = new InputStreamResource(setorService.exportarCsv(filtro));
+                filename = "carros.csv";
+                mediaType = MediaType.parseMediaType("text/csv");
+            }
+            case "pdf" -> {
+                resource = new InputStreamResource(setorService.exportarPdf(filtro));
+                filename = "carros.pdf";
+                mediaType = MediaType.APPLICATION_PDF;
+            }
+            default -> throw new IllegalArgumentException("Tipo de relatório inválido: " + tipo);
+        }
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=setores.xlsx")
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(mediaType)
                 .body(resource);
     }
 
-    @GetMapping("/relatorio/csv")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Resource> exportarCsv(@RequestParam(required = false) String filtro) {
-        var stream = setorService.exportarCsv(filtro);
-        InputStreamResource resource = new InputStreamResource(stream);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=setores.csv")
-                .contentType(MediaType.parseMediaType("text/csv"))
-                .body(resource);
-    }
-
-    @GetMapping("/relatorio/pdf")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Resource> exportarPdf(@RequestParam(required = false) String filtro) {
-        var stream = setorService.exportarPdf(filtro);
-        InputStreamResource resource = new InputStreamResource(stream);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=setores.pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(resource);
-    }
 
 
 }

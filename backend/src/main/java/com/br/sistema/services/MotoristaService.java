@@ -15,6 +15,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 
@@ -303,7 +305,7 @@ public class MotoristaService {
 
             // colunas
             String[] colunas = {"ID", "Matrícula", "Nome", "Telefone","Ativo"};
-            float[] colWidths = {50, 100, 200, 150,50};
+            float[] colWidths = {20, 50, 280, 80,30};
 
             int rowIndex = 0;
             int pageNumber = 1;
@@ -313,11 +315,27 @@ public class MotoristaService {
             PDPageContentStream contentStream = new PDPageContentStream(document, page);
             float yPosition = yStart;
 
+            // 🔹 Carrega a imagem da logo
+            InputStream logoStream = getClass().getResourceAsStream("/static/images/logo_hrg.png");
+            if (logoStream != null) {
+                PDImageXObject logo = PDImageXObject.createFromByteArray(document, logoStream.readAllBytes(), "logo");
+
+                float logoWidth = 83;   // largura desejada
+                float logoHeight = 23;  // altura desejada
+                float logoX = margin;   // canto esquerdo da página
+                float logoY = yStart -10 ; // topo da página
+
+                // desenha a logo
+                contentStream.drawImage(logo, logoX, logoY, logoWidth, logoHeight);
+            } else {
+                System.err.println("⚠️ Logo não encontrada em /images/logo_hrg.png");
+            }
+
             // título
             contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
             contentStream.beginText();
             contentStream.newLineAtOffset(pageSize.getWidth() / 2 - 100, yPosition);
-            contentStream.showText("Relatório de Motoristas");
+            contentStream.showText("Relatório de Motoristas - HRG - NUTRAN");
             contentStream.endText();
 
             yPosition -= 40;
@@ -326,7 +344,7 @@ public class MotoristaService {
             yPosition = desenharCabecalho(contentStream, margin, yPosition, tableWidth, rowHeight, colunas, colWidths);
 
             // linhas
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            contentStream.setFont(PDType1Font.HELVETICA, 10);
             for (MotoristaRelatorioDTO m : motoristas) {
                 float nextX = margin;
 
@@ -342,7 +360,8 @@ public class MotoristaService {
                         String.valueOf(m.id()),
                         m.matricula(),
                         m.nome(),
-                        m.telefone()
+                        m.telefone(),
+                        m.ativo() ? "Sim" : "Não"
                 };
 
                 for (int i = 0; i < valores.length; i++) {
@@ -394,7 +413,7 @@ public class MotoristaService {
         cs.fill();
         cs.setNonStrokingColor(0, 0, 0);
 
-        cs.setFont(PDType1Font.HELVETICA_BOLD, 12);
+        cs.setFont(PDType1Font.HELVETICA_BOLD, 10);
         float nextX = margin;
         for (int i = 0; i < colunas.length; i++) {
             cs.beginText();

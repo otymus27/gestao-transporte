@@ -16,6 +16,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 
@@ -281,11 +283,27 @@ public class CarroService {
             PDPageContentStream contentStream = new PDPageContentStream(document, page);
             float yPosition = yStart;
 
+            // 🔹 Carrega a imagem da logo
+            InputStream logoStream = getClass().getResourceAsStream("/static/images/logo_hrg.png");
+            if (logoStream != null) {
+                PDImageXObject logo = PDImageXObject.createFromByteArray(document, logoStream.readAllBytes(), "logo");
+
+                float logoWidth = 83;   // largura desejada
+                float logoHeight = 23;  // altura desejada
+                float logoX = margin;   // canto esquerdo da página
+                float logoY = yStart -10 ; // topo da página
+
+                // desenha a logo
+                contentStream.drawImage(logo, logoX, logoY, logoWidth, logoHeight);
+            } else {
+                System.err.println("⚠️ Logo não encontrada em /images/logo_hrg.png");
+            }
+
             // título
             contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
             contentStream.beginText();
             contentStream.newLineAtOffset(pageSize.getWidth() / 2 - 80, yPosition);
-            contentStream.showText("Relatório de Carros");
+            contentStream.showText("Relatório de Carros - HRG - NUTRAN");
             contentStream.endText();
 
             yPosition -= 40;
@@ -368,14 +386,14 @@ public class CarroService {
         cs.setNonStrokingColor(0, 0, 0);
 
         // texto
-        cs.setFont(PDType1Font.HELVETICA_BOLD, 12);
+        cs.setFont(PDType1Font.HELVETICA_BOLD, 10);
         float nextX = margin;
-        for (String col : colunas) {
+        for (int i = 0; i < colunas.length; i++) {
             cs.beginText();
             cs.newLineAtOffset(nextX + 5, yPosition - 15);
-            cs.showText(col);
+            cs.showText(colunas[i]);
             cs.endText();
-            nextX += colWidths[colunas.length - 1 == 0 ? 0 : colunas.length - 1];
+            nextX += colWidths[i];
         }
 
         // borda

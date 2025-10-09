@@ -21,6 +21,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
@@ -445,14 +447,14 @@ public List<SolicitacaoRelatorioDTO> gerarRelatorio(String filtro) {
         try (PDDocument document = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             // formato paisagem
             PDRectangle pageSize = new PDRectangle(PDRectangle.A4.getHeight(), PDRectangle.A4.getWidth());
-            float margin = 40;
+            float margin = 30;
             float yStart = pageSize.getUpperRightY() - margin;
             float tableWidth = pageSize.getWidth() - 2 * margin;
             float rowHeight = 18;
 
             // colunas (ajustei largura agora que temos mais espaço)
-            String[] colunas = {"ID", "Data", "Status", "Carro", "Motorista", "Usuário", "Setor", "Destino", "Km Inicial", "Km Final", "Saída", "Chegada"};
-            float[] colWidths = {30, 60, 60, 70, 80, 80, 80, 80, 60, 60, 60, 60};
+            String[] colunas = {"ID", "Data", "Status", "Carro", "Motorista", "Setor", "Destino", "Km Total"};
+            float[] colWidths = {15, 60, 60, 50, 200, 180, 150,30};
 
             int rowIndex = 0;
             int pageNumber = 1;
@@ -461,6 +463,22 @@ public List<SolicitacaoRelatorioDTO> gerarRelatorio(String filtro) {
             document.addPage(page);
             PDPageContentStream contentStream = new PDPageContentStream(document, page);
             float yPosition = yStart;
+
+            // 🔹 Carrega a imagem da logo
+            InputStream logoStream = getClass().getResourceAsStream("/static/images/logo_hrg.png");
+            if (logoStream != null) {
+                PDImageXObject logo = PDImageXObject.createFromByteArray(document, logoStream.readAllBytes(), "logo");
+
+                float logoWidth = 83;   // largura desejada
+                float logoHeight = 23;  // altura desejada
+                float logoX = margin;   // canto esquerdo da página
+                float logoY = yStart -10 ; // topo da página
+
+                // desenha a logo
+                contentStream.drawImage(logo, logoX, logoY, logoWidth, logoHeight);
+            } else {
+                System.err.println("⚠️ Logo não encontrada em /images/logo_hrg.png");
+            }
 
             // título
             contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
@@ -492,9 +510,11 @@ public List<SolicitacaoRelatorioDTO> gerarRelatorio(String filtro) {
                         s.status(),
                         s.carro(),
                         s.motorista(),
-                        s.usuario(),
                         s.setor(),
-                        s.destino()
+                        s.destino(),
+                        //s.kmInicial() != null ? s.kmInicial().toString() : "-",
+                        //s.kmFinal() != null ? s.kmFinal().toString() : "-",
+                        s.getKmTotal() // ✅ campo calculado tratado
                 };
 
                 for (int i = 0; i < valores.length; i++) {

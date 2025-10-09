@@ -16,6 +16,11 @@ import { DestinoComponent } from './components/destino/destino.component';
 import { CarroComponent } from './components/carro/carro.component';
 import { MotoristaComponent } from './components/motorista/motorista.component';
 import { SolicitacaoComponent } from './components/solicitacao/solicitacao.component';
+import { CarrosRelatorioComponent } from './components/relatorios/carros/carros-relatorio.component';
+import { MotoristasRelatorioComponent } from './components/relatorios/motoristas/motoristas-relatorio.component';
+import { DestinosRelatorioComponent } from './components/relatorios/destinos/destinos-relatorio.component';
+import { SetoresRelatorioComponent } from './components/relatorios/setor/setor-relatorio.component';
+import { SolicitacoesRelatorioComponent } from './components/relatorios/solicitacao/solicitacao-relatorio.component';
 
 export const routes: Routes = [
   // --- Rotas Públicas ---
@@ -56,6 +61,11 @@ export const routes: Routes = [
             component: CarroComponent,
             data: { roles: ['ADMIN'] },
           },
+          {
+            path: 'relatorio',
+            component: CarrosRelatorioComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
+          },
         ],
       },
 
@@ -74,9 +84,9 @@ export const routes: Routes = [
             data: { roles: ['ADMIN', 'GERENTE'] },
           },
           {
-            path: 'novo',
-            component: DestinoComponent,
-            data: { roles: ['ADMIN'] },
+            path: 'relatorio',
+            component: DestinosRelatorioComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
           },
         ],
       },
@@ -96,9 +106,9 @@ export const routes: Routes = [
             data: { roles: ['ADMIN', 'GERENTE'] },
           },
           {
-            path: 'novo',
-            component: MotoristaComponent,
-            data: { roles: ['ADMIN'] },
+            path: 'relatorio',
+            component: MotoristasRelatorioComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
           },
         ],
       },
@@ -118,9 +128,9 @@ export const routes: Routes = [
             data: { roles: ['ADMIN', 'GERENTE'] },
           },
           {
-            path: 'novo',
-            component: SetorComponent,
-            data: { roles: ['ADMIN'] },
+            path: 'relatorio',
+            component: SetoresRelatorioComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
           },
         ],
       },
@@ -140,8 +150,8 @@ export const routes: Routes = [
             data: { roles: ['ADMIN', 'GERENTE'] },
           },
           {
-            path: 'novo',
-            component: SolicitacaoComponent,
+            path: 'relatorio',
+            component: SolicitacoesRelatorioComponent,
             data: { roles: ['ADMIN', 'GERENTE'] },
           },
         ],
