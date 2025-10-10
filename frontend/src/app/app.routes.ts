@@ -9,7 +9,7 @@ import { RedefinicaoSenhaComponent } from './components/redefinicao-senha/redefi
 // Componentes Admin
 
 import { AlterarSenhaComponent } from './components/alterar-senha/alterar-senha.component';
-import { SobreComponent } from './components/layout-admin/sobre/sobre.component';
+
 import { Login } from './components/login/login';
 import { SetorComponent } from './components/setor/setor.component';
 import { DestinoComponent } from './components/destino/destino.component';
@@ -22,6 +22,7 @@ import { DestinosRelatorioComponent } from './components/relatorios/destinos/des
 import { SetoresRelatorioComponent } from './components/relatorios/setor/setor-relatorio.component';
 import { SolicitacoesRelatorioComponent } from './components/relatorios/solicitacao/solicitacao-relatorio.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { SobreComponent } from './components/sobre/sobre.component';
 
 export const routes: Routes = [
   // --- Rotas Públicas ---

@@ -1,10 +1,24 @@
-<div class="container mt-4">
-  <h2 class="mb-3">📊 Painel de Controle</h2>
-
-  <div *ngIf="loading" class="text-center mt-5">
-    <div class="spinner-border text-primary" role="status"></div>
+<div class="container mt-4 dashboard-container">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+    <h2 class="mb-0">📊 Painel de Controle</h2>
+    <div class="text-end">
+      <button class="btn btn-outline-primary btn-sm me-2" (click)="carregarDashboard()">
+        🔄 Atualizar agora
+      </button>
+      <span class="text-muted small">
+        Última atualização:
+        <strong>{{ lastUpdated | date: 'dd/MM/yyyy HH:mm:ss' }}</strong>
+      </span>
+    </div>
   </div>
 
+  <!-- Loader -->
+  <div *ngIf="loading" class="text-center mt-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2">Carregando estatísticas...</p>
+  </div>
+
+  <!-- Conteúdo principal -->
   <div *ngIf="!loading && dashboard">
 
     <!-- === Cards principais === -->
@@ -15,10 +29,10 @@
         { titulo: 'Motoristas', valor: dashboard.totalMotoristas, cor: 'bg-warning' },
         { titulo: 'Setores', valor: dashboard.totalSetores, cor: 'bg-info' }
       ]">
-        <div class="card text-white {{card.cor}} shadow-sm">
-          <div class="card-body text-center">
-            <h5>{{card.titulo}}</h5>
-            <h2>{{card.valor}}</h2>
+        <div class="card shadow-sm text-white text-center {{card.cor}} dashboard-card">
+          <div class="card-body">
+            <h5 class="card-title">{{card.titulo}}</h5>
+            <h2 class="card-value">{{card.valor}}</h2>
           </div>
         </div>
       </div>
@@ -27,82 +41,70 @@
     <!-- === Totais de solicitações === -->
     <div class="card shadow-sm mb-4">
       <div class="card-body">
-        <h5>Solicitações</h5>
+        <h5 class="mb-3">📦 Solicitações</h5>
         <div class="row text-center mt-3">
-          <div class="col-md-3">
+          <div class="col-md-3 col-6 mb-3">
             <h6>Total</h6>
-            <h4>{{dashboard?.totalSolicitacoes}}</h4>
+            <h4 class="fw-bold">{{dashboard.totalSolicitacoes}}</h4>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 col-6 mb-3">
             <h6>Em Andamento</h6>
-            <h4 class="text-warning">{{dashboard?.solicitacoesEmAndamento}}</h4>
+            <h4 class="fw-bold text-warning">{{dashboard.solicitacoesEmAndamento}}</h4>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 col-6 mb-3">
             <h6>Finalizadas</h6>
-            <h4 class="text-success">{{dashboard?.solicitacoesFinalizadas}}</h4>
+            <h4 class="fw-bold text-success">{{dashboard.solicitacoesFinalizadas}}</h4>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 col-6 mb-3">
             <h6>Canceladas</h6>
-            <h4 class="text-danger">{{dashboard?.solicitacoesCanceladas}}</h4>
+            <h4 class="fw-bold text-danger">{{dashboard.solicitacoesCanceladas}}</h4>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- === Atividade de usuários === -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-body text-center">
-        <h5>Usuários</h5>
-        <p>Ativos agora: <strong>{{dashboard?.usuariosAtivosAgora}}</strong></p>
-        <p>Logaram hoje: <strong>{{dashboard?.usuariosLogaramHoje}}</strong></p>
-      </div>
-    </div>
-
-    <!-- === Rankings === -->
+    <!-- === Gráficos de barras === -->
     <div class="row g-4">
-      <!-- Top Setores -->
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="mb-3">🏢 Top Setores</h5>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item" *ngFor="let s of dashboard.topSetores">
-                {{s.nome}} <span class="badge bg-primary float-end">{{s.quantidade}}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Top Motoristas -->
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="mb-3">🚗 Top Motoristas</h5>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item" *ngFor="let m of dashboard.topMotoristas">
-                {{m.nome}} <span class="badge bg-success float-end">{{m.quantidade}}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Top Carros -->
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="mb-3">🚙 Top Carros</h5>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item" *ngFor="let c of dashboard.topCarros">
-                {{c.nome}} <span class="badge bg-info float-end">{{c.quantidade}}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
+      <div class="col-md-4" *ngFor="let grafico of [
+        { opt: setoresOptions },
+        { opt: motoristasOptions },
+        { opt: carrosOptions }
+      ]; let i = index">
+        <apx-chart
+          [series]="grafico.opt.series"
+          [chart]="grafico.opt.chart"
+          [colors]="grafico.opt.colors"
+          [xaxis]="grafico.opt.xaxis"
+          [dataLabels]="grafico.opt.dataLabels"
+          [title]="grafico.opt.title">
+        </apx-chart>
       </div>
     </div>
 
+    <!-- === Gráfico de linha === -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <apx-chart
+          [series]="solicitacoesDiaOptions.series"
+          [chart]="solicitacoesDiaOptions.chart"
+          [stroke]="solicitacoesDiaOptions?.stroke || {}"
+          [colors]="solicitacoesDiaOptions.colors"
+          [xaxis]="solicitacoesDiaOptions.xaxis"
+          [yaxis]="solicitacoesDiaOptions?.yaxis || []"
+          [fill]="solicitacoesDiaOptions?.fill || {}"
+          [grid]="solicitacoesDiaOptions?.grid || {}"
+          [title]="solicitacoesDiaOptions.title">
+        </apx-chart>
+      </div>
+    </div>
+
+    <!-- === Informações de usuários === -->
+    <div class="card shadow-sm mt-4 mb-5">
+      <div class="card-body text-center">
+        <h5>👤 Usuários</h5>
+        <p>Ativos agora: <strong>{{dashboard.usuariosAtivosAgora}}</strong></p>
+        <p>Logaram hoje: <strong>{{dashboard.usuariosLogaramHoje}}</strong></p>
+      </div>
+    </div>
   </div>
 </div>
-
