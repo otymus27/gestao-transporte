@@ -131,6 +131,67 @@
           />
         </div>
 
+        <!-- 🔹 ATALHOS RÁPIDOS DE DATA -->
+        <div class="col-12 mt-3 mb-2 d-flex flex-wrap align-items-center gap-2">
+          <span class="fw-bold me-2">Período rápido:</span>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            (click)="setPeriodo('hoje')"
+          >
+            Hoje
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            (click)="setPeriodo('7')"
+          >
+            Últimos 7 dias
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            (click)="setPeriodo('30')"
+          >
+            Últimos 30 dias
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            (click)="setPeriodo('mes')"
+          >
+            Este mês
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="limparPeriodo()"
+          >
+            Limpar
+          </button>
+        </div>
+
+        <!-- 🔹 DATA INICIAL -->
+        <div class="col-md-2 mt-2">
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="filtros.inicio"
+            placeholder="Data Inicial"
+          />
+        </div>
+
+        <!-- 🔹 DATA FINAL -->
+        <div class="col-md-2 mt-2">
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="filtros.fim"
+            placeholder="Data Final"
+          />
+        </div>
+
         <!-- BOTÕES -->
         <div class="col-md-4 mt-2 d-flex gap-2">
           <button class="btn btn-primary flex-grow-1" (click)="consultar()">

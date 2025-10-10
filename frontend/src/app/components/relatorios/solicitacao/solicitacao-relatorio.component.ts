@@ -26,6 +26,8 @@ export class SolicitacoesRelatorioComponent implements OnInit {
     setorId: '',
     username: '',
     destinoId: '',
+    inicio: '',
+    fim: '',
   };
 
   resultados: any[] = [];
@@ -189,12 +191,44 @@ export class SolicitacoesRelatorioComponent implements OnInit {
       setorId: '',
       username: '',
       destinoId: '',
+      inicio: '',
+      fim: '',
     };
     this.motoristaNome = '';
     this.carroTexto = '';
     this.setorTexto = '';
     this.destinoTexto = '';
     this.resultados = [];
+  }
+
+  // 🔹 Funções auxiliares para atalhos de data
+  setPeriodo(tipo: string) {
+    const hoje = new Date();
+    const fim = hoje.toISOString().split('T')[0];
+    let inicio = fim;
+
+    if (tipo === '7') {
+      const d = new Date();
+      d.setDate(hoje.getDate() - 7);
+      inicio = d.toISOString().split('T')[0];
+    } else if (tipo === '30') {
+      const d = new Date();
+      d.setDate(hoje.getDate() - 30);
+      inicio = d.toISOString().split('T')[0];
+    } else if (tipo === 'mes') {
+      const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      inicio = primeiroDia.toISOString().split('T')[0];
+    } else if (tipo === 'hoje') {
+      inicio = fim;
+    }
+
+    this.filtros.inicio = inicio;
+    this.filtros.fim = fim;
+  }
+
+  limparPeriodo() {
+    this.filtros.inicio = '';
+    this.filtros.fim = '';
   }
 
   exportar(tipo: string): void {

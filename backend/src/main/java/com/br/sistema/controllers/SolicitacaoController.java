@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -344,12 +345,14 @@ public class SolicitacaoController {
             @RequestParam(required = false) Long setorId,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) Long destinoId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
             Pageable pageable,
             HttpServletRequest request
     ) {
         try {
             var solicitacoes = solicitacaoService.filtrarGenerico(
-                    id,status, motoristaId, carroId, setorId, username, destinoId, pageable
+                    id,status, motoristaId, carroId, setorId, username, destinoId, inicio,fim, pageable
             );
             return ResponseEntity.ok(solicitacoes);
         } catch (Exception e) {

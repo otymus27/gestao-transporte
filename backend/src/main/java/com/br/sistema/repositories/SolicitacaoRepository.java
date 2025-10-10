@@ -196,4 +196,6 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
 
     List<Solicitacao> filtrarSemPaginacao(String filtro);
 
+    Page<Solicitacao> findByDataSolicitacaoBetween(LocalDate inicio, LocalDate fim, Pageable pageable);
+
 }

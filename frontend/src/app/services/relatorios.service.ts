@@ -97,15 +97,12 @@ export class RelatorioService {
   listarSolicitacoes(filtros: any): Observable<any> {
     let params = new HttpParams();
     Object.keys(filtros).forEach((key) => {
-      if (
-        filtros[key] !== null &&
-        filtros[key] !== undefined &&
-        filtros[key] !== ''
-      ) {
-        params = params.set(key, filtros[key]);
+      const valor = filtros[key];
+      if (valor !== null && valor !== undefined && valor !== '') {
+        params = params.set(key, valor);
       }
     });
-
+  
     return this.http.get(`${this.API_URL}/solicitacao/buscar`, { params });
   }
 

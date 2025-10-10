@@ -297,6 +297,8 @@ public class SolicitacaoService {
             Long setorId,
             String username,
             Long destinoId,
+            LocalDate inicio,
+            LocalDate fim,
             Pageable pageable
     ) {
 
@@ -320,11 +322,18 @@ public class SolicitacaoService {
             return solicitacaoRepository.findByUsernameContainingIgnoreCase(username, pageable).map(this::toResponseDTO);
         }
 
+        // ✅ Novo filtro: intervalo de datas
+        if (inicio != null && fim != null) {
+            return solicitacaoRepository
+                    .findByDataSolicitacaoBetween(inicio, fim, pageable)
+                    .map(this::toResponseDTO);
+        }
+
         if (destinoId != null) {
             return solicitacaoRepository.findByDestino_Id(destinoId, pageable).map(this::toResponseDTO);
         }
 
-        // Se nenhum filtro informado, retorna tudo paginado
+        // 🔹 Se nenhum filtro informado, retorna tudo
         return solicitacaoRepository.findAll(pageable).map(this::toResponseDTO);
     }
 
