@@ -1,0 +1,19 @@
+.card {
+  border-radius: 12px;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+.card h2 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

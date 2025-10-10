@@ -1,27 +1,37 @@
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-// Opcional: interface para tipar os dados que virão do backend
-export interface DashboardMetrics {
-  totalCarros: number;
-  totalUsuarios: number;
-  totalProprietarios: number;
-  totalMarcas: number;
+export interface RankingItem {
+  nome: string;
+  quantidade: number;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+export interface Dashboard {
+  totalUsuarios: number;
+  totalCarros: number;
+  totalMotoristas: number;
+  totalSetores: number;
+  totalSolicitacoes: number;
+  solicitacoesEmAndamento: number;
+  solicitacoesFinalizadas: number;
+  solicitacoesCanceladas: number;
+  usuariosAtivosAgora: number;
+  usuariosLogaramHoje: number;
+  solicitacoesPorDia: any[]; // por enquanto vazio
+  topSetores: RankingItem[];
+  topMotoristas: RankingItem[];
+  topCarros: RankingItem[];
+}
+
+@Injectable({ providedIn: 'root' })
 export class DashboardService {
   private http = inject(HttpClient);
-  // ✅ Ajuste para a URL real do seu backend
-  private readonly API_URL = environment.apiUrl + '/estatisticas';
+  private readonly API_URL = `${environment.apiUrl}/dashboard`;
 
-  constructor() {}
-
-  getMetrics(): Observable<DashboardMetrics> {
-    return this.http.get<DashboardMetrics>(this.API_URL);
+  getDashboard(): Observable<Dashboard> {
+    return this.http.get<Dashboard>(this.API_URL);
   }
 }

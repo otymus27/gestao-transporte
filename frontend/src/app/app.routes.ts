@@ -7,7 +7,7 @@ import { UsuarioComponent } from './components/usuario/usuario.component';
 import { RedefinicaoSenhaComponent } from './components/redefinicao-senha/redefinicao-senha.component';
 
 // Componentes Admin
-import { DashboardComponent } from './features/admin/pages/dashboard/dashboard.component';
+
 import { AlterarSenhaComponent } from './components/alterar-senha/alterar-senha.component';
 import { SobreComponent } from './components/layout-admin/sobre/sobre.component';
 import { Login } from './components/login/login';
@@ -21,6 +21,7 @@ import { MotoristasRelatorioComponent } from './components/relatorios/motoristas
 import { DestinosRelatorioComponent } from './components/relatorios/destinos/destinos-relatorio.component';
 import { SetoresRelatorioComponent } from './components/relatorios/setor/setor-relatorio.component';
 import { SolicitacoesRelatorioComponent } from './components/relatorios/solicitacao/solicitacao-relatorio.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 export const routes: Routes = [
   // --- Rotas Públicas ---
