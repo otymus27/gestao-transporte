@@ -1,32 +1,30 @@
 services:
-  # ===========================
-  # Backend - Spring Boot
-  # ===========================
-  api:
-    build: ./backend
-    container_name: api-portal
-    env_file:
-      - ./backend/.env
-    ports:
-      - "8081:8080"
-    volumes:
-      - ./backend/storage:${STORAGE_PATH}  
-    networks:
-      - otymus_net
- 
-  # ===========================
-  # Frontend - Angular + Nginx
-  # ===========================
-  frontend:
-    build: ./frontend
-    container_name: frontend-portal
-    ports:
-      - "86:80"
-    depends_on:
-      - api
-    networks:
-      - otymus_net
+    # ===========================
+    # Backend - Spring Boot
+    # ===========================
+    api:
+        build: ./backend
+        container_name: api-transporte
+        env_file:
+            - .env
+        ports:
+            - "8084:8080"
+        networks:
+            - otymus_net
+
+    # ===========================
+    # Frontend - Angular + Nginx
+    # ===========================
+    frontend:
+        build: ./frontend
+        container_name: frontend-transporte
+        ports:
+            - "85:80"
+        depends_on:
+            - api
+        networks:
+            - otymus_net
 
 networks:
-    otymus_net: 
+    otymus_net:
         external: true

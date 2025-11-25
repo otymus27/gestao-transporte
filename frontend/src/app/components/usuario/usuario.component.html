@@ -1,42 +1,47 @@
 <div class="container">
   <div class="card">
     <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded">
+      <div
+        class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded"
+      >
         <h1>Gerenciamento de Usuários</h1>
-        <button class="btn btn-primary btn-rounded btn-shadow me-2" (click)="cadastrarModal()">
+        <button
+          class="btn btn-primary btn-rounded btn-shadow me-2"
+          (click)="cadastrarModal()"
+        >
           <i class="bi bi-plus-circle me-1"></i> Novo Usuário
         </button>
       </div>
 
       <!-- Barra de pesquisa e filtros -->
-    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-      <div class="d-flex flex-grow-1 me-2 gap-2">
-        <!-- Filtro por login (username) -->
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Filtrar por login"
-          [(ngModel)]="filtroUsername"
-          (keyup.enter)="aplicarFiltros()"
-        />
+      <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div class="d-flex flex-grow-1 me-2 gap-2">
+          <!-- Filtro por login (username) -->
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Filtrar por login"
+            [(ngModel)]="filtroUsername"
+            (keyup.enter)="aplicarFiltros()"
+          />
 
-        <!-- Filtro por nome -->
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Filtrar por nome"
-          [(ngModel)]="filtroNome"
-          (keyup.enter)="aplicarFiltros()"
-        />
+          <!-- Filtro por nome -->
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Filtrar por nome"
+            [(ngModel)]="filtroNome"
+            (keyup.enter)="aplicarFiltros()"
+          />
+        </div>
+
+        <button class="btn btn-primary ms-2" (click)="aplicarFiltros()">
+          <i class="bi bi-search"></i> Pesquisar
+        </button>
+        <button class="btn btn-secondary ms-2" (click)="limparFiltros()">
+          Limpar
+        </button>
       </div>
-
-      <button class="btn btn-primary ms-2" (click)="aplicarFiltros()">
-        <i class="bi bi-search"></i> Pesquisar
-      </button>
-      <button class="btn btn-secondary ms-2" (click)="limparFiltros()">
-        Limpar
-      </button>
-    </div>
 
       <!-- Tabela de Usuários -->
       <table class="table table-striped mt-3">
@@ -77,7 +82,8 @@
               ></i>
             </th>
             <th>Roles</th>
-            <th>Status</th> <!-- ✅ Coluna Ativo -->
+            <th>Status</th>
+            <!-- ✅ Coluna Ativo -->
             <th>Ação</th>
           </tr>
         </thead>
@@ -94,12 +100,14 @@
             </td>
 
             <td>
-              <span class="badge" [ngClass]="usuario.ativo ? 'bg-success' : 'bg-danger'">
-                {{ usuario.ativo ? 'Ativo' : 'Inativo' }}
+              <span
+                class="badge"
+                [ngClass]="usuario.ativo ? 'bg-success' : 'bg-danger'"
+              >
+                {{ usuario.ativo ? "Ativo" : "Inativo" }}
               </span>
             </td>
 
-          
             <td>
               <button
                 class="btn btn-warning btn-sm btn-shadow me-1"
@@ -116,14 +124,14 @@
                 <i class="bi bi-trash"></i>
               </button>
 
-              <button 
+              <button
                 class="btn btn-warning btn-sm btn-shadow mr-2"
                 (click)="resetarSenha(usuario.id)"
-                title="Resetar Senha">
+                title="Resetar Senha"
+              >
                 <i class="fas fa-key"></i>
                 <span class="visually-hidden">Resetar Senha</span>
               </button>
-              
             </td>
           </tr>
           } @empty {
@@ -133,9 +141,11 @@
           }
         </tbody>
       </table>
-      
+
       <!-- Paginação estilizada com contador na mesma linha -->
-      <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap bg-light text-black p-3 rounded">
+      <div
+        class="d-flex justify-content-between align-items-center mt-4 flex-wrap bg-light text-black p-3 rounded"
+      >
         <div class="me-3">
           <small>
             Exibindo página <strong>{{ page + 1 }}</strong> de
@@ -143,7 +153,7 @@
             <strong>{{ totalElements }}</strong>
           </small>
         </div>
-      
+
         <!-- Aqui temos a paginação -->
         <nav>
           <ul class="pagination mb-0">
@@ -156,7 +166,7 @@
                 ‹ Anterior
               </button>
             </li>
-      
+
             <li
               *ngFor="let p of [].constructor(totalPages); let i = index"
               class="page-item"
@@ -166,7 +176,7 @@
                 {{ i + 1 }}
               </button>
             </li>
-      
+
             <li class="page-item" [class.disabled]="page + 1 >= totalPages">
               <button
                 class="page-link"
@@ -182,7 +192,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- Aqui temos os modais de cadastro e edição -->
 <ng-template #modalUserDetalhe>
@@ -214,7 +223,7 @@
       </div>
 
       <div class="d-flex align-items-center mb-3">
-        <label class="me-2 fw-bold" style="width: 120px">Nome de Usuário:</label>
+        <label class="me-2 fw-bold" style="width: 120px">Nome:</label>
         <input
           mdbInput
           [(ngModel)]="registroSelecionado.nome"
@@ -223,8 +232,7 @@
           required
           class="form-control flex-grow-1"
         />
-      </div>     
-    
+      </div>
 
       <div class="d-flex align-items-center mb-3">
         <label class="me-2 fw-bold" style="width: 120px">Senha:</label>
@@ -235,7 +243,7 @@
           #password="ngModel"
           name="password"
           [required]="!registroSelecionado.id || registroSelecionado.id <= 0"
-          [disabled]="registroSelecionado.id > 0" 
+          [disabled]="registroSelecionado.id > 0"
           class="form-control flex-grow-1"
         />
       </div>
@@ -250,8 +258,13 @@
       <div class="d-flex align-items-center mb-3">
         <label class="me-2 fw-bold" style="width: 120px">Ativo:</label>
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="ativoUsuario"
-            [(ngModel)]="registroSelecionado.ativo" name="ativo" />
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="ativoUsuario"
+            [(ngModel)]="registroSelecionado.ativo"
+            name="ativo"
+          />
           <label class="form-check-label" for="ativoUsuario">
             {{ registroSelecionado.ativo ? "Sim" : "Não" }}
           </label>
@@ -266,7 +279,7 @@
           <li
             class="list-group-item d-flex justify-content-between align-items-center"
           >
-            {{ p.nome }} 
+            {{ p.nome }}
             <button
               type="button"
               class="btn btn-sm btn-danger"
@@ -282,10 +295,9 @@
           class="btn btn-outline-success btn-sm"
           (click)="abrirModalRoles()"
         >
-          ➕ Adicionar Proprietário
+          ➕ Adicionar Permissão
         </button>
       </div>
-
     </form>
   </div>
 
@@ -293,7 +305,11 @@
     <div class="d-flex justify-content-end mt-3 gap-2">
       <button
         class="btn btn-primary me-2"
-        [disabled]="userForm.invalid || !registroSelecionado.roles || registroSelecionado.roles.length === 0"
+        [disabled]="
+          userForm.invalid ||
+          !registroSelecionado.roles ||
+          registroSelecionado.roles.length === 0
+        "
         (click)="salvarUsuario(registroSelecionado)"
       >
         Salvar
@@ -315,7 +331,8 @@
   <div class="modal-body">
     <p>
       Tem certeza que deseja excluir o usuário
-      <strong>{{ registroSelecionado.username }}</strong>?
+      <strong>{{ registroSelecionado.username }}</strong
+      >?
     </p>
   </div>
 
@@ -344,7 +361,7 @@
       <li
         class="list-group-item d-flex justify-content-between align-items-center"
       >
-        {{ p.nome }} 
+        {{ p.nome }}
         <button
           type="button"
           class="btn btn-sm btn-success"
@@ -358,27 +375,26 @@
   </div>
 </ng-template>
 
-
 <!-- Componente de Toast -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   @for (toast of toastService.messages$ | async; track toast) {
-    <div 
-      class="toast show" 
-      [ngClass]="{
-        'bg-success': toast.type === 'success',
-        'bg-danger': toast.type === 'danger',
-        'bg-info': toast.type === 'info'
-      }" 
-      role="alert" 
-      aria-live="assertive" 
-      aria-atomic="true">
-      <div class="toast-header border-0 bg-transparent text-white">
-        <strong class="me-auto text-capitalize">{{ toast.type }}</strong>
-      </div>
-      <div class="toast-body text-white">
-        {{ toast.message }}
-      </div>
+  <div
+    class="toast show"
+    [ngClass]="{
+      'bg-success': toast.type === 'success',
+      'bg-danger': toast.type === 'danger',
+      'bg-info': toast.type === 'info'
+    }"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    <div class="toast-header border-0 bg-transparent text-white">
+      <strong class="me-auto text-capitalize">{{ toast.type }}</strong>
     </div>
+    <div class="toast-body text-white">
+      {{ toast.message }}
+    </div>
+  </div>
   }
 </div>
-

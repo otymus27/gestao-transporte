@@ -4,6 +4,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { HttpErrorResponse } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 interface AuthResponse {
   accessToken: string;
@@ -205,7 +208,36 @@ export class AuthService {
             this.router.navigate(['/admin/dashboard']);
           }
         }),
-        map(() => true)
+        map(() => true),
+        catchError((error: HttpErrorResponse) => {
+          // 👇 Aqui tratamos os casos específicos
+          if (
+            error.status === 403 &&
+            (error.error?.error === 'Usuário inativo' ||
+              error.error?.erro === 'Usuário inativo') // dependendo de como está o ErrorMessage
+          ) {
+            // Lança um erro mais amigável pro componente
+            return throwError(
+              () =>
+                new Error(
+                  'Sua conta está inativa. Entre em contato com o administrador.'
+                )
+            );
+          }
+
+          if (error.status === 401) {
+            return throwError(() => new Error('Usuário ou senha incorretos.'));
+          }
+
+          // Demais erros → genérico
+          console.error('Erro inesperado no login:', error);
+          return throwError(
+            () =>
+              new Error(
+                'Erro ao tentar fazer login. Tente novamente mais tarde.'
+              )
+          );
+        })
       );
   }
 

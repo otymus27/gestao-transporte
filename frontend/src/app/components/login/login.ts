@@ -63,20 +63,33 @@ export class Login {
         // A navegação já é tratada dentro do authService
         this.loading = false; // Desativa o spinner
       },
+
       error: (error: HttpErrorResponse) => {
-        this.loading = false; // Desativa o spinner
+        this.loading = false;
+
+        console.error('Erro de login:', error);
+
+        // 👇 Só pra ficar claro o que veio do backend
+        const backendError = error.error; // deve ser o objeto { status, error, message, path, timestamp }
+
         if (error.status === 401) {
           this.errorMessage =
             'Credenciais inválidas. Verifique seu usuário e senha.';
+        } else if (
+          error.status === 403 &&
+          backendError &&
+          backendError.error === 'Usuário inativo'
+        ) {
+          // 👇 usa a mensagem que veio do backend, se quiser
+          this.errorMessage =
+            backendError.message ||
+            'Sua conta está inativa. Entre em contato com o administrador.';
         } else if (error.status === 0) {
-          // Erro de status 0 geralmente indica problema de CORS,
-          // ou que o servidor da API não está online ou acessível.
           this.errorMessage =
             'Não foi possível conectar ao servidor de backend. Por favor, verifique sua conexão ou tente novamente mais tarde.';
         } else {
-          this.errorMessage = `Ocorreu um erro: ${error.status} - ${error.message}.`;
+          this.errorMessage = `Ocorreu um erro: ${error.message}.`;
         }
-        console.error('Erro de login:', error);
       },
     });
   }

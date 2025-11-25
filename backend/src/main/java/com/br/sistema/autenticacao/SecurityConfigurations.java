@@ -1,7 +1,12 @@
 package com.br.sistema.autenticacao;
 
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Base64;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,11 +34,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 @EnableWebSecurity
@@ -88,15 +91,15 @@ public class SecurityConfigurations {
         // Origens liberadas (Dev + Produção)
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:4200",   // Angular dev
-                "http://localhost:86",     // Nginx local
-                "http://10.85.190.202:86", // Nginx na rede
-                "http://10.85.190.38:86", // Nginx na rede maquina linux
+                "http://localhost:85",     // Nginx local
+                "http://10.85.190.202:85", // Nginx na rede
+                "http://10.85.190.38:85", // Nginx na rede maquina linux
                 "http://10.85.190.202",    // acesso direto
                 "null"                     // file://
         ));
 
         // 🔓 Libera qualquer origem que use a porta 86 (seja localhost, IP da rede ou DNS)
-        config.addAllowedOriginPattern("http://*:86");
+        config.addAllowedOriginPattern("http://*:85");
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));
@@ -123,10 +126,7 @@ public class SecurityConfigurations {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/login", "/api/login").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll() // ✅ corrigido
-                        .requestMatchers(HttpMethod.GET, "/api/publico/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/privado/pastas/download").authenticated()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()                           
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));

@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -175,14 +176,13 @@ public class ApiExceptionHandler implements AuthenticationEntryPoint {
     }
 
     @ResponseBody
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorMessage handleGenericException(Exception ex, HttpServletRequest request) {
-        ex.printStackTrace();
+    @ExceptionHandler(UsuarioInativoException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage handleUsuarioInativo(UsuarioInativoException ex, HttpServletRequest request) {
         return new ErrorMessage(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Erro interno no servidor",
-                "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.",
+                HttpStatus.FORBIDDEN.value(),
+                "Usuário inativo",
+                "Sua conta está inativa. Contate o administrador.",
                 request.getRequestURI()
         );
     }
@@ -191,6 +191,7 @@ public class ApiExceptionHandler implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
+
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         new ObjectMapper().writeValue(response.getOutputStream(),
                 new ErrorMessage(
@@ -209,6 +210,53 @@ public class ApiExceptionHandler implements AuthenticationEntryPoint {
                 HttpStatus.BAD_REQUEST.value(),
                 "Dados inválidos",
                 ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
+
+    @ResponseBody
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    public org.springframework.http.ResponseEntity<ErrorMessage> handleInternalAuthentication(
+            InternalAuthenticationServiceException ex,
+            HttpServletRequest request) {
+
+        // 👇 Se a causa for nosso UsuarioInativoException, devolve 403 bonitinho
+        if (ex.getCause() instanceof UsuarioInativoException usuarioInativo) {
+
+            ErrorMessage error = new ErrorMessage(
+                    HttpStatus.FORBIDDEN.value(),
+                    "Usuário inativo",
+                    usuarioInativo.getMessage(), // "Sua conta está inativa. Contate o administrador."
+                    request.getRequestURI()
+            );
+
+            return org.springframework.http.ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(error);
+        }
+
+        // 👇 Se for outro erro de autenticação interna, devolve 401 genérico
+        ErrorMessage error = new ErrorMessage(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Falha na autenticação",
+                "Usuário ou senha inválidos.",
+                request.getRequestURI()
+        );
+
+        return org.springframework.http.ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(error);
+    }
+
+    @ResponseBody
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorMessage handleGenericException(Exception ex, HttpServletRequest request) {
+        ex.printStackTrace();
+        return new ErrorMessage(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Erro interno no servidor",
+                "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.",
                 request.getRequestURI()
         );
     }

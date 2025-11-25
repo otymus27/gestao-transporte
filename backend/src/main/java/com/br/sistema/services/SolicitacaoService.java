@@ -1,21 +1,13 @@
 package com.br.sistema.services;
 
-import com.br.sistema.entities.Carro.DTO.CarroDetalhadoDTO;
-import com.br.sistema.entities.DTO.SolicitacaoPorDiaDTO;
-import com.br.sistema.entities.Destino.DTO.DestinoDetalhadoDTO;
-import com.br.sistema.entities.Motorista.DTO.MotoristaDetalhadoDTO;
-import com.br.sistema.entities.Motorista.DTO.SolicitacaoPorMotoristaDTO;
-import com.br.sistema.entities.Setor.DTO.SetorDetalhadoDTO;
-import com.br.sistema.entities.Setor.DTO.SolicitacaoPorSetorDTO;
-import com.br.sistema.entities.Solicitacao.DTO.*;
-import com.br.sistema.entities.Solicitacao.Solicitacao;
-import com.br.sistema.entities.Usuario.DTO.SolicitacaoPorUsuarioDTO;
-import com.br.sistema.entities.Usuario.DTO.UsuarioDetalhadoDTO;
-import com.br.sistema.entities.Usuario.Usuario;
-import com.br.sistema.repositories.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
+import java.util.List;
 
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -32,13 +24,31 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.AccessDeniedException;
-import java.time.LocalDate;
-import java.util.List;
+import com.br.sistema.entities.Carro.DTO.CarroDetalhadoDTO;
+import com.br.sistema.entities.DTO.SolicitacaoPorDiaDTO;
+import com.br.sistema.entities.Destino.DTO.DestinoDetalhadoDTO;
+import com.br.sistema.entities.Motorista.DTO.MotoristaDetalhadoDTO;
+import com.br.sistema.entities.Motorista.DTO.SolicitacaoPorMotoristaDTO;
+import com.br.sistema.entities.Setor.DTO.SetorDetalhadoDTO;
+import com.br.sistema.entities.Setor.DTO.SolicitacaoPorSetorDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoDetalhadaDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoPorStatusDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoRelatorioDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoRequestDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoResponseDTO;
+import com.br.sistema.entities.Solicitacao.Solicitacao;
+import com.br.sistema.entities.Usuario.DTO.SolicitacaoPorUsuarioDTO;
+import com.br.sistema.entities.Usuario.DTO.UsuarioDetalhadoDTO;
+import com.br.sistema.entities.Usuario.Usuario;
+import com.br.sistema.repositories.CarroRepository;
+import com.br.sistema.repositories.DestinoRepository;
+import com.br.sistema.repositories.MotoristaRepository;
+import com.br.sistema.repositories.SetorRepository;
+import com.br.sistema.repositories.SolicitacaoRepository;
+import com.br.sistema.repositories.UsuarioRepository;
+
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class SolicitacaoService {
@@ -140,10 +150,14 @@ public class SolicitacaoService {
             throw new SecurityException("Usuário não autenticado.");
         }
 
-        // Apenas ADMIN pode atualizar
-        boolean isAdmin = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> "ADMIN".equals(r.getNome()));
-        if (!isAdmin) {
+        if (usuarioLogado == null) {
+            throw new SecurityException("Usuário não autenticado.");
+        }
+
+        // 🔐 Apenas ADMIN e GERENTE podem atualizar solicitações
+        boolean permitido = usuarioLogado.getRoles().stream()
+                .anyMatch(r -> r.getNome().equals("ADMIN") || r.getNome().equals("GERENTE"));
+        if (!permitido) {
             throw new AccessDeniedException("Usuário não tem permissão para atualizar solicitações.");
         }
 

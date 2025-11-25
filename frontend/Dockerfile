@@ -9,7 +9,7 @@ RUN npm cache clean --force
 COPY package.json package-lock.json ./
 
 # Instala as dependências do projeto
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # Copia todo o código-fonte
 COPY . .
@@ -23,7 +23,7 @@ FROM nginx:alpine
 # remover a página padrão
 RUN rm -rf /usr/share/nginx/html/*
 # Copia os arquivos estáticos de build do estágio anterior
-COPY --from=build /app/dist/app-portal/browser /usr/share/nginx/html
+COPY --from=build /app/dist/app-transporte/browser /usr/share/nginx/html
 
 # Substitui a config padrão do Nginx
 COPY nginx.conf /etc/nginx/nginx.conf

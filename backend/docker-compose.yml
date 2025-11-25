@@ -1,8 +1,14 @@
 services:
   api:
     build: .
-    container_name: api-portal
+    container_name: api-transporte
     env_file:
       - .env
     ports:
       - "8080:8080"
+    networks:
+      - otymus_net
+
+networks:
+  otymus_net:
+    external: true
