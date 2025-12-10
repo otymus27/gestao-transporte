@@ -74,10 +74,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "app-portal:build:production"
+              "buildTarget": "app-transporte:build:production"
             },
             "development": {
-              "buildTarget": "app-portal:build:development"
+              "buildTarget": "app-transporte:build:development"
             }
           },
           "defaultConfiguration": "development"

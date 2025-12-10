@@ -3,6 +3,7 @@ export interface Motorista {
   id: number;
   nome: string;
   matricula: string;
+  telefone: string;
   ativo: boolean;
 
   // Caso no backend o DTO detalhado inclua mais informações,

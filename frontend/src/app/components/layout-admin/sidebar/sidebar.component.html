@@ -194,7 +194,7 @@
             >Gerenciar</a
           >
         </li>
-        <li *ngIf="isAdmin()" class="nav-item">
+        <li *ngIf="isAdmin() || isGerente()" class="nav-item">
           <a
             routerLink="/admin/solicitacoes/relatorio"
             class="nav-link"

@@ -12,10 +12,13 @@ import { AuthTokenInterceptor } from './app/services/auth-token.interceptor'; //
 import { AuthService } from './app/services/auth.service'; // ✅ Importe seu AuthService se ele não tiver `providedIn: 'root'`
 import { importProvidersFrom } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { provideNgxMask } from 'ngx-mask';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes), // Provedor de roteamento
+
+    provideNgxMask(),
 
     // ✅ Configuração do HttpClient para usar interceptors do DI
     provideHttpClient(withInterceptorsFromDi()),

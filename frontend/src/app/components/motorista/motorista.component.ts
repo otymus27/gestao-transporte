@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MdbFormsModule } from 'mdb-angular-ui-kit/forms';
+import { NgxMaskDirective } from 'ngx-mask';
 import {
   MdbModalModule,
   MdbModalRef,
@@ -20,13 +21,22 @@ import {
 @Component({
   selector: 'app-motorista',
   standalone: true,
-  imports: [CommonModule, FormsModule, MdbFormsModule, MdbModalModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MdbFormsModule,
+    MdbModalModule,
+    NgxMaskDirective,
+  ],
   templateUrl: './motorista.component.html',
   styleUrl: './motorista.component.scss',
 })
 export class MotoristaComponent {
   lista: Motorista[] = [];
   registroSelecionado!: Motorista;
+
+  // Regex para formato do telefone
+  telefoneRegex: RegExp = /^\([0-9]{2}\) [0-9]{4,5}-[0-9]{4}$/;
 
   // Paginação
   page = 0;
@@ -147,6 +157,7 @@ export class MotoristaComponent {
       id: 0,
       nome: '',
       matricula: '',
+      telefone: '',
       ativo: true,
     };
     this.modalRef = this.modalService.open(this.modalMotoristaDetalhe);
@@ -170,6 +181,18 @@ export class MotoristaComponent {
     }
     if (!motorista.matricula?.trim()) {
       this.toastService.showError('O campo matrícula é obrigatório.');
+      return;
+    }
+
+    if (!motorista.telefone?.trim()) {
+      this.toastService.showError('O campo telefone é obrigatório.');
+      return;
+    }
+
+    if (!this.telefoneRegex.test(motorista.telefone)) {
+      this.toastService.showError(
+        'Telefone inválido. Use o formato (99) 99999-9999.'
+      );
       return;
     }
 

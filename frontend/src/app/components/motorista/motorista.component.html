@@ -98,6 +98,7 @@
             <td>{{ motorista.id }}</td>
             <td>{{ motorista.nome }}</td>
             <td>{{ motorista.matricula }}</td>
+            <td>{{ motorista.telefone }}</td>
             <td>
               <span
                 class="badge"
@@ -125,7 +126,9 @@
           </tr>
           } @empty {
           <tr>
-            <td colspan="5" class="text-center">Nenhum motorista encontrado.</td>
+            <td colspan="5" class="text-center">
+              Nenhum motorista encontrado.
+            </td>
           </tr>
           }
         </tbody>
@@ -231,6 +234,35 @@
         </div>
       </div>
 
+      <div class="mb-3">
+        <label class="form-label fw-bold">Telefone:</label>
+        <input
+          mdbInput
+          [(ngModel)]="registroSelecionado.telefone"
+          #telefone="ngModel"
+          name="telefone"
+          required
+          mask="(00) 00000-0000"
+          [dropSpecialCharacters]="false"
+          class="form-control"
+          placeholder="(99) 99999-9999"
+        />
+        <div
+          *ngIf="telefone.invalid && (telefone.dirty || telefone.touched)"
+          class="text-danger mt-1"
+        >
+          O campo Telefone é obrigatório.
+        </div>
+
+        <!-- Mensagem se formato estiver errado
+        <div
+          *ngIf="telefone.errors?.['pattern'] && (telefone.dirty || telefone.touched)"
+          class="text-danger mt-1"
+        >
+          Formato inválido. Use (99) 99999-9999.
+        </div> -->
+      </div>
+
       <div class="mb-3 form-check">
         <input
           type="checkbox"
@@ -268,7 +300,8 @@
   <div class="modal-body">
     <p>
       Tem certeza que deseja excluir o motorista
-      <strong>{{ registroSelecionado.nome }}</strong>?
+      <strong>{{ registroSelecionado.nome }}</strong
+      >?
     </p>
   </div>
 
