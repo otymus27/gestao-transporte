@@ -49,9 +49,9 @@ INSERT INTO tb_roles (nome) VALUES
 INSERT INTO tb_usuarios (username, password, senha_provisoria, nome_completo, ativo, data_criacao, data_atualizacao) VALUES
      ('admin','$2a$12$jQ0dPE2juypEy07pKe1uBOjcUzxJq8lSIb/nM1.pQATbzWvoB0kN2',0,'Administrador do Sistema',TRUE,'2025-09-17 10:34:32.322224','2025-09-17 14:05:11.524568'),
      ('14329301','$2a$10$RuPJRDA5waAaFUazCqHR6OjEXV89x3Rx47RKlT8R/0.JiubM6RZz6',0,'FABIO DE ALENCAR',TRUE,'2025-09-17 10:34:32.322224','2025-09-17 10:59:00.003140'),
-     ('gabriel','$2a$10$RuPJRDA5waAaFUazCqHR6OjEXV89x3Rx47RKlT8R/0.JiubM6RZz6',0,'GABRIEL',TRUE,'2025-09-17 10:34:32.322224','2025-09-18 11:39:35.680566'),
-     ('beatriz','$2a$10$RuPJRDA5waAaFUazCqHR6OjEXV89x3Rx47RKlT8R/0.JiubM6RZz6',0,'Beatriz de Alencar Rocha',TRUE,'2025-09-17 10:40:04.777697','2025-09-17 14:11:47.130158'),
-     ('teste','$2a$10$RuPJRDA5waAaFUazCqHR6OjEXV89x3Rx47RKlT8R/0.JiubM6RZz6',0,'OSIEL ALEX FERREIRA PACHECO',TRUE,'2025-09-17 11:01:46.391264','2025-09-17 11:01:46.391264')
+     ('1305158','$2a$10$RuPJRDA5waAaFUazCqHR6OjEXV89x3Rx47RKlT8R/0.JiubM6RZz6',0,'EUREUDES RODRIGUES SANTOS',TRUE,'2025-09-17 10:34:32.322224','2025-09-18 11:39:35.680566'),
+     ('teste','$2a$10$RuPJRDA5waAaFUazCqHR6OjEXV89x3Rx47RKlT8R/0.JiubM6RZz6',0,'Usuario Gerente Teste',TRUE,'2025-09-17 10:40:04.777697','2025-09-17 14:11:47.130158'),
+     ('teste1','$2a$10$RuPJRDA5waAaFUazCqHR6OjEXV89x3Rx47RKlT8R/0.JiubM6RZz6',0,'Usuario Basico Teste',TRUE,'2025-09-17 11:01:46.391264','2025-09-17 11:01:46.391264')
     ON DUPLICATE KEY UPDATE
                          password = VALUES(password),
                          nome_completo = VALUES(nome_completo),
@@ -60,9 +60,9 @@ INSERT INTO tb_usuarios (username, password, senha_provisoria, nome_completo, at
 -- Inserção de relacionamento usuário ↔ role
 INSERT INTO tb_usuarios_roles (user_id, role_id) VALUES
                                                      (1,1),
-                                                     (2,1),
-                                                     (3,3),
-                                                     (4,3),
+                                                     (2,2),
+                                                     (3,1),
+                                                     (4,2),
                                                      (5,3)
 
 

@@ -108,7 +108,7 @@ public class SolicitacaoService {
 
         // 🔐 Apenas ADMIN e GERENTE podem cadastrar solicitações
         boolean permitido = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> r.getNome().equals("ADMIN") || r.getNome().equals("GERENTE"));
+                .anyMatch(r -> r.getNome().equals("ADMIN") || r.getNome().equals("GERENTE") || r.getNome().equals("BASIC"));
         if (!permitido) {
             throw new AccessDeniedException("Usuário não tem permissão para cadastrar solicitações.");
         }
@@ -156,7 +156,7 @@ public class SolicitacaoService {
 
         // 🔐 Apenas ADMIN e GERENTE podem atualizar solicitações
         boolean permitido = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> r.getNome().equals("ADMIN") || r.getNome().equals("GERENTE"));
+                .anyMatch(r -> r.getNome().equals("ADMIN") || r.getNome().equals("GERENTE") || r.getNome().equals("BASIC"));
         if (!permitido) {
             throw new AccessDeniedException("Usuário não tem permissão para atualizar solicitações.");
         }

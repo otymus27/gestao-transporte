@@ -19,6 +19,14 @@ INSERT INTO tb_destino (nome) VALUES
                                   ('UBS 01'),
                                   ('UBS 02'),
                                   ('UBS 03'),
+                                  ('UBS 04'),
+                                  ('UBS 05'),
+                                  ('UBS 06'),
+                                  ('UBS 07'),
+                                  ('UBS 08'),
+                                  ('UBS 09'),
                                   ('LACEN'),
+                                  ('FARMACIA ALTO CUSTO'),
                                   ('ADMC - POO 700'),
-                                  ('UBS PONTE ALTA');
+                                  ('UBS-ENGENHO DAS LAJES'),
+                                  ('UBS-PONTE ALTA');

@@ -52,7 +52,7 @@ public class SolicitacaoController {
     // ✅ Cadastrar solicitação
     @PostMapping
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
     public ResponseEntity<?> cadastrar(@Valid @RequestBody SolicitacaoRequestDTO dto,
                                        Authentication authentication,
                                        HttpServletRequest request) {
@@ -87,7 +87,7 @@ public class SolicitacaoController {
     // ✅ Atualizar solicitação
     @PatchMapping("/{id}")
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE', 'BASIC')")
     public ResponseEntity<?> atualizar(@PathVariable Long id,
                                        @Valid @RequestBody SolicitacaoRequestDTO dto,
                                        Authentication authentication,

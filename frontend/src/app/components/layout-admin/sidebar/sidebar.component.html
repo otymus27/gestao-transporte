@@ -186,7 +186,7 @@
         ></i>
       </a>
       <ul *ngIf="isSubmenuOpen('solicitacoes')" class="nav flex-column ms-3">
-        <li *ngIf="isAdmin() || isGerente()">
+        <li *ngIf="isAdmin() || isGerente() || isBasic()">
           <a
             class="nav-link"
             routerLink="/admin/solicitacoes/gerenciar"
