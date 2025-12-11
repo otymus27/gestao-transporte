@@ -155,8 +155,8 @@ export class SolicitacaoComponent {
       this.motoristas = [];
       return;
     }
-    this.motoristaService.filtrarPorNome(query).subscribe({
-      next: (res) => (this.motoristas = res.content),
+    this.motoristaService.buscarParaCombo(query).subscribe({
+      next: (lista) => (this.motoristas = lista),
       error: () => this.toastService.showError('Erro ao buscar motoristas!'),
     });
   }

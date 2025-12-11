@@ -44,5 +44,10 @@ public interface MotoristaRepository extends JpaRepository<Motorista, Long> {
     List<Motorista> filtrarRelatorio(@Param("nome") String nome,
                                      @Param("matricula") String matricula);
 
+    Page<Motorista> findByMatriculaContainingIgnoreCaseOrNomeContainingIgnoreCase(
+            String matricula,
+            String nome,
+            Pageable pageable
+    );
 
 }

@@ -218,6 +218,33 @@ public class MotoristaService {
                 .map(m -> MotoristaDetalhadoDTO.fromEntity(m, false)); // 🚫 sem solicitações
     }
 
+    @Transactional(readOnly = true)
+    public Page<MotoristaDetalhadoDTO> filtrarPorTermo(String termo, Pageable pageable) {
+
+        if (termo == null || termo.isBlank()) {
+            // se não mandou nada, reaproveita o listar padrão se você tiver
+            return motoristaRepository.findAll(pageable)
+                    .map(m -> MotoristaDetalhadoDTO.fromEntity(m, false));
+        }
+
+        String filtro = termo.trim();
+
+        String nome = null;
+        String matricula = null;
+
+        // Regra simples:
+        // - só dígitos → considera matrícula
+        // - qualquer outra coisa → considera nome (parte do nome)
+        if (filtro.matches("\\d+")) {
+            matricula = filtro;
+        } else {
+            nome = filtro;
+        }
+
+        return motoristaRepository.filtrar(nome, matricula, pageable)
+                .map(m -> MotoristaDetalhadoDTO.fromEntity(m, false)); // 🚫 sem solicitações
+    }
+
 
     // 🔹 Método auxiliar para mapear solicitação em DTO enxuto
     private SolicitacaoResumoDTO mapSolicitacaoResumo(Solicitacao s) {

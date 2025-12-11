@@ -9,6 +9,7 @@ import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoPorStatusDTO;
 import com.br.sistema.entities.Solicitacao.Solicitacao;
 import com.br.sistema.entities.Usuario.DTO.SolicitacaoPorUsuarioDTO;
 import com.br.sistema.entities.Usuario.Usuario;
+import com.br.sistema.relatorio.DTO.QuantidadePorMesDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -192,10 +193,23 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
               LOWER(s.status) LIKE LOWER(CONCAT('%', :filtro, '%'))
         )
     """)
-
-
     List<Solicitacao> filtrarSemPaginacao(String filtro);
 
+
+
     Page<Solicitacao> findByDataSolicitacaoBetween(LocalDate inicio, LocalDate fim, Pageable pageable);
+
+    // Série mensal (agrupa por ano/mês)
+    @Query("""
+           SELECT new com.br.sistema.relatorio.DTO.QuantidadePorMesDTO(
+               YEAR(s.dataSolicitacao), MONTH(s.dataSolicitacao), COUNT(s)
+           )
+           FROM Solicitacao s
+           WHERE DATE(s.dataSolicitacao) BETWEEN :inicio AND :fim
+           GROUP BY YEAR(s.dataSolicitacao), MONTH(s.dataSolicitacao)
+           ORDER BY YEAR(s.dataSolicitacao), MONTH(s.dataSolicitacao)
+           """)
+    List<QuantidadePorMesDTO> contarPorMes(@Param("inicio") LocalDate inicio,
+                                           @Param("fim") LocalDate fim);
 
 }

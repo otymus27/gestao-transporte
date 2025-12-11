@@ -11,6 +11,8 @@ import { Paginacao } from '../models/paginacao';
 import { environment } from '../../environments/environment';
 import { Motorista } from '../models/motorista';
 
+import { of, map } from 'rxjs';
+
 export interface ErrorMessage {
   status: number;
   error: string;
@@ -69,6 +71,31 @@ export class MotoristaService {
     return this.http
       .get<Paginacao<Motorista>>(`${this.API_URL}/buscar`, { params })
       .pipe(catchError(this.tratarErro));
+  }
+
+  /**
+   * Buscar motoristas para o combobox (matrícula ou nome, paginado).
+   */
+  buscarParaCombo(
+    termo: string,
+    page: number = 0,
+    size: number = 10
+  ): Observable<Motorista[]> {
+    if (!termo.trim()) {
+      return of([]); // precisa importar 'of' do rxjs
+    }
+
+    let params = new HttpParams()
+      .set('termo', termo.trim())
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http
+      .get<Paginacao<Motorista>>(`${this.API_URL}/buscar-combo`, { params })
+      .pipe(
+        map((res) => res.content), // pega só o content pra popular o combo
+        catchError(this.tratarErro)
+      );
   }
 
   /**

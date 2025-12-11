@@ -197,11 +197,16 @@
           class="form-control"
           [(ngModel)]="motoristaNome"
           [ngModelOptions]="{ standalone: true }"
+          placeholder="Digite matrícula ou parte do nome"
           (input)="buscarMotoristas(motoristaNome)"
         />
         <div *ngIf="motoristas.length > 0" class="panel">
-          <div class="option" *ngFor="let m of motoristas" (click)="selecionarMotorista(m)">
-            {{ m.nome }}
+          <div
+            class="option"
+            *ngFor="let m of motoristas"
+            (click)="selecionarMotorista(m)"
+          >
+            {{ m.matricula }} - {{ m.nome }}
           </div>
         </div>
       </div>

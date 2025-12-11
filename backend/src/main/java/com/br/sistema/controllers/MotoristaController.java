@@ -288,6 +288,27 @@ public class MotoristaController {
         }
     }
 
+    @GetMapping("/buscar-combo")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> filtrarPorTermo(@RequestParam String termo,
+                                             Pageable pageable,
+                                             HttpServletRequest request) {
+        try {
+            var motoristas = motoristaService.filtrarPorTermo(termo, pageable);
+            return ResponseEntity.ok(motoristas);
+
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao filtrar motoristas (combo)", e);
+            ErrorMessage error = new ErrorMessage(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Erro interno no servidor",
+                    "Erro ao buscar motoristas para o combo.",
+                    request.getRequestURI()
+            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
     @GetMapping("/relatorio")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Resource> exportarRelatorio(

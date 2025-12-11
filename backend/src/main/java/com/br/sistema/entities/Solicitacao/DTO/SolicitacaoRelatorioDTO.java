@@ -24,5 +24,6 @@ public record SolicitacaoRelatorioDTO(
         }
         return String.valueOf(kmFinal - kmInicial);
     }
+
 }
 
