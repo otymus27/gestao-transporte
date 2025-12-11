@@ -145,6 +145,21 @@
             <version>2.0.30</version>
         </dependency>
 
+        <!-- JasperReports core -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>7.0.3</version> <!-- ou a mais recente que você quiser -->
+        </dependency>
+
+        <!-- Caso precise de exportação para XLSX -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports-fonts</artifactId>
+            <version>7.0.3</version>
+        </dependency>
+
+
     </dependencies>
 
 	<build>

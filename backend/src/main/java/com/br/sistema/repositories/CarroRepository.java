@@ -1,6 +1,7 @@
 package com.br.sistema.repositories;
 
 import com.br.sistema.entities.Carro.Carro;
+import com.br.sistema.entities.Carro.DTO.CarroRelatorioDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -45,7 +46,18 @@ public interface CarroRepository extends JpaRepository<Carro, Long> {
         """)
     List<Carro> filtrarSemPaginacao(String filtro);
 
-
+    @Query("""
+        SELECT new com.br.sistema.entities.Carro.DTO.CarroRelatorioDTO(
+            c.id,
+            c.placa,
+            c.marca,
+            c.modelo,
+            c.tipo
+        )
+        FROM Carro c
+        ORDER BY c.id,c.marca, c.modelo, c.placa
+    """)
+    List<CarroRelatorioDTO> listarParaRelatorio();
 
 
 }
