@@ -11,6 +11,9 @@ public record CarroRequestDTO(
         @NotBlank(message = "Modelo é obrigatório")
         String modelo,
 
+        @NotBlank(message = "Tipo é obrigatório")
+        String tipo,
+
         @NotBlank(message = "Placa é obrigatória")
         @Size(min = 7, max = 7, message = "Placa deve ter 7 caracteres")
         String placa

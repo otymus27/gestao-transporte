@@ -1,0 +1,12 @@
+export enum MarcaCarro {
+  CITROEN = 'CITROEN',
+  CHEVROLET = 'GM - CHEVROLET',
+  FIAT = 'FIAT',
+  FORD = 'FORD',
+  HYIUNDAI = 'HYIUNDAI',
+  HONDA = 'HONDA',
+  MITSUBICHI = 'MITSUBICHI',
+  RENAULT = 'RENAULT',
+  TOYOTA = 'TOYOTA',
+  VW = 'VW',
+}

@@ -12,6 +12,7 @@ import { ToastService } from '../../services/toast.service';
 import { Paginacao } from '../../models/paginacao';
 import { Carro } from '../../models/carro';
 import { ErrorMessage, CarroService } from '../../services/carro.service';
+import { TipoCarro } from './../../enums/tipo_carro.enum';
 
 @Component({
   selector: 'app-carro',
@@ -23,6 +24,35 @@ import { ErrorMessage, CarroService } from '../../services/carro.service';
 export class CarroComponent {
   lista: Carro[] = [];
   registroSelecionado!: Carro;
+
+  //lista de tipos atraves de enums
+  tiposCarro = Object.values(TipoCarro);
+  marcas = [
+    'CITROEN',
+    'FIAT',
+    'FORD',
+    'RENAULT',
+    'VOLKSWAGEN',
+    'CHEVROLET',
+    'TOYOTA',
+  ];
+
+  modelosPorMarca: Record<string, string[]> = {
+    CITROEN: ['MASTER', 'C3'],
+    CHEVROLET: ['ONIX', 'PRISMA', 'S10', 'SPIN'],
+    FIAT: ['DOBLO', 'PALIO WEEKEND', 'STRADA', 'TORO'],
+    FORD: ['KA', 'FOCUS', 'FIESTA', 'FUSION'],
+    RENAULT: ['CLIO', 'DUSTER', 'MASTER'],
+    TOYOTA: ['COROLLA', 'YARIS', 'HILUX', 'ETIOS', 'SW4'],
+    VOLKSWAGEN: ['GOL', 'POLO', 'VIRTUS', 'SAVEIRO'],
+  };
+
+  modelosFiltrados: string[] = [];
+
+  onMarcaChange(marca: string) {
+    this.modelosFiltrados = this.modelosPorMarca[marca] || [];
+    this.registroSelecionado.modelo = ''; // limpa o modelo atual
+  }
 
   // Paginação
   page = 0;
@@ -141,7 +171,13 @@ export class CarroComponent {
 
   // 📌 Modal de cadastro
   cadastrarModal() {
-    this.registroSelecionado = { id: 0, placa: '', marca: '', modelo: '' };
+    this.registroSelecionado = {
+      id: 0,
+      placa: '',
+      marca: '',
+      modelo: '',
+      tipo: '',
+    };
     this.modalRef = this.modalService.open(this.modalCarroDetalhe);
   }
 
@@ -157,7 +193,12 @@ export class CarroComponent {
 
   // 📌 Salvar (cadastrar ou atualizar)
   salvarCarro(carro: Carro) {
-    if (!carro.placa?.trim() || !carro.marca?.trim() || !carro.modelo?.trim()) {
+    if (
+      !carro.placa?.trim() ||
+      !carro.marca?.trim() ||
+      !carro.modelo?.trim() ||
+      !carro.tipo?.trim()
+    ) {
       this.toastService.showError('Todos os campos são obrigatórios.');
       return;
     }

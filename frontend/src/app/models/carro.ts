@@ -5,5 +5,6 @@ export interface Carro {
   placa: string;
   marca: string;
   modelo: string;
+  tipo: string;
   //solicitacoes?: SolicitacaoResumo[]; // ✅ opcional, só quando buscar detalhado
 }

@@ -4,6 +4,7 @@ public record CarroRelatorioDTO(
         Long id,
         String marca,
         String modelo,
+        String tipo,
         String placa
 ) {
 }

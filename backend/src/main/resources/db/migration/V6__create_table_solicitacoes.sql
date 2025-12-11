@@ -24,8 +24,5 @@ INSERT INTO tb_solicitacao (
     data_solicitacao, status, km_inicial, km_final, hora_saida, hora_chegada,
     id_carro, id_motorista, id_usuario, id_setor, id_destino
 ) VALUES
-      ('2025-05-01', 'PENDENTE', 0, 0, '17:50:00', '18:00:00', 1, 1, 1, 1, 1),
-      ('2025-05-02', 'CONCLUIDA', 1, 5, '17:50:00', '18:00:00', 2, 2, 2, 2, 2),
-      ('2025-05-03', 'RECUSADA', 0, 0, '17:50:00', '18:00:00', 3, 3, 3, 3, 3),
-      ('2025-05-04', 'PENDENTE', 0, 0, '17:50:00', '18:00:00', 4, 4, 4, 4, 4),
-      ('2025-05-05', 'CONCLUIDA', 1, 5, '17:50:00', '18:00:00', 5, 5, 5, 5, 5);
+      ('2025-05-02', 'CONCLUIDA', 1, 5, '17:50:00', '18:00:00', 1, 2, 2, 2, 2),
+      ('2025-05-05', 'CONCLUIDA', 1, 5, '17:50:00', '18:00:00', 1, 5, 5, 5, 5);

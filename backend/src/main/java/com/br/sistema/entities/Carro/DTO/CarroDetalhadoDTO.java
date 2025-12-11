@@ -8,9 +8,11 @@ import java.util.List;
 
 public record CarroDetalhadoDTO(
         Long id,
+        String placa,
         String marca,
         String modelo,
-        String placa,
+        String tipo,
+
         List<SolicitacaoResumoDTO> solicitacoes
 ) {
 
@@ -24,9 +26,10 @@ public record CarroDetalhadoDTO(
 
         return new CarroDetalhadoDTO(
                 carro.getId(),
+                carro.getPlaca(),
                 carro.getMarca(),
                 carro.getModelo(),
-                carro.getPlaca(),
+                carro.getTipo(),
                 solicitacoes
         );
     }

@@ -317,8 +317,8 @@ export class SolicitacaoComponent {
   // 📌 Modal de Abertura
   abrirModalAbertura() {
     this.registroSelecionado = novaSolicitacao();
-    this.registroSelecionado.usuarioId = this.authService.getUsuarioId();
-    this.registroSelecionado.status = 'PENDENTE'; // ✅ já seta como PENDENTE
+    this.registroSelecionado.usuarioId = this.authService.getUsuarioId(); // ✅ já seta como o usuário logado
+    this.registroSelecionado.status = 'CONCLUIDO'; // ✅ já seta como CONCLUIDO
 
     this.motoristaNome = '';
     this.carroPlaca = '';
@@ -433,5 +433,11 @@ export class SolicitacaoComponent {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
       d.getDate()
     )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  /** Calculo para kilometragem total */
+  calcularKmTotal(solicitacao: any): number | string {
+    if (!solicitacao.kmInicial || !solicitacao.kmFinal) return '-';
+    return solicitacao.kmFinal - solicitacao.kmInicial;
   }
 }

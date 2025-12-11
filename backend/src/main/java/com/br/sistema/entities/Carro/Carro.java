@@ -28,6 +28,9 @@ public class Carro {
     @Column(nullable = false, unique = true)
     private String placa;
 
+    @Column(nullable = false)
+    private String tipo;
+
     //Relacionamento com Solicitacao - um carro pode estar vinculado a várias solicitações
     @OneToMany(mappedBy = "carro")
     @JsonBackReference("carro-solicitacoes")

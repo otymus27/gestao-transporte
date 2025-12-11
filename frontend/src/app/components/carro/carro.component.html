@@ -1,7 +1,9 @@
 <div class="container">
   <div class="card">
     <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded">
+      <div
+        class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded"
+      >
         <h1>Gerenciamento de Carros</h1>
         <button
           class="btn btn-primary btn-rounded btn-shadow me-2"
@@ -93,6 +95,9 @@
                 }"
               ></i>
             </th>
+
+            <th style="cursor: pointer">Tipo</th>
+
             <th>Ação</th>
           </tr>
         </thead>
@@ -103,6 +108,7 @@
             <td>{{ carro.placa }}</td>
             <td>{{ carro.marca }}</td>
             <td>{{ carro.modelo }}</td>
+            <td>{{ carro.tipo }}</td>
             <td>
               <button
                 class="btn btn-warning btn-sm btn-shadow me-1"
@@ -209,32 +215,57 @@
 
       <div class="mb-3">
         <label class="form-label fw-bold">Marca:</label>
-        <input
-          mdbInput
+        <select
+          class="form-select"
           [(ngModel)]="registroSelecionado.marca"
-          #marca="ngModel"
           name="marca"
+          #marca="ngModel"
           required
-          class="form-control"
-        />
-        <div
-          *ngIf="marca.invalid && (marca.dirty || marca.touched)"
-          class="text-danger mt-1"
+          (change)="onMarcaChange(registroSelecionado.marca)"
         >
+          <option [ngValue]="null">Selecione a marca</option>
+          <option *ngFor="let m of marcas" [ngValue]="m">{{ m }}</option>
+        </select>
+      
+        <div *ngIf="marca.invalid && (marca.dirty || marca.touched)" class="text-danger mt-1">
           O campo Marca é obrigatório.
         </div>
       </div>
 
       <div class="mb-3">
         <label class="form-label fw-bold">Modelo:</label>
-        <input
-          mdbInput
+        <select
+          class="form-select"
           [(ngModel)]="registroSelecionado.modelo"
-          #modelo="ngModel"
           name="modelo"
+          #modelo="ngModel"
           required
-          class="form-control"
-        />
+          [disabled]="!modelosFiltrados.length"
+        >
+          <option [ngValue]="null">Selecione o modelo</option>
+          <option *ngFor="let mod of modelosFiltrados" [ngValue]="mod">{{ mod }}</option>
+        </select>
+      
+        <div *ngIf="modelo.invalid && (modelo.dirty || modelo.touched)" class="text-danger mt-1">
+          O campo Modelo é obrigatório.
+        </div>
+      </div>
+      
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">Tipo:</label>
+        <select
+          class="form-select"
+          [(ngModel)]="registroSelecionado.tipo"
+          name="tipo"
+          #tipo="ngModel"
+          required
+        >
+          <option [ngValue]="null">Selecione...</option>
+          <option *ngFor="let t of tiposCarro" [ngValue]="t">
+            {{ t }}
+          </option>
+        </select>
         <div
           *ngIf="modelo.invalid && (modelo.dirty || modelo.touched)"
           class="text-danger mt-1"
@@ -269,7 +300,8 @@
   <div class="modal-body">
     <p>
       Tem certeza que deseja excluir o carro com placa
-      <strong>{{ registroSelecionado.placa }}</strong>?
+      <strong>{{ registroSelecionado.placa }}</strong
+      >?
     </p>
   </div>
 

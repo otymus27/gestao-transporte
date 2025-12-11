@@ -1,0 +1,6 @@
+export enum TipoCarro {
+  AMBULANCIA = 'AMBULANCIA',
+  AUTOMOVEL = 'AUTOMOVEL',
+  CAMINHONETE = 'CAMINHONETE',
+  FURGAO = 'FURGAO',
+}

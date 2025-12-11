@@ -8,6 +8,7 @@ public record CarroResponseDTO(
         Long id,
         String marca,
         String modelo,
+        String tipo,
         String placa,
         List<SolicitacaoResumoDTO> solicitacoes
 ) {

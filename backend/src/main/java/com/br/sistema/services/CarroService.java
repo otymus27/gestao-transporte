@@ -61,6 +61,9 @@ public class CarroService {
         if (dto.modelo() == null || dto.modelo().isBlank()) {
             throw new IllegalArgumentException("Modelo é obrigatório.");
         }
+        if (dto.tipo() == null || dto.tipo().isBlank()) {
+            throw new IllegalArgumentException("Tipo é obrigatório.");
+        }
         if (dto.placa() == null || dto.placa().isBlank()) {
             throw new IllegalArgumentException("Placa é obrigatória.");
         }
@@ -81,6 +84,7 @@ public class CarroService {
         Carro carro = new Carro();
         carro.setMarca(dto.marca().trim());
         carro.setModelo(dto.modelo().trim());
+        carro.setTipo(dto.tipo().trim());
         carro.setPlaca(dto.placa().trim());
 
         try {
@@ -110,6 +114,9 @@ public class CarroService {
         if (dto.modelo() == null || dto.modelo().isBlank()) {
             throw new IllegalArgumentException("Modelo é obrigatório.");
         }
+        if (dto.tipo() == null || dto.tipo().isBlank()) {
+            throw new IllegalArgumentException("Tipo é obrigatório.");
+        }
         if (dto.placa() == null || dto.placa().isBlank()) {
             throw new IllegalArgumentException("Placa é obrigatória.");
         }
@@ -133,6 +140,7 @@ public class CarroService {
         // 6️⃣ Aplicar alterações
         carro.setMarca(dto.marca().trim());
         carro.setModelo(dto.modelo().trim());
+        carro.setTipo(dto.tipo().trim());
         carro.setPlaca(dto.placa().trim());
 
         try {
@@ -209,6 +217,7 @@ public class CarroService {
                         c.getId(),
                         c.getMarca(),
                         c.getModelo(),
+                        c.getTipo(),
                         c.getPlaca()
                 ))
                 .toList();
@@ -227,7 +236,8 @@ public class CarroService {
             header.createCell(0).setCellValue("ID");
             header.createCell(1).setCellValue("Marca");
             header.createCell(2).setCellValue("Modelo");
-            header.createCell(3).setCellValue("Placa");
+            header.createCell(3).setCellValue("Tipo");
+            header.createCell(4).setCellValue("Placa");
 
             // Dados
             int rowIdx = 1;
@@ -236,7 +246,8 @@ public class CarroService {
                 row.createCell(0).setCellValue(c.id());
                 row.createCell(1).setCellValue(c.marca());
                 row.createCell(2).setCellValue(c.modelo());
-                row.createCell(3).setCellValue(c.placa());
+                row.createCell(3).setCellValue(c.tipo());
+                row.createCell(4).setCellValue(c.placa());
             }
 
             workbook.write(out);
@@ -249,12 +260,13 @@ public class CarroService {
         List<CarroRelatorioDTO> carros = gerarRelatorio(filtro);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("ID;Marca;Modelo;Placa\n");
+        sb.append("ID;Marca;Modelo;Tipo;Placa\n");
 
         for (CarroRelatorioDTO c : carros) {
             sb.append(c.id()).append(";")
                     .append(c.marca()).append(";")
                     .append(c.modelo()).append(";")
+                    .append(c.tipo()).append(";")
                     .append(c.placa()).append("\n");
         }
 
@@ -272,8 +284,8 @@ public class CarroService {
             float rowHeight = 20;
 
             // colunas
-            String[] colunas = {"ID", "Marca", "Modelo", "Placa"};
-            float[] colWidths = {50, 150, 150, 150};
+            String[] colunas = {"ID", "Marca", "Modelo","Tipo", "Placa"};
+            float[] colWidths = {50, 150, 150, 150,150};
 
             int rowIndex = 0;
             int pageNumber = 1;

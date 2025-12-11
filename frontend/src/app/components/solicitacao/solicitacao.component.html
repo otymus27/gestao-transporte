@@ -35,31 +35,7 @@
           [ngModelOptions]="{standalone: true}"
           (input)="usarFiltro('usuarioLogin')"
           (keyup.enter)="aplicarFiltros()"
-        />       
-
-        <!-- Status (COMBOBOX) -->
-        <select
-          class="form-select w-auto"
-          [(ngModel)]="filtroStatus"
-          [ngModelOptions]="{standalone: true}"
-          (change)="usarFiltro('status'); aplicarFiltros()"
-        >
-          <option value="" selected>Todos os status</option>
-          <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
-        </select>
-
-        <!-- Atalho: Somente PENDENTE -->
-        <button
-          type="button"
-          class="btn"
-          [class.btn-outline-secondary]="!mostrarSomentePendentes"
-          [class.btn-secondary]="mostrarSomentePendentes"
-          (click)="alternarFiltroPendentes()"
-          title="Alternar entre todas e apenas PENDENTE"
-        >
-          <i class="bi bi-filter"></i>
-          {{ mostrarSomentePendentes ? 'Apenas PENDENTE' : 'Todos os status' }}
-        </button>
+        /> 
 
         <!-- Ações -->
         <button class="btn btn-primary ms-2" (click)="aplicarFiltros()">
@@ -75,11 +51,7 @@
         <thead>
           <tr>
             <th (click)="ordenarPor('id')" style="cursor:pointer;">ID</th>
-            <th (click)="ordenarPor('status')" style="cursor:pointer;">
-              Status
-              <i *ngIf="colunaOrdenada === 'status'" class="bi"
-                 [ngClass]="{ 'bi-caret-up-fill': ordem === 'asc', 'bi-caret-down-fill': ordem === 'desc' }"></i>
-            </th>
+           
             <th (click)="ordenarPor('dataSolicitacao')" style="cursor:pointer;">
               Data
               <i *ngIf="colunaOrdenada === 'dataSolicitacao'" class="bi"
@@ -90,38 +62,30 @@
             <th>Usuário</th>
             <th>Setor</th>
             <th>Destino</th>
+            <th>Km Inicial</th>
+            <th>Hora Saida</th>
+            <th>Km Final</th>
+            <th>Hora Chegada</th>
+            <th>Total km</th>
             <th>Ações</th>
           </tr>
         </thead>
         <tbody>
           @for (sol of lista; track sol.id) {
           <tr>
-            <td>{{ sol.id }}</td>
-            <td>
-              <span
-                class="badge"
-                [class.bg-danger]="sol.status === 'PENDENTE'"
-                [class.bg-info]="sol.status === 'EM_ANDAMENTO'"
-                [class.bg-success]="sol.status === 'CONCLUIDO'"
-                [class.bg-secondary]="sol.status === 'CANCELADO'"
-              >
-                {{ sol.status }}
-              </span>
-            </td>
-            <td>{{ sol.dataSolicitacao | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ sol.id }}</td>            
+            <td>{{ sol.dataSolicitacao | date: 'dd/MM/yyyy' }}</td>
             <td>{{ sol.carroPlaca }}</td>
             <td>{{ sol.motoristaNome }}</td>
             <td>{{ sol.usuarioNome }}</td>
             <td>{{ sol.setorNome }}</td>
             <td>{{ sol.destinoNome }}</td>
-            <td>
-              <button
-                *ngIf="sol.status === 'PENDENTE' || sol.status === 'EM_ANDAMENTO'"
-                class="btn btn-success btn-sm me-1"
-                (click)="abrirModalFechamento(sol)"
-              >
-                <i class="bi bi-check-circle"></i>
-              </button>
+            <td>{{ sol.kmInicial }}</td>
+            <td>{{ sol.horaSaida }}</td>
+            <td>{{ sol.kmFinal }}</td>
+            <td>{{ sol.horaChegada }}</td>
+            <td>{{ calcularKmTotal(sol) }}</td>
+            <td>             
               <button
                 class="btn btn-warning btn-sm me-1"
                 (click)="editarModal(sol)"
@@ -179,7 +143,7 @@
   </div>
 </div>
 
-<!-- 📌 Modal de Abertura -->
+<!-- 📌 Modal de Abertura para cadastro de solicitação -->
 <ng-template #modalSolicitacaoAbertura>
   <div class="modal-header">
     <h5 class="modal-title">
@@ -219,6 +183,7 @@
           class="form-control"
           [(ngModel)]="carroPlaca"
           [ngModelOptions]="{ standalone: true }"
+          placeholder="Digite a placa do veículo"
           (input)="buscarCarros(carroPlaca)"
         />
         <div *ngIf="carros.length > 0" class="panel">
@@ -236,6 +201,7 @@
           class="form-control"
           [(ngModel)]="setorNome"
           [ngModelOptions]="{ standalone: true }"
+          placeholder="Digite o setor solicitante"
           (input)="buscarSetores(setorNome)"
         />
         <div *ngIf="setores.length > 0" class="panel">
@@ -253,6 +219,7 @@
           class="form-control"
           [(ngModel)]="destinoNome"
           [ngModelOptions]="{ standalone: true }"
+          placeholder="Digite o destino da viagem"
           (input)="buscarDestinos(destinoNome)"
         />
         <div *ngIf="destinos.length > 0" class="panel">
@@ -273,30 +240,55 @@
         />
       </div>
 
-      <!-- Status -->
-      <div class="mb-3">
-        <label>Status</label>
-        <select
-          *ngIf="isAdmin"
-          class="form-select"
-          [(ngModel)]="registroSelecionado.status"
-          [ngModelOptions]="{ standalone: true }"
-        >
-          <option *ngFor="let s of statusOptions" [ngValue]="s">{{ s }}</option>
-        </select>
-        <input
-          *ngIf="!isAdmin"
-          type="text"
-          class="form-control"
-          [(ngModel)]="registroSelecionado.status"
-          [ngModelOptions]="{ standalone: true }"
-          readonly
-        />
+      <!-- Linha 1: Km Inicial + Hora Saída -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Km Inicial</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="registroSelecionado.kmInicial"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Hora de Saída</label>
+          <input
+            type="time"
+            class="form-control"
+            [(ngModel)]="registroSelecionado.horaSaida"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        </div>
       </div>
+
+      <!-- Linha 2: Km Final + Hora Chegada -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Km Final</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="registroSelecionado.kmFinal"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Hora de Chegada</label>
+          <input
+            type="time"
+            class="form-control"
+            [(ngModel)]="registroSelecionado.horaChegada"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        </div>
+      </div>    
     </form>
   </div>
-  <div class="modal-footer">
-    <button class="btn btn-secondary" (click)="cancelarModal()">Cancelar</button>
+  <div class="modal-footer d-flex justify-content-center">
+    <button class="btn btn-secondary me-2" (click)="cancelarModal()">Cancelar</button>
     <button class="btn btn-primary" (click)="salvarSolicitacao(registroSelecionado)">Salvar</button>
   </div>
 </ng-template>
