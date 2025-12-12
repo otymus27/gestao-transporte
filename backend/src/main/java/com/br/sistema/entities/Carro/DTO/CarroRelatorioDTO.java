@@ -1,10 +1,12 @@
 package com.br.sistema.entities.Carro.DTO;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-public record CarroRelatorioDTO(
-        Long id,
-        String marca,
-        String modelo,
-        String tipo,
-        String placa
-) {
+@Getter
+@AllArgsConstructor
+public class CarroRelatorioDTO {
+    private String placa;
+    private String marca;
+    private String modelo;
+    private String tipo;
 }

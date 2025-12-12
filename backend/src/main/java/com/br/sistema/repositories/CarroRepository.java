@@ -48,14 +48,13 @@ public interface CarroRepository extends JpaRepository<Carro, Long> {
 
     @Query("""
         SELECT new com.br.sistema.entities.Carro.DTO.CarroRelatorioDTO(
-            c.id,
             c.placa,
             c.marca,
             c.modelo,
             c.tipo
         )
         FROM Carro c
-        ORDER BY c.id,c.marca, c.modelo, c.placa
+        ORDER BY c.marca, c.modelo, c.placa
     """)
     List<CarroRelatorioDTO> listarParaRelatorio();
 

@@ -245,42 +245,8 @@ public class CarroController {
         }
     }
 
-    // ✅ Gerar relatório (sem paginação, mas aceita filtro)
-    @GetMapping("/relatorio")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Resource> exportarRelatorio(
-            @RequestParam(required = false) String filtro,
-            @RequestParam(defaultValue = "pdf") String tipo // pdf | csv | excel
-    ) throws IOException {
 
-        InputStreamResource resource;
-        String filename;
-        MediaType mediaType;
 
-        switch (tipo.toLowerCase()) {
-            case "excel" -> {
-                resource = new InputStreamResource(carroService.exportarExcel(filtro));
-                filename = "carros.xlsx";
-                mediaType = MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            }
-            case "csv" -> {
-                resource = new InputStreamResource(carroService.exportarCsv(filtro));
-                filename = "carros.csv";
-                mediaType = MediaType.parseMediaType("text/csv");
-            }
-            case "pdf" -> {
-                resource = new InputStreamResource(carroService.exportarPdf(filtro));
-                filename = "carros.pdf";
-                mediaType = MediaType.APPLICATION_PDF;
-            }
-            default -> throw new IllegalArgumentException("Tipo de relatório inválido: " + tipo);
-        }
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
-                .contentType(mediaType)
-                .body(resource);
-    }
 
 
 
