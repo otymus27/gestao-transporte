@@ -1,16 +1,8 @@
 package com.br.sistema.controllers;
 
-import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoRequestDTO;
-import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoResponseDTO;
-import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoDetalhadaDTO;
-import com.br.sistema.entities.Usuario.Usuario;
-import com.br.sistema.exceptions.ErrorMessage;
-import com.br.sistema.services.SolicitacaoService;
-import com.br.sistema.utils.AuthService;
-
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
+import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +18,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoDetalhadaDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoRequestDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoResponseDTO;
+import com.br.sistema.entities.Usuario.Usuario;
+import com.br.sistema.exceptions.ErrorMessage;
+import com.br.sistema.services.SolicitacaoService;
+import com.br.sistema.utils.AuthService;
+
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-
-import java.io.IOException;
-import java.nio.file.AccessDeniedException;
-import java.time.LocalDate;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/solicitacao")
@@ -393,8 +400,8 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacaoService.buscarPorStatus());
     }
 
-    @GetMapping("/relatorio")
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/relatorio")    
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public ResponseEntity<Resource> exportarRelatorio(
             @RequestParam(required = false) String filtro,
             @RequestParam(defaultValue = "pdf") String tipo

@@ -14,16 +14,24 @@ public class RelatorioCarroController {
 
     private final RelatorioCarroService relatorioCarroService;
 
-    @GetMapping(value = "/carros", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> gerarRelatorioCarros() {
-        byte[] pdf = relatorioCarroService.gerarRelatorioCarrosSimples();
-
-        String fileName = "relatorio_carros_simples.pdf";
+    @GetMapping("/carros/pdf")
+    public ResponseEntity<byte[]> gerarRelatorioCarrosPdf() {
+        byte[] relatorio = relatorioCarroService.gerarRelatorioCarrosPdf(null);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=" + fileName)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=rel_carros.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
-                .body(pdf);
+                .body(relatorio);
     }
+
+    @GetMapping("/carros/excel")
+    public ResponseEntity<byte[]> gerarRelatorioCarrosExcel() {
+        byte[] relatorio = relatorioCarroService.gerarRelatorioCarrosPdf(null);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=rel_carros.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(relatorio);
+    }
+
 }

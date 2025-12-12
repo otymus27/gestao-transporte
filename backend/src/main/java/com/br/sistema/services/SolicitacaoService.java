@@ -414,6 +414,7 @@ public List<SolicitacaoRelatorioDTO> gerarRelatorio(String filtro) {
             header.createCell(9).setCellValue("Km Final");
             header.createCell(10).setCellValue("Hora Saída");
             header.createCell(11).setCellValue("Hora Chegada");
+            header.createCell(12).setCellValue("Km Total");
 
             // Dados
             int rowIdx = 1;
@@ -431,6 +432,7 @@ public List<SolicitacaoRelatorioDTO> gerarRelatorio(String filtro) {
                 row.createCell(9).setCellValue(s.kmFinal() != null ? s.kmFinal() : 0);
                 row.createCell(10).setCellValue(s.horaSaida() != null ? s.horaSaida().toString() : "");
                 row.createCell(11).setCellValue(s.horaChegada() != null ? s.horaChegada().toString() : "");
+                row.createCell(12).setCellValue(s.getKmTotal() !=null ? s.getKmTotal().toString() : "");
             }
 
             workbook.write(out);

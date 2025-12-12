@@ -47,7 +47,7 @@ public class MotoristaController {
     // ✅ Cadastrar motorista
     @PostMapping
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public ResponseEntity<?> cadastrar(@Valid @RequestBody MotoristaRequestDTO dto,
                                        Authentication authentication,
                                        HttpServletRequest request)  {
@@ -100,7 +100,7 @@ public class MotoristaController {
     // ✅ Atualizar motorista
     @PutMapping("/{id}")
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public ResponseEntity<?> atualizar(@PathVariable Long id,
                                        @Valid @RequestBody MotoristaRequestDTO dto,
                                        Authentication authentication,
@@ -310,7 +310,7 @@ public class MotoristaController {
     }
 
     @GetMapping("/relatorio")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public ResponseEntity<Resource> exportarRelatorio(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String matricula,

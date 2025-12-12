@@ -127,7 +127,7 @@
             >Gerenciar</a
           >
         </li>
-        <li *ngIf="isAdmin()" class="nav-item">
+        <li *ngIf="isAdmin() || isGerente()" class="nav-item">
           <a
             routerLink="/admin/motoristas/relatorio"
             class="nav-link"

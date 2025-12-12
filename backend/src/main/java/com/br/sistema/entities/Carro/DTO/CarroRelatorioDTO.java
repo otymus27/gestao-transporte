@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CarroRelatorioDTO {
+    private Long id;
     private String placa;
     private String marca;
     private String modelo;
