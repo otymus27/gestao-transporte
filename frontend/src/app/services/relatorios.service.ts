@@ -3,6 +3,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.prod';
 
+export interface FiltroCarroRelatorio {
+  marca?: string | null;
+  tipo?: string | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -34,6 +39,7 @@ export class RelatorioService {
       responseType: 'blob',
     });
   }
+  
 
   // 🔹 Destinos
   listarDestinos(filtros: any): Observable<any> {
@@ -102,7 +108,7 @@ export class RelatorioService {
         params = params.set(key, valor);
       }
     });
-  
+
     return this.http.get(`${this.API_URL}/solicitacao/buscar`, { params });
   }
 

@@ -10,6 +10,21 @@ import { Paginacao } from '../models/paginacao';
 import { environment } from '../../environments/environment';
 import { Carro } from '../models/carro';
 
+export interface CarroRelatorioItem {
+  id: number;
+  placa: string;
+  marca: string;
+  modelo: string;
+  tipo: string;
+}
+
+export interface FiltrosCarroRelatorio {
+  placa?: string;
+  marca?: string;
+  modelo?: string;
+  tipo?: string;
+}
+
 export interface ErrorMessage {
   status: number;
   error: string;
@@ -76,6 +91,33 @@ export class CarroService {
     return this.http
       .get<Paginacao<Carro>>(`${this.API_URL}/buscar`, { params })
       .pipe(catchError(this.tratarErro));
+  }
+
+  /**
+   * Filtrar por placa, marca, modelo e tipo para gerar relatorios
+   */
+  consultarParaRelatorio(
+    filtros: FiltrosCarroRelatorio,
+    page: number,
+    size: number
+  ): Observable<Paginacao<CarroRelatorioItem[]>> {
+    let params = new HttpParams()
+    .set('page', page)
+    .set('size', size);
+
+    if (filtros.placa?.trim())
+      params = params.set('placa', filtros.placa.trim());
+    if (filtros.marca?.trim())
+      params = params.set('marca', filtros.marca.trim());
+    if (filtros.modelo?.trim())
+      params = params.set('modelo', filtros.modelo.trim());
+    if (filtros.tipo?.trim()) params = params.set('tipo', filtros.tipo.trim());
+
+    // Exemplo de endpoint: GET /carros/relatorio/consultar?placa=...&marca=...
+    return this.http.get<Paginacao<CarroRelatorioItem[]>>(
+      `${this.API_URL}/relatorio/consultar`,
+      { params }
+    );
   }
 
   /**

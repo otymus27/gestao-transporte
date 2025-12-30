@@ -59,5 +59,50 @@ public interface CarroRepository extends JpaRepository<Carro, Long> {
     """)
     List<CarroRelatorioDTO> listarParaRelatorio();
 
+    @Query("""
+    SELECT new com.br.sistema.entities.Carro.DTO.CarroRelatorioDTO(
+        c.id,
+        c.placa,
+        c.marca,
+        c.modelo,
+        c.tipo
+    )
+    FROM Carro c
+    WHERE (:placa IS NULL OR :placa = '' OR LOWER(c.placa) LIKE LOWER(CONCAT('%', :placa, '%')))
+      AND (:marca IS NULL OR :marca = '' OR LOWER(c.marca) LIKE LOWER(CONCAT('%', :marca, '%')))
+      AND (:modelo IS NULL OR :modelo = '' OR LOWER(c.modelo) LIKE LOWER(CONCAT('%', :modelo, '%')))
+      AND (:tipo IS NULL OR :tipo = '' OR LOWER(c.tipo) LIKE LOWER(CONCAT('%', :tipo, '%')))
+    ORDER BY c.id, c.marca, c.modelo, c.placa
+""")
+    List<CarroRelatorioDTO> listarParaRelatorioFiltrado(
+            @Param("placa") String placa,
+            @Param("marca") String marca,
+            @Param("modelo") String modelo,
+            @Param("tipo") String tipo
+    );
+
+    @Query("""
+    SELECT new com.br.sistema.entities.Carro.DTO.CarroRelatorioDTO(
+        c.id,
+        c.placa,
+        c.marca,
+        c.modelo,
+        c.tipo
+    )
+    FROM Carro c
+    WHERE (:placa IS NULL OR :placa = '' OR LOWER(c.placa) LIKE LOWER(CONCAT('%', :placa, '%')))
+      AND (:marca IS NULL OR :marca = '' OR LOWER(c.marca) LIKE LOWER(CONCAT('%', :marca, '%')))
+      AND (:modelo IS NULL OR :modelo = '' OR LOWER(c.modelo) LIKE LOWER(CONCAT('%', :modelo, '%')))
+      AND (:tipo IS NULL OR :tipo = '' OR LOWER(c.tipo) LIKE LOWER(CONCAT('%', :tipo, '%')))
+""")
+    Page<CarroRelatorioDTO> listarParaConsultaRelatorioPaginado(
+            @Param("placa") String placa,
+            @Param("marca") String marca,
+            @Param("modelo") String modelo,
+            @Param("tipo") String tipo,
+            Pageable pageable
+    );
+
+
 
 }

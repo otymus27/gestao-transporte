@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<div class="container mt-2 mw-100">
   <div class="card shadow-sm">
     <div class="card-body">
       <div
@@ -9,7 +9,7 @@
 
       <!-- Filtros -->
       <div class="row g-2 mb-3">
-        <div class="col-md-3">
+        <div class="col-md-2">
           <input
             type="text"
             class="form-control"
@@ -17,7 +17,8 @@
             [(ngModel)]="filtros.placa"
           />
         </div>
-        <div class="col-md-3">
+
+        <div class="col-sm-2">
           <input
             type="text"
             class="form-control"
@@ -25,7 +26,8 @@
             [(ngModel)]="filtros.marca"
           />
         </div>
-        <div class="col-md-3">
+
+        <div class="col-sm-2">
           <input
             type="text"
             class="form-control"
@@ -34,7 +36,16 @@
           />
         </div>
 
-        <div class="col-md-3 d-flex gap-2">
+        <div class="col-sm-2">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Filtrar por Tipo"
+            [(ngModel)]="filtros.tipo"
+          />
+        </div>
+
+        <div class="col-sm-2 d-flex gap-2">
           <button class="btn btn-primary flex-grow-1" (click)="consultar()">
             <i class="bi bi-search"></i> Consultar
           </button>
@@ -45,7 +56,10 @@
       </div>
 
       <!-- Exportação -->
-      <div *ngIf="resultados.length > 0" class="d-flex justify-content-end gap-2 mb-2">
+      <div
+        *ngIf="resultados.length > 0"
+        class="d-flex justify-content-st gap-2 mb-2"
+      >
         <button class="btn btn-danger btn-sm" (click)="exportar('pdf')">
           <i class="bi bi-file-earmark-pdf"></i> PDF
         </button>
@@ -57,27 +71,89 @@
         </button>
       </div>
 
-      <!-- Tabela -->
+      <!-- Tabela de resultados -->
       <div *ngIf="resultados.length > 0; else semResultados">
         <table class="table table-hover table-bordered align-middle">
           <thead class="table-dark">
             <tr>
+              <th>ID</th>
               <th>Placa</th>
               <th>Marca</th>
               <th>Modelo</th>
+              <th>Tipo</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let carro of resultados">
+              <td>{{ carro.id }}</td>
               <td>{{ carro.placa }}</td>
               <td>{{ carro.marca }}</td>
               <td>{{ carro.modelo }}</td>
+              <td>{{ carro.tipo }}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Mensagem de estado -->
+      <!-- Paginação -->
+      <div
+        *ngIf="resultados.length > 0"
+        class="d-flex justify-content-between align-items-center mt-2"
+      >
+        <div class="text-muted">
+          Total: <b>{{ totalElements }}</b> registros
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <label class="text-muted mb-0">Por página:</label>
+          <select
+            class="form-select form-select-sm"
+            style="width: 90px"
+            (change)="mudarTamanho($event)"
+          >
+            <option [selected]="size === 5" value="5">5</option>
+            <option [selected]="size === 10" value="10">10</option>
+            <option [selected]="size === 20" value="20">20</option>
+            <option [selected]="size === 50" value="50">50</option>
+          </select>
+
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            (click)="irPara(0)"
+            [disabled]="page === 0"
+          >
+            «
+          </button>
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            (click)="irPara(page - 1)"
+            [disabled]="page === 0"
+          >
+            ‹
+          </button>
+
+          <span class="text-muted">
+            Página <b>{{ page + 1 }}</b> de <b>{{ totalPages }}</b>
+          </span>
+
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            (click)="irPara(page + 1)"
+            [disabled]="page >= totalPages - 1"
+          >
+            ›
+          </button>
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            (click)="irPara(totalPages - 1)"
+            [disabled]="page >= totalPages - 1"
+          >
+            »
+          </button>
+        </div>
+      </div>
+
+      <!-- Mensagens -->
       <ng-template #semResultados>
         <div class="text-center text-muted mt-4" *ngIf="!carregando">
           Nenhum resultado encontrado.

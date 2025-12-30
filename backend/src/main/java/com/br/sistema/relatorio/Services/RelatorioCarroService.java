@@ -12,6 +12,9 @@ import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -181,4 +184,117 @@ public class RelatorioCarroService {
             return "Usuário não identificado";
         }
     }
+
+
+
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public byte[] gerarRelatorioCarrosPdfFiltrado(String placa, String marca, String modelo, String tipo) {
+        List<CarroRelatorioDTO> dados = carroRepository.listarParaRelatorioFiltrado(placa, marca, modelo, tipo);
+        String filtroDescricao = montarDescricaoFiltro(placa, marca, modelo, tipo);
+        return gerarPdf(dados, filtroDescricao);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public byte[] gerarRelatorioCarrosExcelFiltrado(String placa, String marca, String modelo, String tipo) {
+        List<CarroRelatorioDTO> dados = carroRepository.listarParaRelatorioFiltrado(placa, marca, modelo, tipo);
+        String filtroDescricao = montarDescricaoFiltro(placa, marca, modelo, tipo);
+        return gerarExcel(dados, filtroDescricao);
+    }
+
+    private byte[] gerarPdf(List<CarroRelatorioDTO> dados, String filtroDescricao) {
+        try {
+            if (dados == null || dados.isEmpty()) {
+                log.warn("Nenhum dado encontrado para o relatório de carros (PDF).");
+            }
+
+            ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
+
+            try (InputStream jrxmlStream = resource.getInputStream()) {
+                JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+
+                Map<String, Object> params = new HashMap<>();
+                params.put("NOME_USUARIO", obterNomeUsuarioLogado());
+                params.put("FILTRO_DESCRICAO", filtroDescricao);
+
+                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
+                JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
+
+                return JasperExportManager.exportReportToPdf(jasperPrint);
+            }
+        } catch (Exception e) {
+            log.error("Erro ao gerar relatório de carros em PDF", e);
+            throw new RuntimeException("Erro ao gerar relatório de carros em PDF: " + e.getMessage(), e);
+        }
+    }
+
+    private byte[] gerarExcel(List<CarroRelatorioDTO> dados, String filtroDescricao) {
+        try {
+            if (dados == null || dados.isEmpty()) {
+                log.warn("Nenhum dado encontrado para o relatório de carros (Excel).");
+            }
+
+            ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
+
+            try (InputStream jrxmlStream = resource.getInputStream();
+                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+                JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+
+                Map<String, Object> params = new HashMap<>();
+                params.put("NOME_USUARIO", obterNomeUsuarioLogado());
+                params.put("FILTRO_DESCRICAO", filtroDescricao);
+
+                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
+                JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
+
+                JRXlsxExporter exporter = new JRXlsxExporter();
+                exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+                exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+
+                SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
+                configuration.setDetectCellType(true);
+                configuration.setCollapseRowSpan(false);
+                configuration.setWhitePageBackground(false);
+                configuration.setRemoveEmptySpaceBetweenRows(true);
+                exporter.setConfiguration(configuration);
+
+                exporter.exportReport();
+
+                return out.toByteArray();
+            }
+        } catch (Exception e) {
+            log.error("Erro ao gerar relatório de carros em Excel", e);
+            throw new RuntimeException("Erro ao gerar relatório de carros em Excel: " + e.getMessage(), e);
+        }
+    }
+
+    private String montarDescricaoFiltro(String placa, String marca, String modelo, String tipo) {
+        StringBuilder sb = new StringBuilder("Filtros: ");
+        boolean algum = false;
+
+        if (placa != null && !placa.isBlank()) { sb.append("Placa=").append(placa).append(" | "); algum = true; }
+        if (marca != null && !marca.isBlank()) { sb.append("Marca=").append(marca).append(" | "); algum = true; }
+        if (modelo != null && !modelo.isBlank()) { sb.append("Modelo=").append(modelo).append(" | "); algum = true; }
+        if (tipo != null && !tipo.isBlank()) { sb.append("Tipo=").append(tipo).append(" | "); algum = true; }
+
+        if (!algum) return "Sem filtros aplicados";
+        return sb.substring(0, sb.length() - 3);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public List<CarroRelatorioDTO> consultarCarrosParaRelatorio(String placa, String marca, String modelo, String tipo) {
+        return carroRepository.listarParaRelatorioFiltrado(placa, marca, modelo, tipo);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public Page<CarroRelatorioDTO> consultarCarrosParaRelatorioPaginado(
+            String placa, String marca, String modelo, String tipo,
+            int page, int size
+    ) {
+        var pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return carroRepository.listarParaConsultaRelatorioPaginado(placa, marca, modelo, tipo, pageable);
+    }
+
+
 }
