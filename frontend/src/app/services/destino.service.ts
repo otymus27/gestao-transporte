@@ -69,6 +69,28 @@ export class DestinoService {
   }
 
   /**
+   * Filtrar por nome para gerar relatórios de setores
+   */
+  consultarParaRelatorio(
+    filtros: { nome?: string | null },
+    page: number,
+    size: number
+  ): Observable<Paginacao<any[]>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+
+    if (filtros.nome?.trim()) {
+      params = params.set('nome', filtros.nome.trim());
+    }
+
+    // Exemplo de endpoint:
+    // GET /setor/relatorio/consultar?nome=...
+    return this.http.get<Paginacao<any[]>>(
+      `${this.API_URL}/relatorio/consultar`,
+      { params }
+    );
+  }
+
+  /**
    * Busca destino por ID (resumido).
    */
   buscarPorId(id: number): Observable<Destino> {
@@ -143,10 +165,11 @@ export class DestinoService {
   /**
    * Exportar relatório unificado
    */
-  exportarRelatorio(tipo: 'pdf' | 'csv' | 'excel' = 'pdf', filtro?: string): Observable<Blob> {
-    let params = new HttpParams()
-      .set('tipo', tipo)
-      .set('filtro', filtro || '');
+  exportarRelatorio(
+    tipo: 'pdf' | 'csv' | 'excel' = 'pdf',
+    filtro?: string
+  ): Observable<Blob> {
+    let params = new HttpParams().set('tipo', tipo).set('filtro', filtro || '');
 
     return this.http.get(`${this.API_URL}/relatorio`, {
       params,

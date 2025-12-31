@@ -227,41 +227,4 @@ public class DestinoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-
-    // ✅ Gerar relatório (sem paginação, mas aceita filtro)
-    @GetMapping("/relatorio")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Resource> exportarRelatorio(
-            @RequestParam(required = false) String filtro,
-            @RequestParam(defaultValue = "pdf") String tipo // pdf | csv | excel
-    ) throws IOException {
-
-        InputStreamResource resource;
-        String filename;
-        MediaType mediaType;
-
-        switch (tipo.toLowerCase()) {
-            case "excel" -> {
-                resource = new InputStreamResource(destinoService.exportarExcel(filtro));
-                filename = "destinos.xlsx";
-                mediaType = MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            }
-            case "csv" -> {
-                resource = new InputStreamResource(destinoService.exportarCsv(filtro));
-                filename = "destinos.csv";
-                mediaType = MediaType.parseMediaType("text/csv");
-            }
-            case "pdf" -> {
-                resource = new InputStreamResource(destinoService.exportarPdf(filtro));
-                filename = "destinos.pdf";
-                mediaType = MediaType.APPLICATION_PDF;
-            }
-            default -> throw new IllegalArgumentException("Tipo de relatório inválido: " + tipo);
-        }
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
-                .contentType(mediaType)
-                .body(resource);
-    }
 }

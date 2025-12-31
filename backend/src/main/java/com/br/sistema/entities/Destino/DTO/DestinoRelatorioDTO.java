@@ -1,7 +1,11 @@
 package com.br.sistema.entities.Destino.DTO;
 
-public record DestinoRelatorioDTO(
-        Long id,
-        String nome
-) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class DestinoRelatorioDTO {
+    private Long id;
+    private String nome;
 }
