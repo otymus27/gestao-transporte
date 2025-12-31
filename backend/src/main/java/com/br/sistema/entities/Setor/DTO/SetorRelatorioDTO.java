@@ -1,7 +1,11 @@
 package com.br.sistema.entities.Setor.DTO;
 
-public record SetorRelatorioDTO(
-        Long id,
-        String nome
-) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class SetorRelatorioDTO {
+    private Long id;
+    private String nome;
 }

@@ -1,0 +1,74 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="rel_setor" language="java" columnCount="1" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c8d21e19-3c2a-4f47-9b0f-0a2b3a3c1d55">
+	<parameter name="NOME_USUARIO" class="java.lang.String"/>
+	<parameter name="FILTRO_DESCRICAO" class="java.lang.String"/>
+	<field name="id" class="java.lang.Long"/>
+	<field name="nome" class="java.lang.String"/>
+	<variable name="TOTAL_SETORES" calculation="Count" class="java.lang.Integer">
+		<expression><![CDATA[$F{id}]]></expression>
+	</variable>
+	<title height="38">
+		<element kind="staticText" uuid="19547f29-98b5-4bcf-a638-caf215ac3bfd" x="0" y="0" width="555" height="30" fontSize="18.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Sistema de Controle de Requisição]]></text>
+		</element>
+		<element kind="image" uuid="23468aa7-de75-4382-a5e6-1516c5757e26" x="0" y="5" width="60" height="25">
+			<expression><![CDATA["D:/PRODUÇÃO/gestao-transporte/backend/src/main/resources/static/images/logo_hrg.png"]]></expression>
+		</element>
+	</title>
+	<pageHeader height="48">
+		<element kind="textField" uuid="3ee36bc1-4e79-4bbe-a555-8abb157f54e8" x="400" y="4" width="155" height="18" hTextAlign="Right">
+			<expression><![CDATA[
+                "Impresso em: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date())
+            ]]></expression>
+		</element>
+		<element kind="staticText" uuid="f1a0a2eb-b423-424f-a82d-d73fb337c4d6" x="0" y="5" width="280" height="15" fontSize="10.0">
+			<text><![CDATA[Relatório de Setores - HRG]]></text>
+		</element>
+		<element kind="textField" uuid="8cadda58-27cc-4ac0-b12f-daf3353e4a09" x="0" y="20" width="280" height="14" fontSize="8.0">
+			<expression><![CDATA[
+                "Usuário: " + ($P{NOME_USUARIO} == null ? "" : $P{NOME_USUARIO})
+            ]]></expression>
+		</element>
+		<element kind="textField" uuid="7523906a-f483-4297-931f-5090c3da52e9" x="0" y="34" width="555" height="14" fontSize="8.0" italic="true">
+			<expression><![CDATA[
+                $P{FILTRO_DESCRICAO} == null ? "" : $P{FILTRO_DESCRICAO}
+            ]]></expression>
+		</element>
+	</pageHeader>
+	<columnHeader height="25">
+		<element kind="staticText" uuid="d97e7cd2-8f38-4386-87be-396ab5ec3280" x="0" y="0" width="80" height="15" bold="true">
+			<text><![CDATA[ID]]></text>
+		</element>
+		<element kind="staticText" uuid="33759541-b89e-4779-b178-931736eada02" x="100" y="0" width="300" height="15" bold="true">
+			<text><![CDATA[Nome do Setor]]></text>
+		</element>
+		<element kind="line" uuid="886a1d3c-dd92-44d6-907b-028a402014f8" x="0" y="18" width="555" height="1"/>
+	</columnHeader>
+	<detail>
+		<band height="20">
+			<element kind="textField" uuid="63ea9ced-0b1d-4abd-a8ab-1b33f339aa8f" x="0" y="0" width="80" height="18">
+				<expression><![CDATA[$F{id}]]></expression>
+			</element>
+			<element kind="textField" uuid="f031af3b-384c-4c2b-a095-e4e4f35edbd8" x="100" y="0" width="400" height="18">
+				<expression><![CDATA[$F{nome}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<pageFooter height="32">
+		<element kind="line" uuid="d9eddb57-727d-4cba-b943-772710e640bb" x="0" y="4" width="560" height="1"/>
+		<element kind="textField" uuid="4e96139b-2c38-4c0a-a51d-bd924acbb48c" x="200" y="8" width="155" height="20" fontSize="8.0" hTextAlign="Center">
+			<expression><![CDATA[
+                "Página " + $V{PAGE_NUMBER} + " de " + $V{PAGE_COUNT}
+            ]]></expression>
+		</element>
+	</pageFooter>
+	<summary height="50">
+		<element kind="line" uuid="e1252f6a-c8a8-40c5-981a-f341eb1b6cdd" x="0" y="5" width="560" height="1"/>
+		<element kind="staticText" uuid="139de3cb-e07b-480f-bf73-66e165a2eead" x="0" y="15" width="120" height="20">
+			<text><![CDATA[Total de setores:]]></text>
+		</element>
+		<element kind="textField" uuid="ea82320c-898f-49fe-88db-847c739a0349" x="130" y="15" width="60" height="20" fontSize="10.0" bold="true">
+			<expression><![CDATA[$V{TOTAL_SETORES}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

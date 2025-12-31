@@ -63,12 +63,33 @@ export class SetorService {
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sort', `${sortField},${sortDirection}`); // ✅ aqui também
-  
+
     return this.http
       .get<Paginacao<Setor>>(`${this.API_URL}/buscar`, { params })
       .pipe(catchError(this.tratarErro));
   }
-  
+
+  /**
+   * Filtrar por nome para gerar relatórios de setores
+   */
+  consultarParaRelatorio(
+    filtros: { nome?: string | null },
+    page: number,
+    size: number
+  ): Observable<Paginacao<any[]>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+
+    if (filtros.nome?.trim()) {
+      params = params.set('nome', filtros.nome.trim());
+    }
+
+    // Exemplo de endpoint:
+    // GET /setor/relatorio/consultar?nome=...
+    return this.http.get<Paginacao<any[]>>(
+      `${this.API_URL}/relatorio/consultar`,
+      { params }
+    );
+  }
 
   /**
    * Busca setor por ID (resumido).
