@@ -1,7 +1,7 @@
 package com.br.sistema.relatorio.Services;
 
-import com.br.sistema.entities.Carro.DTO.CarroRelatorioDTO;
-import com.br.sistema.repositories.CarroRepository;
+import com.br.sistema.entities.Motorista.DTO.MotoristaRelatorioDTO;
+import com.br.sistema.repositories.MotoristaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,34 +29,34 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RelatorioCarroService {
+public class RelatorioMotoristaService {
 
-    private static final String CAMINHO_RELATORIO = "reports/carros/rel_carros.jrxml";
+    private static final String CAMINHO_RELATORIO = "reports/motoristas/rel_motorista.jrxml";
 
-    private final CarroRepository carroRepository;
+    private final MotoristaRepository motoristaRepository;
 
     /**
      * Mantido para compatibilidade.
      * Gera o PDF usando usuário logado e sem filtro específico.
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] gerarRelatorioCarrosSimples() {
-        return gerarRelatorioCarrosPdf(null);
+    public byte[] gerarRelatorioMotoristasSimples() {
+        return gerarRelatorioMotoristasPdf(null);
     }
 
     /**
-     * Gera PDF de carros usando:
+     * Gera PDF de motoristas usando:
      * - usuário logado (buscado do SecurityContext)
      * - descrição opcional de filtro para exibir no cabeçalho
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] gerarRelatorioCarrosPdf(String filtroDescricao) {
+    public byte[] gerarRelatorioMotoristasPdf(String filtroDescricao) {
         try {
             // 1. Busca dados
-            List<CarroRelatorioDTO> dados = carroRepository.listarParaRelatorio();
+            List<MotoristaRelatorioDTO> dados = motoristaRepository.listarParaRelatorio();
 
             if (dados == null || dados.isEmpty()) {
-                log.warn("Nenhum dado encontrado para o relatório de carros.");
+                log.warn("Nenhum dado encontrado para o relatório de motoristas.");
             }
 
             // 2. Carrega o JRXML do classpath
@@ -86,23 +86,23 @@ public class RelatorioCarroService {
             }
 
         } catch (Exception e) {
-            log.error("Erro ao gerar relatório de carros em PDF", e);
-            throw new RuntimeException("Erro ao gerar relatório de carros em PDF: " + e.getMessage(), e);
+            log.error("Erro ao gerar relatório de motoristas em PDF", e);
+            throw new RuntimeException("Erro ao gerar relatório de motoristas em PDF: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Gera o relatório de carros em Excel (XLSX),
+     * Gera o relatório de motoristas em Excel (XLSX),
      * usando usuário logado e descrição opcional de filtros.
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] gerarRelatorioCarrosExcel(String filtroDescricao) {
+    public byte[] gerarRelatorioMotoristasExcel(String filtroDescricao) {
         try {
             // 1. Busca dados
-            List<CarroRelatorioDTO> dados = carroRepository.listarParaRelatorio();
+            List<MotoristaRelatorioDTO> dados = motoristaRepository.listarParaRelatorio();
 
             if (dados == null || dados.isEmpty()) {
-                log.warn("Nenhum dado encontrado para o relatório de carros (Excel).");
+                log.warn("Nenhum dado encontrado para o relatório de motoristas (Excel).");
             }
 
             // 2. Carrega o JRXML
@@ -146,8 +146,8 @@ public class RelatorioCarroService {
             }
 
         } catch (Exception e) {
-            log.error("Erro ao gerar relatório de carros em Excel", e);
-            throw new RuntimeException("Erro ao gerar relatório de carros em Excel: " + e.getMessage(), e);
+            log.error("Erro ao gerar relatório de motoristas em Excel", e);
+            throw new RuntimeException("Erro ao gerar relatório de motoristas em Excel: " + e.getMessage(), e);
         }
     }
 
@@ -167,7 +167,7 @@ public class RelatorioCarroService {
 
             // Caso clássico: UserDetails
             if (principal instanceof UserDetails userDetails) {
-                return userDetails.getUsername(); // ou outro dado
+                return userDetails.getUsername();
             }
 
             // Fallback: usa o próprio name do Authentication
@@ -180,24 +180,32 @@ public class RelatorioCarroService {
         }
     }
 
+    // ==========================
+    // RELATÓRIO FILTRADO (PDF/EXCEL)
+    // ==========================
+
     @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] gerarRelatorioCarrosPdfFiltrado(String placa, String marca, String modelo, String tipo) {
-        List<CarroRelatorioDTO> dados = carroRepository.listarParaRelatorioFiltrado(placa, marca, modelo, tipo);
-        String filtroDescricao = montarDescricaoFiltro(placa, marca, modelo, tipo);
+    public byte[] gerarRelatorioMotoristasPdfFiltrado(String matricula, String nome, String telefone, Boolean ativo) {
+        List<MotoristaRelatorioDTO> dados =
+                motoristaRepository.listarParaRelatorioFiltrado(matricula, nome, telefone, ativo);
+
+        String filtroDescricao = montarDescricaoFiltro(matricula, nome, telefone, ativo);
         return gerarPdf(dados, filtroDescricao);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] gerarRelatorioCarrosExcelFiltrado(String placa, String marca, String modelo, String tipo) {
-        List<CarroRelatorioDTO> dados = carroRepository.listarParaRelatorioFiltrado(placa, marca, modelo, tipo);
-        String filtroDescricao = montarDescricaoFiltro(placa, marca, modelo, tipo);
+    public byte[] gerarRelatorioMotoristasExcelFiltrado(String matricula, String nome, String telefone, Boolean ativo) {
+        List<MotoristaRelatorioDTO> dados =
+                motoristaRepository.listarParaRelatorioFiltrado(matricula, nome, telefone, ativo);
+
+        String filtroDescricao = montarDescricaoFiltro(matricula, nome, telefone, ativo);
         return gerarExcel(dados, filtroDescricao);
     }
 
-    private byte[] gerarPdf(List<CarroRelatorioDTO> dados, String filtroDescricao) {
+    private byte[] gerarPdf(List<MotoristaRelatorioDTO> dados, String filtroDescricao) {
         try {
             if (dados == null || dados.isEmpty()) {
-                log.warn("Nenhum dado encontrado para o relatório de carros (PDF).");
+                log.warn("Nenhum dado encontrado para o relatório de motoristas (PDF).");
             }
 
             ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
@@ -215,15 +223,15 @@ public class RelatorioCarroService {
                 return JasperExportManager.exportReportToPdf(jasperPrint);
             }
         } catch (Exception e) {
-            log.error("Erro ao gerar relatório de carros em PDF", e);
-            throw new RuntimeException("Erro ao gerar relatório de carros em PDF: " + e.getMessage(), e);
+            log.error("Erro ao gerar relatório de motoristas em PDF", e);
+            throw new RuntimeException("Erro ao gerar relatório de motoristas em PDF: " + e.getMessage(), e);
         }
     }
 
-    private byte[] gerarExcel(List<CarroRelatorioDTO> dados, String filtroDescricao) {
+    private byte[] gerarExcel(List<MotoristaRelatorioDTO> dados, String filtroDescricao) {
         try {
             if (dados == null || dados.isEmpty()) {
-                log.warn("Nenhum dado encontrado para o relatório de carros (Excel).");
+                log.warn("Nenhum dado encontrado para o relatório de motoristas (Excel).");
             }
 
             ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
@@ -256,37 +264,41 @@ public class RelatorioCarroService {
                 return out.toByteArray();
             }
         } catch (Exception e) {
-            log.error("Erro ao gerar relatório de carros em Excel", e);
-            throw new RuntimeException("Erro ao gerar relatório de carros em Excel: " + e.getMessage(), e);
+            log.error("Erro ao gerar relatório de motoristas em Excel", e);
+            throw new RuntimeException("Erro ao gerar relatório de motoristas em Excel: " + e.getMessage(), e);
         }
     }
 
-    private String montarDescricaoFiltro(String placa, String marca, String modelo, String tipo) {
+    private String montarDescricaoFiltro(String matricula, String nome, String telefone, Boolean ativo) {
         StringBuilder sb = new StringBuilder("Filtros: ");
         boolean algum = false;
 
-        if (placa != null && !placa.isBlank()) { sb.append("Placa=").append(placa).append(" | "); algum = true; }
-        if (marca != null && !marca.isBlank()) { sb.append("Marca=").append(marca).append(" | "); algum = true; }
-        if (modelo != null && !modelo.isBlank()) { sb.append("Modelo=").append(modelo).append(" | "); algum = true; }
-        if (tipo != null && !tipo.isBlank()) { sb.append("Tipo=").append(tipo).append(" | "); algum = true; }
+        if (matricula != null && !matricula.isBlank()) { sb.append("Matrícula=").append(matricula).append(" | "); algum = true; }
+        if (nome != null && !nome.isBlank()) { sb.append("Nome=").append(nome).append(" | "); algum = true; }
+        if (telefone != null && !telefone.isBlank()) { sb.append("Telefone=").append(telefone).append(" | "); algum = true; }
+        if (ativo != null) { sb.append("Ativo=").append(ativo ? "Sim" : "Não").append(" | "); algum = true; }
 
         if (!algum) return "Sem filtros aplicados";
         return sb.substring(0, sb.length() - 3);
     }
 
+    // ==========================
+    // CONSULTA (LISTA / PÁGINA) PARA TELA DE RELATÓRIO
+    // ==========================
+
     @Transactional(Transactional.TxType.REQUIRED)
-    public List<CarroRelatorioDTO> consultarCarrosParaRelatorio(String placa, String marca, String modelo, String tipo) {
-        return carroRepository.listarParaRelatorioFiltrado(placa, marca, modelo, tipo);
+    public List<MotoristaRelatorioDTO> consultarMotoristasParaRelatorio(
+            String matricula, String nome, String telefone, Boolean ativo
+    ) {
+        return motoristaRepository.listarParaRelatorioFiltrado(matricula, nome, telefone, ativo);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public Page<CarroRelatorioDTO> consultarCarrosParaRelatorioPaginado(
-            String placa, String marca, String modelo, String tipo,
+    public Page<MotoristaRelatorioDTO> consultarMotoristasParaRelatorioPaginado(
+            String matricula, String nome, String telefone, Boolean ativo,
             int page, int size
     ) {
         var pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return carroRepository.listarParaConsultaRelatorioPaginado(placa, marca, modelo, tipo, pageable);
+        return motoristaRepository.listarParaConsultaRelatorioPaginado(matricula, nome, telefone, ativo, pageable);
     }
-
-
 }

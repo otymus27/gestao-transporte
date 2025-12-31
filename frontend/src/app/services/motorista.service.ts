@@ -13,6 +13,20 @@ import { Motorista } from '../models/motorista';
 
 import { of, map } from 'rxjs';
 
+export interface MotoristaRelatorioItem {
+  id: number;
+  matricula: string;
+  nome: string;
+  telefone: string;
+  ativo: boolean;
+}
+
+export interface FiltrosMotoristaRelatorio {
+  matricula?: string;
+  nome?: string;
+  ativo?: boolean;
+}
+
 export interface ErrorMessage {
   status: number;
   error: string;
@@ -71,6 +85,28 @@ export class MotoristaService {
     return this.http
       .get<Paginacao<Motorista>>(`${this.API_URL}/buscar`, { params })
       .pipe(catchError(this.tratarErro));
+  }
+
+  /**
+   * Filtrar por matrícula e nome para gerar relatórios
+   */
+  consultarParaRelatorio(
+    filtros: FiltrosMotoristaRelatorio,
+    page: number,
+    size: number
+  ): Observable<Paginacao<MotoristaRelatorioItem[]>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+
+    if (filtros.matricula?.trim())
+      params = params.set('matricula', filtros.matricula.trim());
+
+    if (filtros.nome?.trim()) params = params.set('nome', filtros.nome.trim());
+
+    // Endpoint: GET /motoristas/relatorio/consultar?matricula=...&nome=...
+    return this.http.get<Paginacao<MotoristaRelatorioItem[]>>(
+      `${this.API_URL}/relatorio/consultar`,
+      { params }
+    );
   }
 
   /**

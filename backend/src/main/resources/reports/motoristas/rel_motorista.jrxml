@@ -1,0 +1,91 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="rel_carros" language="java" columnCount="1" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2ad15a25-912c-4128-92ae-7752d34ae560">
+	<parameter name="NOME_USUARIO" class="java.lang.String"/>
+	<parameter name="FILTRO_DESCRICAO" class="java.lang.String"/>
+	<field name="id" class="java.lang.Long"/>
+	<field name="matricula" class="java.lang.String"/>
+	<field name="nome" class="java.lang.String"/>
+	<field name="telefone" class="java.lang.String"/>
+	<field name="ativo" class="java.lang.Boolean"/>
+	<variable name="TOTAL_MOTORISTAS" calculation="Count" class="java.lang.Integer">
+		<expression><![CDATA[$F{id}]]></expression>
+	</variable>
+	<title height="38" splitType="Stretch">
+		<element kind="staticText" uuid="6b36f268-f26d-4ada-a389-0443eaa01d11" stretchType="NoStretch" x="0" y="0" width="555" height="30" fontSize="18.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Sistema de Controle de Requisição]]></text>
+		</element>
+		<element kind="image" uuid="9c873df0-cb72-4288-b79b-11917270e3ee" x="-1" y="5" width="61" height="25">
+			<expression><![CDATA["D:/PRODUÇÃO/gestao-transporte/backend/src/main/resources/static/images/logo_hrg.png"]]></expression>
+		</element>
+	</title>
+	<pageHeader height="48">
+		<element kind="textField" uuid="e1966e90-fd7f-426f-8543-cc875a3b761a" x="400" y="4" width="155" height="18" pattern="MMMMM dd, yyyy" hTextAlign="Right">
+			<expression><![CDATA["Impresso em: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new Date())]]></expression>
+		</element>
+		<element kind="staticText" uuid="5099ccd8-6bef-4ecc-a19e-b1aa0c33154c" stretchType="NoStretch" x="-1" y="5" width="280" height="15" fontSize="10.0" bold="false" italic="false" hTextAlign="Left" vTextAlign="Top">
+			<text><![CDATA[Relatório de Veículos - HRG]]></text>
+		</element>
+		<element kind="textField" uuid="40761217-b87d-45ba-9922-c9c4fecd2040" x="-1" y="20" width="280" height="14" fontSize="8.0" hTextAlign="Left">
+			<expression><![CDATA[
+                "Usuário: " + ($P{NOME_USUARIO} == null ? "" : $P{NOME_USUARIO})
+            ]]></expression>
+		</element>
+		<element kind="textField" uuid="b776edb1-24d6-4c67-9eb6-0224c0664a52" x="-1" y="34" width="555" height="14" fontSize="8.0" italic="true" hTextAlign="Left">
+			<expression><![CDATA[
+                $P{FILTRO_DESCRICAO} == null ? "" : $P{FILTRO_DESCRICAO}
+            ]]></expression>
+		</element>
+	</pageHeader>
+	<columnHeader height="29" splitType="Stretch">
+		<element kind="staticText" uuid="39a2df76-b542-41c0-a9dd-c88a370cde33" stretchType="NoStretch" x="0" y="0" width="60" height="15" bold="true">
+			<text><![CDATA[Id]]></text>
+		</element>
+		<element kind="staticText" uuid="9da725d0-a27f-4355-ba39-f400d7b23bde" stretchType="NoStretch" x="74" y="0" width="60" height="15" bold="true">
+			<text><![CDATA[Matricula]]></text>
+		</element>
+		<element kind="staticText" uuid="49179cd3-b23d-40bd-aebc-e045977348cc" stretchType="NoStretch" x="213" y="0" width="50" height="15" bold="true">
+			<text><![CDATA[Nome]]></text>
+		</element>
+		<element kind="staticText" uuid="4c1463cf-e958-4fcd-b6a3-4e948630202d" stretchType="NoStretch" x="351" y="0" width="50" height="15" bold="true">
+			<text><![CDATA[Telefone]]></text>
+		</element>
+		<element kind="staticText" uuid="f89b8809-1b28-4cfa-abbc-8bbe2b22ff45" x="474" y="1" width="40" height="14" bold="true">
+			<text><![CDATA[Ativo]]></text>
+		</element>
+		<element kind="line" uuid="35197650-a1f4-4a73-b8f3-054dae98b230" x="0" y="-12" width="556" height="1"/>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<element kind="textField" uuid="fd085ed4-2328-410a-8a3b-df9f45a7d50d" stretchType="NoStretch" x="0" y="0" width="80" height="18">
+				<expression><![CDATA[$F{id}]]></expression>
+			</element>
+			<element kind="textField" uuid="a6b6f480-b5c3-46a6-b44d-083e1a2a03a3" stretchType="NoStretch" x="75" y="0" width="80" height="18">
+				<expression><![CDATA[$F{matricula}]]></expression>
+			</element>
+			<element kind="textField" uuid="7d0ca9b1-89b0-412a-b06f-29217d68d07e" stretchType="NoStretch" x="213" y="0" width="120" height="18">
+				<expression><![CDATA[$F{nome}]]></expression>
+			</element>
+			<element kind="textField" uuid="d1734c79-628e-48e1-8503-0e0d7eef9005" stretchType="NoStretch" x="353" y="0" width="90" height="18">
+				<expression><![CDATA[$F{telefone}]]></expression>
+			</element>
+			<element kind="textField" uuid="01ce26f3-9e2e-4e02-b3c3-119bab8241d8" stretchType="NoStretch" x="473" y="0" width="74" height="18">
+				<expression><![CDATA[$F{ativo} ? "Sim" : "Não"]]></expression>
+			</element>
+		</band>
+	</detail>
+	<pageFooter height="32" splitType="Stretch">
+		<element kind="textField" uuid="0e754864-8a5f-4831-8092-e6e066a9802a" stretchType="NoStretch" x="200" y="6" width="155" height="20" fontSize="8.0" hTextAlign="Center">
+			<expression><![CDATA["Página " + $V{PAGE_NUMBER} + " de " + $V{PAGE_COUNT}]]></expression>
+		</element>
+		<element kind="line" uuid="c50d59f1-e665-4c74-93aa-3b79014c1738" x="0" y="4" width="560" height="1"/>
+	</pageFooter>
+	<summary height="53">
+		<element kind="staticText" uuid="23470d58-7734-49cf-9610-69a1a8fde3fe" x="0" y="23" width="100" height="30">
+			<text><![CDATA[Total de motoristas:]]></text>
+		</element>
+		<element kind="line" uuid="258e1f6e-7605-4047-a098-e9b0cd99f751" x="0" y="14" width="560" height="1"/>
+		<element kind="textField" uuid="34900e14-64d9-4b88-a6a4-48568248492b" x="110" y="23" width="60" height="30" fontSize="10.0" bold="true" hTextAlign="Left">
+			<expression><![CDATA[$V{TOTAL_MOTORISTAS}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

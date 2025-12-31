@@ -1,5 +1,6 @@
 package com.br.sistema.repositories;
 
+import com.br.sistema.entities.Motorista.DTO.MotoristaRelatorioDTO;
 import com.br.sistema.entities.Motorista.Motorista;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +48,63 @@ public interface MotoristaRepository extends JpaRepository<Motorista, Long> {
     Page<Motorista> findByMatriculaContainingIgnoreCaseOrNomeContainingIgnoreCase(
             String matricula,
             String nome,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT new com.br.sistema.entities.Motorista.DTO.MotoristaRelatorioDTO(
+            m.id,
+            m.matricula,
+            m.nome,
+            m.telefone,
+            m.ativo
+        )
+        FROM Motorista m
+        ORDER BY m.id, m.nome, m.matricula
+    """)
+    List<MotoristaRelatorioDTO> listarParaRelatorio();
+
+    @Query("""
+        SELECT new com.br.sistema.entities.Motorista.DTO.MotoristaRelatorioDTO(
+            m.id,
+            m.matricula,
+            m.nome,
+            m.telefone,
+            m.ativo
+        )
+        FROM Motorista m
+        WHERE (:matricula IS NULL OR :matricula = '' OR LOWER(m.matricula) LIKE LOWER(CONCAT('%', :matricula, '%')))
+          AND (:nome IS NULL OR :nome = '' OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+          AND (:telefone IS NULL OR :telefone = '' OR LOWER(m.telefone) LIKE LOWER(CONCAT('%', :telefone, '%')))
+          AND (:ativo IS NULL OR m.ativo = :ativo)
+        ORDER BY m.id, m.nome, m.matricula
+    """)
+    List<MotoristaRelatorioDTO> listarParaRelatorioFiltrado(
+            @Param("matricula") String matricula,
+            @Param("nome") String nome,
+            @Param("telefone") String telefone,
+            @Param("ativo") Boolean ativo
+    );
+
+    @Query("""
+        SELECT new com.br.sistema.entities.Motorista.DTO.MotoristaRelatorioDTO(
+            m.id,
+            m.matricula,
+            m.nome,
+            m.telefone,
+            m.ativo
+        )
+        FROM Motorista m
+        WHERE (:matricula IS NULL OR :matricula = '' OR LOWER(m.matricula) LIKE LOWER(CONCAT('%', :matricula, '%')))
+          AND (:nome IS NULL OR :nome = '' OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+          AND (:telefone IS NULL OR :telefone = '' OR LOWER(m.telefone) LIKE LOWER(CONCAT('%', :telefone, '%')))
+          AND (:ativo IS NULL OR m.ativo = :ativo)
+    """)
+    Page<MotoristaRelatorioDTO> listarParaConsultaRelatorioPaginado(
+            @Param("matricula") String matricula,
+            @Param("nome") String nome,
+            @Param("telefone") String telefone,
+            @Param("ativo") Boolean ativo,
             Pageable pageable
     );
 

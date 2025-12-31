@@ -132,13 +132,12 @@ export class CarrosRelatorioComponent {
     window.URL.revokeObjectURL(url);
   }
 
-
   mudarTamanho(event: Event): void {
     const val = Number((event.target as HTMLSelectElement).value);
     this.size = val;
     this.consultar(0);
   }
-  
+
   irPara(p: number): void {
     if (p < 0 || p >= this.totalPages) return;
     this.consultar(p);
