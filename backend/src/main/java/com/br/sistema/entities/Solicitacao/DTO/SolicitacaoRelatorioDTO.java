@@ -1,29 +1,35 @@
 package com.br.sistema.entities.Solicitacao.DTO;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record SolicitacaoRelatorioDTO(
-        Long id,
-        LocalDate dataSolicitacao,
-        String status,
-        String carro,
-        String motorista,
-        String usuario,
-        String setor,
-        String destino,
-        Integer kmInicial,
-        Integer kmFinal,
-        LocalTime horaSaida,
-        LocalTime horaChegada
-) {
-    // ✅ Campo calculado (tratando nulos)
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class SolicitacaoRelatorioDTO {
+
+    private Long id;
+    private LocalDate dataSolicitacao;
+    private String status;
+    private String carro;
+    private String motorista;
+    private String usuario;
+    private String setor;
+    private String destino;
+    private Integer kmInicial;
+    private Integer kmFinal;
+    private LocalTime horaSaida;
+    private LocalTime horaChegada;
+
+    // ✅ Campo calculado (Jasper reconhece como getter)
     public String getKmTotal() {
         if (kmInicial == null || kmFinal == null) {
-            return "-"; // Exibe um traço quando a solicitação está pendente ou incompleta
+            return "-"; // Solicitação pendente ou incompleta
         }
         return String.valueOf(kmFinal - kmInicial);
     }
-
 }
-

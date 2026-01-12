@@ -1,245 +1,180 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { RelatorioService } from '../../../services/relatorios.service';
+import { CommonModule } from '@angular/common';
+import { SolicitacaoService } from '../../../services/solicitacao.service';
+import { RelatorioSolicitacaoService } from '../../../services/relatorios/relatorio-solicitacao.service';
+
+type ExportTipo = 'pdf' | 'excel' | 'csv';
 
 @Component({
-  selector: 'app-solicitacoes-relatorio',
-  standalone: true,
+  selector: 'app-solicitacao-relatorio',
   imports: [CommonModule, FormsModule],
   templateUrl: './solicitacao-relatorio.component.html',
-  styleUrls: ['./solicitacao-relatorio.component.scss'],
+  styleUrl: './solicitacao-relatorio.component.scss',
 })
-export class SolicitacoesRelatorioComponent implements OnInit {
+export class SolicitacaoRelatorioComponent {
   constructor(
-    private relatorioService: RelatorioService,
-    private eRef: ElementRef
+    private solicitacaoService: SolicitacaoService,
+    private relatorioService: RelatorioSolicitacaoService
   ) {}
 
   filtros = {
-    id: '',
-    status: '',
-    motoristaId: '',
-    carroId: '',
-    setorId: '',
-    username: '',
-    destinoId: '',
-    inicio: '',
-    fim: '',
+    filtro: '',
+    dataInicio: '', // yyyy-MM-dd
+    dataFim: '', // yyyy-MM-dd
   };
 
   resultados: any[] = [];
   carregando = false;
 
-  statusOptions = ['PENDENTE', 'EMPRESTADO', 'DEVOLVIDO', 'CANCELADO'];
+  page = 0;
+  size = 10;
+  totalPages = 0;
+  totalElements = 0;
 
-  // 🔹 Listas
-  motoristas: any[] = [];
-  carros: any[] = [];
-  setores: any[] = [];
-  destinos: any[] = [];
-
-  // 🔹 Campos temporários (texto digitado)
-  motoristaNome = '';
-  carroTexto = '';
-  setorTexto = '';
-  destinoTexto = '';
-
-  // 🔹 Observables para busca dinâmica
-  motoristaSearch$ = new Subject<string>();
-  carroSearch$ = new Subject<string>();
-  setorSearch$ = new Subject<string>();
-  destinoSearch$ = new Subject<string>();
-
-  ngOnInit(): void {
-    // Motoristas
-    this.motoristaSearch$
-      .pipe(
-        debounceTime(400),
-        distinctUntilChanged(),
-        switchMap((term) =>
-          this.relatorioService.listarMotoristas({ nome: term })
-        )
-      )
-      .subscribe((data) => (this.motoristas = data.content || data));
-
-    // Carros
-    this.carroSearch$
-      .pipe(
-        debounceTime(400),
-        distinctUntilChanged(),
-        switchMap((term) => {
-          // Detecta automaticamente se o usuário digitou uma placa
-          const filtro: any = {};
-          const termo = term?.trim().toUpperCase();
-
-          if (!termo) return [];
-
-          // 🔹 Placa normalmente tem formato com letras e números (ex: ABC1D23)
-          const padraoPlaca = /^[A-Z]{3}\d[A-Z0-9]\d{2}$/;
-          const padraoAntigo = /^[A-Z]{3}-?\d{4}$/;
-
-          if (padraoPlaca.test(termo) || padraoAntigo.test(termo)) {
-            filtro.placa = termo.replace('-', '');
-          } else {
-            filtro.marca = termo;
-            filtro.modelo = termo;
-          }
-
-          return this.relatorioService.listarCarros(filtro);
-        })
-      )
-      .subscribe((data) => (this.carros = data.content || data));
-
-    // Setores
-    this.setorSearch$
-      .pipe(
-        debounceTime(400),
-        distinctUntilChanged(),
-        switchMap((term) => this.relatorioService.listarSetores({ nome: term }))
-      )
-      .subscribe((data) => (this.setores = data.content || data));
-
-    // Destinos
-    this.destinoSearch$
-      .pipe(
-        debounceTime(400),
-        distinctUntilChanged(),
-        switchMap((term) =>
-          this.relatorioService.listarDestinos({ nome: term })
-        )
-      )
-      .subscribe((data) => (this.destinos = data.content || data));
-  }
-
-  // 🔹 Seleções
-  selecionarMotorista(m: any) {
-    this.filtros.motoristaId = m.id;
-    this.motoristaNome = m.nome;
-    this.motoristas = [];
-  }
-
-  selecionarCarro(c: any) {
-    this.filtros.carroId = c.id;
-    this.carroTexto = `${c.placa} - ${c.marca}`;
-    this.carros = [];
-  }
-
-  selecionarSetor(s: any) {
-    this.filtros.setorId = s.id;
-    this.setorTexto = s.nome;
-    this.setores = [];
-  }
-
-  selecionarDestino(d: any) {
-    this.filtros.destinoId = d.id;
-    this.destinoTexto = d.nome;
-    this.destinos = [];
-  }
-
-  // 🔹 Fechar dropdowns ao clicar fora
-  @HostListener('document:click', ['$event'])
-  clickFora(event: Event) {
-    if (!this.eRef.nativeElement.contains(event.target)) {
-      this.motoristas = [];
-      this.carros = [];
-      this.setores = [];
-      this.destinos = [];
-    }
-  }
-
-  // 🔹 Reativar busca ao limpar campo
-  limparCampo(tipo: string) {
-    if (tipo === 'motorista') {
-      this.motoristaNome = '';
-      this.filtros.motoristaId = '';
-    }
-    if (tipo === 'carro') {
-      this.carroTexto = '';
-      this.filtros.carroId = '';
-    }
-    if (tipo === 'setor') {
-      this.setorTexto = '';
-      this.filtros.setorId = '';
-    }
-    if (tipo === 'destino') {
-      this.destinoTexto = '';
-      this.filtros.destinoId = '';
-    }
-  }
-
-  // 🔹 Buscar solicitações
-  consultar(): void {
+  consultar(page: number = 0): void {
     this.carregando = true;
-    this.relatorioService.listarSolicitacoes(this.filtros).subscribe({
-      next: (data) => {
-        this.resultados = data.content || data;
-        this.carregando = false;
-      },
-      error: () => (this.carregando = false),
-    });
+    this.page = page;
+
+    const filtrosApi: any = {
+      filtro: this.filtros.filtro,
+      dataInicio: this.filtros.dataInicio || null,
+      dataFim: this.filtros.dataFim || null,
+    };
+
+    this.solicitacaoService
+      .consultarParaRelatorio(filtrosApi, this.page, this.size)
+      .subscribe({
+        next: (resp) => {
+          this.resultados = resp.content ?? [];
+          this.totalPages = resp.totalPages ?? 0;
+          this.totalElements = resp.totalElements ?? 0;
+          this.page = resp.number ?? 0;
+          this.size = resp.size ?? this.size;
+        },
+        error: (err) => {
+          console.error('Erro ao consultar paginado', err);
+          alert('Erro ao consultar dados.');
+          this.resultados = [];
+          this.totalPages = 0;
+          this.totalElements = 0;
+        },
+        complete: () => (this.carregando = false),
+      });
   }
 
   limpar(): void {
-    this.filtros = {
-      id: '',
-      status: '',
-      motoristaId: '',
-      carroId: '',
-      setorId: '',
-      username: '',
-      destinoId: '',
-      inicio: '',
-      fim: '',
-    };
-    this.motoristaNome = '';
-    this.carroTexto = '';
-    this.setorTexto = '';
-    this.destinoTexto = '';
+    this.filtros = { filtro: '', dataInicio: '', dataFim: '' };
     this.resultados = [];
+    this.page = 0;
+    this.totalPages = 0;
+    this.totalElements = 0;
   }
 
-  // 🔹 Funções auxiliares para atalhos de data
-  setPeriodo(tipo: string) {
-    const hoje = new Date();
-    const fim = hoje.toISOString().split('T')[0];
-    let inicio = fim;
+  exportar(tipo: ExportTipo): void {
+    if (!this.resultados || this.resultados.length === 0) return;
 
-    if (tipo === '7') {
-      const d = new Date();
-      d.setDate(hoje.getDate() - 7);
-      inicio = d.toISOString().split('T')[0];
-    } else if (tipo === '30') {
-      const d = new Date();
-      d.setDate(hoje.getDate() - 30);
-      inicio = d.toISOString().split('T')[0];
-    } else if (tipo === 'mes') {
-      const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-      inicio = primeiroDia.toISOString().split('T')[0];
-    } else if (tipo === 'hoje') {
-      inicio = fim;
+    const filtrosExport: any = {
+      filtro: this.filtros.filtro,
+      dataInicio: this.filtros.dataInicio || null,
+      dataFim: this.filtros.dataFim || null,
+    };
+
+    if (tipo === 'pdf') {
+      this.relatorioService.exportarPdf(filtrosExport).subscribe({
+        next: (blob) =>
+          this.baixarArquivo(blob, 'rel_solicitacoes.pdf', 'application/pdf'),
+        error: (err) => {
+          console.error('Erro ao exportar PDF', err);
+          alert('Erro ao exportar PDF.');
+        },
+      });
+      return;
     }
 
-    this.filtros.inicio = inicio;
-    this.filtros.fim = fim;
-  }
-
-  limparPeriodo() {
-    this.filtros.inicio = '';
-    this.filtros.fim = '';
-  }
-
-  exportar(tipo: string): void {
-    const filtroGlobal = Object.values(this.filtros).filter(Boolean).join(' ');
-    this.relatorioService
-      .exportarSolicitacoes(tipo, filtroGlobal)
-      .subscribe((blob) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `relatorio_solicitacoes.${tipo}`;
-        link.click();
+    if (tipo === 'excel') {
+      this.relatorioService.exportarExcel(filtrosExport).subscribe({
+        next: (blob) =>
+          this.baixarArquivo(
+            blob,
+            'rel_solicitacoes.xlsx',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          ),
+        error: (err) => {
+          console.error('Erro ao exportar Excel', err);
+          alert('Erro ao exportar Excel.');
+        },
       });
+      return;
+    }
+
+    // CSV (gerado no front a partir dos resultados da consulta)
+    this.exportarCsv();
+  }
+
+  private exportarCsv(): void {
+    const header = [
+      'ID',
+      'Data Solicitação',
+      'Status',
+      'Carro',
+      'Motorista',
+      'Usuário',
+      'Setor',
+      'Destino',
+      'Km Inicial',
+      'Km Final',
+      'Km Total',
+      'Hora Saída',
+      'Hora Chegada',
+    ];
+
+    const rows = this.resultados.map((r) => [
+      r.id,
+      r.dataSolicitacao,
+      r.status,
+      r.carro,
+      r.motorista,
+      r.usuario,
+      r.setor,
+      r.destino,
+      r.kmInicial,
+      r.kmFinal,
+      r.kmTotal, // getter no DTO (Jasper) - aqui depende se o backend retorna
+      r.horaSaida,
+      r.horaChegada,
+    ]);
+
+    const csv = [header, ...rows]
+      .map((cols) =>
+        cols.map((v) => `"${String(v ?? '').replaceAll('"', '""')}"`).join(';')
+      )
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    this.baixarArquivo(blob, 'rel_solicitacoes.csv', 'text/csv');
+  }
+
+  private baixarArquivo(blob: Blob, nome: string, contentType: string): void {
+    const blobObj = new Blob([blob], { type: contentType });
+    const url = window.URL.createObjectURL(blobObj);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nome;
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+  }
+
+  mudarTamanho(event: Event): void {
+    const val = Number((event.target as HTMLSelectElement).value);
+    this.size = val;
+    this.consultar(0);
+  }
+
+  irPara(p: number): void {
+    if (p < 0 || p >= this.totalPages) return;
+    this.consultar(p);
   }
 }

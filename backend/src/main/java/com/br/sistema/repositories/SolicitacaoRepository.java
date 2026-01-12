@@ -23,6 +23,10 @@ import java.util.List;
 @Repository
 public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> {
 
+    // =========================
+    // CONSULTAS BÁSICAS (PAGINADAS)
+    // =========================
+
     // 🔍 Buscar por status (ex.: todas as PENDENTES)
     Page<Solicitacao> findByStatus(String status, Pageable pageable);
 
@@ -41,6 +45,9 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     // 🔍 Buscar por destino (id)
     Page<Solicitacao> findByDestino_Id(Long destinoId, Pageable pageable);
 
+    // ✅ caso você precise filtrar por id em página (não é comum, mas mantém coerência)
+    Page<Solicitacao> findAllById(Long id, Pageable pageable);
+
     // 🔍 Buscar por solicitação (id)
     Page<Solicitacao> findById(Long id, Pageable pageable);
 
@@ -50,21 +57,26 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     @Query("SELECT s FROM Solicitacao s WHERE LOWER(s.usuario.username) LIKE LOWER(CONCAT('%', :username, '%'))")
     Page<Solicitacao> findByUsernameContainingIgnoreCase(@Param("username") String username, Pageable pageable);
 
-
     long countByStatus(String status);
 
-    // 📊 Tendência de solicitações por dia (últimos N dias)
+    // =========================
+    // DASHBOARD / AGRUPAMENTOS
+    // =========================
+
+    // 📊 Tendência por dia (intervalo)
     @Query("""
-           SELECT new com.br.sistema.entities.DTO.SolicitacaoPorDiaDTO(
-               DATE(s.dataSolicitacao), COUNT(s)
-           )
-           FROM Solicitacao s
-           WHERE DATE(s.dataSolicitacao) BETWEEN :inicio AND :fim
-           GROUP BY DATE(s.dataSolicitacao)
-           ORDER BY DATE(s.dataSolicitacao)
-           """)
+        SELECT new com.br.sistema.entities.DTO.SolicitacaoPorDiaDTO(
+            s.dataSolicitacao, COUNT(s)
+        )
+        FROM Solicitacao s
+        WHERE s.dataSolicitacao BETWEEN :inicio AND :fim
+        GROUP BY s.dataSolicitacao
+        ORDER BY s.dataSolicitacao
+    """)
     List<SolicitacaoPorDiaDTO> countByDia(@Param("inicio") LocalDate inicio,
                                           @Param("fim") LocalDate fim);
+
+
 
     // 📊 Ranking por Setor
     @Query("""
@@ -101,19 +113,6 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
            ORDER BY COUNT(s) DESC
            """)
     List<RankingItemDTO> topCarros();
-
-    // ✅ Solicitações por intervalo de datas (agrupadas por dia)
-    @Query("""
-        SELECT new com.br.sistema.entities.DTO.SolicitacaoPorDiaDTO(
-            DATE(s.dataSolicitacao), COUNT(s)
-        )
-        FROM Solicitacao s
-        WHERE DATE(s.dataSolicitacao) BETWEEN :inicio AND :fim
-        GROUP BY DATE(s.dataSolicitacao)
-        ORDER BY DATE(s.dataSolicitacao)
-    """)
-    List<SolicitacaoPorDiaDTO> buscarPorIntervalo(@Param("inicio") LocalDate inicio,
-                                                  @Param("fim") LocalDate fim);
 
     // ✅ Solicitações por motorista
     @Query("""
@@ -174,41 +173,57 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     """)
     List<SolicitacaoPorDiaDTO> buscarPorDatas(@Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
 
-    // Responsável pelos filtros para gerar o relatorio da lista
+    // =========================
+    // RELATÓRIO (LISTA - FILTRO "LIVRE")
+    // =========================
+
+    /**
+     * Responsável pelos filtros para gerar o relatório (sem paginação).
+     * Usa JOIN FETCH para não estourar LazyInitialization no Jasper.
+     * Usa DISTINCT para evitar linhas duplicadas em caso de joins.
+     */
     @Query("""
-        SELECT s FROM Solicitacao s
+        SELECT DISTINCT s
+        FROM Solicitacao s
         JOIN FETCH s.carro c
         JOIN FETCH s.motorista m
         JOIN FETCH s.usuario u
         JOIN FETCH s.setor se
         JOIN FETCH s.destino d
-        WHERE (:filtro IS NULL OR 
-              LOWER(c.marca) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-              LOWER(c.modelo) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-              LOWER(c.placa) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-              LOWER(m.nome) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-              LOWER(u.nome) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-              LOWER(se.nome) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-              LOWER(d.nome) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-              LOWER(s.status) LIKE LOWER(CONCAT('%', :filtro, '%'))
-        )
+        WHERE (:filtro IS NULL OR :filtro = '' OR
+                LOWER(c.marca)  LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(c.modelo) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(c.placa)  LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(m.nome)   LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(u.nome)   LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(se.nome)  LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(d.nome)   LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(s.status) LIKE LOWER(CONCAT('%', :filtro, '%'))
+          )
+          ORDER BY s.id DESC
     """)
-    List<Solicitacao> filtrarSemPaginacao(String filtro);
+    List<Solicitacao> filtrarSemPaginacao(@Param("filtro") String filtro);
 
 
-
+    /**
+     * Se o seu campo dataSolicitacao for LocalDate (sem horário),
+     * você pode manter este também (ou trocar conforme o tipo do atributo).
+     */
     Page<Solicitacao> findByDataSolicitacaoBetween(LocalDate inicio, LocalDate fim, Pageable pageable);
 
-    // Série mensal (agrupa por ano/mês)
+    // =========================
+    // SÉRIE MENSAL (RELATÓRIO / GRÁFICO)
+    // =========================
+
     @Query("""
-           SELECT new com.br.sistema.relatorio.DTO.QuantidadePorMesDTO(
-               YEAR(s.dataSolicitacao), MONTH(s.dataSolicitacao), COUNT(s)
-           )
-           FROM Solicitacao s
-           WHERE DATE(s.dataSolicitacao) BETWEEN :inicio AND :fim
-           GROUP BY YEAR(s.dataSolicitacao), MONTH(s.dataSolicitacao)
-           ORDER BY YEAR(s.dataSolicitacao), MONTH(s.dataSolicitacao)
-           """)
+        SELECT new com.br.sistema.relatorio.DTO.QuantidadePorMesDTO(
+            YEAR(s.dataSolicitacao), MONTH(s.dataSolicitacao), COUNT(s)
+        )
+        FROM Solicitacao s
+        WHERE FUNCTION('date', s.dataSolicitacao) BETWEEN :inicio AND :fim
+        GROUP BY YEAR(s.dataSolicitacao), MONTH(s.dataSolicitacao)
+        ORDER BY YEAR(s.dataSolicitacao), MONTH(s.dataSolicitacao)
+    """)
     List<QuantidadePorMesDTO> contarPorMes(@Param("inicio") LocalDate inicio,
                                            @Param("fim") LocalDate fim);
 

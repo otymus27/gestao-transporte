@@ -7,250 +7,161 @@
         <h3 class="m-0">Relatório de Solicitações</h3>
       </div>
 
-      <!-- 🔹 FILTROS -->
+      <!-- Filtros -->
       <div class="row g-2 mb-3">
-        <!-- ID -->
+        <div class="col-md-4">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Filtro livre (carro, motorista, usuário, setor, destino, status)"
+            [(ngModel)]="filtros.filtro"
+          />
+        </div>
+
         <div class="col-md-2">
-          <input
-            type="number"
-            class="form-control"
-            placeholder="ID"
-            [(ngModel)]="filtros.id"
-          />
-        </div>
-
-        <!-- STATUS -->
-        <div class="col-md-2">
-          <select class="form-select" [(ngModel)]="filtros.status">
-            <option value="">Status</option>
-            <option *ngFor="let s of statusOptions" [value]="s">
-              {{ s }}
-            </option>
-          </select>
-        </div>
-
-        <!-- MOTORISTA -->
-        <div class="col-md-2 position-relative">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Motorista"
-            [(ngModel)]="motoristaNome"
-            (input)="motoristaSearch$.next($event.target.value)"
-          />
-          <button
-            class="btn btn-sm btn-light limpar-btn"
-            *ngIf="motoristaNome"
-            (click)="limparCampo('motorista')"
-          >
-            ✕
-          </button>
-          <ul class="autocomplete" *ngIf="motoristas.length > 0">
-            <li *ngFor="let m of motoristas" (click)="selecionarMotorista(m)">
-              {{ m.nome }}
-            </li>
-          </ul>
-        </div>
-
-        <!-- CARRO -->
-        <div class="col-md-2 position-relative">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Carro"
-            [(ngModel)]="carroTexto"
-            (input)="carroSearch$.next($event.target.value)"
-          />
-          <button
-            class="btn btn-sm btn-light limpar-btn"
-            *ngIf="carroTexto"
-            (click)="limparCampo('carro')"
-          >
-            ✕
-          </button>
-          <ul class="autocomplete" *ngIf="carros.length > 0">
-            <li *ngFor="let c of carros" (click)="selecionarCarro(c)">
-              {{ c.placa }} - {{ c.marca }}
-            </li>
-          </ul>
-        </div>
-
-        <!-- SETOR -->
-        <div class="col-md-2 position-relative">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Setor"
-            [(ngModel)]="setorTexto"
-            (input)="setorSearch$.next($event.target.value)"
-          />
-          <button
-            class="btn btn-sm btn-light limpar-btn"
-            *ngIf="setorTexto"
-            (click)="limparCampo('setor')"
-          >
-            ✕
-          </button>
-          <ul class="autocomplete" *ngIf="setores.length > 0">
-            <li *ngFor="let s of setores" (click)="selecionarSetor(s)">
-              {{ s.nome }}
-            </li>
-          </ul>
-        </div>
-
-        <!-- DESTINO -->
-        <div class="col-md-2 position-relative">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Destino"
-            [(ngModel)]="destinoTexto"
-            (input)="destinoSearch$.next($event.target.value)"
-          />
-          <button
-            class="btn btn-sm btn-light limpar-btn"
-            *ngIf="destinoTexto"
-            (click)="limparCampo('destino')"
-          >
-            ✕
-          </button>
-          <ul class="autocomplete" *ngIf="destinos.length > 0">
-            <li *ngFor="let d of destinos" (click)="selecionarDestino(d)">
-              {{ d.nome }}
-            </li>
-          </ul>
-        </div>
-
-        <!-- USUÁRIO -->
-        <div class="col-md-2 mt-2">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Usuário (login)"
-            [(ngModel)]="filtros.username"
-          />
-        </div>
-
-        <!-- 🔹 ATALHOS RÁPIDOS DE DATA -->
-        <div class="col-12 mt-3 mb-2 d-flex flex-wrap align-items-center gap-2">
-          <span class="fw-bold me-2">Período rápido:</span>
-
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-primary"
-            (click)="setPeriodo('hoje')"
-          >
-            Hoje
-          </button>
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-primary"
-            (click)="setPeriodo('7')"
-          >
-            Últimos 7 dias
-          </button>
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-primary"
-            (click)="setPeriodo('30')"
-          >
-            Últimos 30 dias
-          </button>
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-primary"
-            (click)="setPeriodo('mes')"
-          >
-            Este mês
-          </button>
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-secondary"
-            (click)="limparPeriodo()"
-          >
-            Limpar
-          </button>
-        </div>
-
-        <!-- 🔹 DATA INICIAL -->
-        <div class="col-md-2 mt-2">
           <input
             type="date"
             class="form-control"
-            [(ngModel)]="filtros.inicio"
-            placeholder="Data Inicial"
+            [(ngModel)]="filtros.dataInicio"
+            title="Data Início"
           />
         </div>
 
-        <!-- 🔹 DATA FINAL -->
-        <div class="col-md-2 mt-2">
+        <div class="col-md-2">
           <input
             type="date"
             class="form-control"
-            [(ngModel)]="filtros.fim"
-            placeholder="Data Final"
+            [(ngModel)]="filtros.dataFim"
+            title="Data Fim"
           />
         </div>
 
-        <!-- BOTÕES -->
-        <div class="col-md-4 mt-2 d-flex gap-2">
-          <button class="btn btn-primary flex-grow-1" (click)="consultar()">
+        <div class="col-sm-3 d-flex gap-2">
+          <button class="btn btn-primary flex-grow-1" (click)="consultar(0)">
             <i class="bi bi-search"></i> Consultar
           </button>
           <button class="btn btn-outline-secondary" (click)="limpar()">
             <i class="bi bi-x-circle"></i>
           </button>
         </div>
-
-        <!-- 🔹 EXPORTAÇÃO -->
-        <div
-          *ngIf="resultados.length > 0"
-          class="d-flex justify-content-end gap-2 mb-2"
-        >
-          <button class="btn btn-danger btn-sm" (click)="exportar('pdf')">
-            <i class="bi bi-file-earmark-pdf"></i> PDF
-          </button>
-          <button class="btn btn-success btn-sm" (click)="exportar('excel')">
-            <i class="bi bi-file-earmark-excel"></i> Excel
-          </button>
-          <button class="btn btn-secondary btn-sm" (click)="exportar('csv')">
-            <i class="bi bi-file-earmark-text"></i> CSV
-          </button>
-        </div>
       </div>
 
-      <!-- RESULTADOS -->
+      <!-- Exportação -->
+      <div
+        *ngIf="resultados.length > 0"
+        class="d-flex justify-content-st gap-2 mb-2"
+      >
+        <button class="btn btn-danger btn-sm" (click)="exportar('pdf')">
+          <i class="bi bi-file-earmark-pdf"></i> PDF
+        </button>
+        <button class="btn btn-success btn-sm" (click)="exportar('excel')">
+          <i class="bi bi-file-earmark-excel"></i> Excel
+        </button>
+        <button class="btn btn-secondary btn-sm" (click)="exportar('csv')">
+          <i class="bi bi-file-earmark-text"></i> CSV
+        </button>
+      </div>
+
+      <!-- Tabela de resultados -->
       <div *ngIf="resultados.length > 0; else semResultados">
         <table class="table table-hover table-bordered align-middle">
           <thead class="table-dark">
             <tr>
-              <th>ID</th>
-              <th>Status</th>
-              <th>Motorista</th>
+              <th style="width: 70px">ID</th>
+              <th style="width: 120px">Data</th>
+              <th style="width: 120px">Status</th>
               <th>Carro</th>
-              <th>Setor</th>
+              <th>Motorista</th>
               <th>Usuário</th>
+              <th>Setor</th>
               <th>Destino</th>
-              <th>Data Solicitação</th>
-              <th>Total KM</th>
+              <th style="width: 90px">Km Inicial</th>
+              <th style="width: 90px">Km Final</th>
+              <th style="width: 90px">Km Total</th>
+              <th style="width: 110px">Saída</th>
+              <th style="width: 110px">Chegada</th>
             </tr>
           </thead>
+
           <tbody>
             <tr *ngFor="let s of resultados">
               <td>{{ s.id }}</td>
+              <td>{{ s.dataSolicitacao }}</td>
               <td>{{ s.status }}</td>
-              <td>{{ s.motoristaNome || "-" }}</td>
-              <td>{{ s.carroPlaca || "-" }}</td>
-              <td>{{ s.setorNome || "-" }}</td>
-              <td>{{ s.username || "-" }}</td>
-              <td>{{ s.destinoNome || "-" }}</td>
-              <td>{{ s.dataSolicitacao | date : "dd/MM/yyyy HH:mm" }}</td>
-              <td>{{ s.kmFinal - s.kmInicial }}</td>
+              <td>{{ s.carro }}</td>
+              <td>{{ s.motorista }}</td>
+              <td>{{ s.usuario }}</td>
+              <td>{{ s.setor }}</td>
+              <td>{{ s.destino }}</td>
+              <td>{{ s.kmInicial ?? '-' }}</td>
+              <td>{{ s.kmFinal ?? '-' }}</td>
+              <td>{{ s.kmTotal ?? '-' }}</td>
+              <td>{{ s.horaSaida ?? '-' }}</td>
+              <td>{{ s.horaChegada ?? '-' }}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
+      <!-- Paginação -->
+      <div
+        *ngIf="resultados.length > 0"
+        class="d-flex justify-content-between align-items-center mt-2"
+      >
+        <div class="text-muted">
+          Total: <b>{{ totalElements }}</b> registros
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <label class="text-muted mb-0">Por página:</label>
+          <select
+            class="form-select form-select-sm"
+            style="width: 90px"
+            (change)="mudarTamanho($event)"
+          >
+            <option [selected]="size === 5" value="5">5</option>
+            <option [selected]="size === 10" value="10">10</option>
+            <option [selected]="size === 20" value="20">20</option>
+            <option [selected]="size === 50" value="50">50</option>
+          </select>
+
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            (click)="irPara(0)"
+            [disabled]="page === 0"
+          >
+            «
+          </button>
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            (click)="irPara(page - 1)"
+            [disabled]="page === 0"
+          >
+            ‹
+          </button>
+
+          <span class="text-muted">
+            Página <b>{{ page + 1 }}</b> de <b>{{ totalPages }}</b>
+          </span>
+
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            (click)="irPara(page + 1)"
+            [disabled]="page >= totalPages - 1"
+          >
+            ›
+          </button>
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            (click)="irPara(totalPages - 1)"
+            [disabled]="page >= totalPages - 1"
+          >
+            »
+          </button>
+        </div>
+      </div>
+
+      <!-- Mensagens -->
       <ng-template #semResultados>
         <div class="text-center text-muted mt-4" *ngIf="!carregando">
           Nenhum resultado encontrado.
@@ -258,7 +169,9 @@
       </ng-template>
 
       <div class="text-center mt-3" *ngIf="carregando">
-        <div class="spinner-border text-primary" role="status"></div>
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
       </div>
     </div>
   </div>

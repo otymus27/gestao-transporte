@@ -82,6 +82,34 @@ export class SolicitacaoService {
       .pipe(catchError(this.tratarErro));
   }
 
+   /**
+ * Consultar solicitações para a tela de relatório (paginado)
+ * GET /solicitacao/relatorio/consultar?filtro=&dataInicio=&dataFim=&page=&size=
+ */
+  consultarParaRelatorio(
+    filtros: { filtro?: string | null; dataInicio?: string | null; dataFim?: string | null },
+    page: number,
+    size: number
+  ): Observable<Paginacao<any[]>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+
+    if (filtros.filtro?.trim()) {
+      params = params.set('filtro', filtros.filtro.trim());
+    }
+
+    if (filtros.dataInicio) {
+      params = params.set('dataInicio', filtros.dataInicio);
+    }
+
+    if (filtros.dataFim) {
+      params = params.set('dataFim', filtros.dataFim);
+    }
+
+    return this.http.get<Paginacao<any[]>>(`${this.API_URL}/relatorio/consultar`, {
+      params,
+    });
+  }
+
   filtrarGenerico(
     filtros: {
       id?: number;

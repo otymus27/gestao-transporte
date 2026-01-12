@@ -400,41 +400,6 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacaoService.buscarPorStatus());
     }
 
-    @GetMapping("/relatorio")    
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
-    public ResponseEntity<Resource> exportarRelatorio(
-            @RequestParam(required = false) String filtro,
-            @RequestParam(defaultValue = "pdf") String tipo
-    ) throws IOException {
-
-        InputStreamResource resource;
-        String filename;
-        MediaType mediaType;
-
-        switch (tipo.toLowerCase()) {
-            case "excel" -> {
-                resource = new InputStreamResource(solicitacaoService.exportarExcel(filtro));
-                filename = "solicitacoes.xlsx";
-                mediaType = MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            }
-            case "csv" -> {
-                resource = new InputStreamResource(solicitacaoService.exportarCsv(filtro));
-                filename = "solicitacoes.csv";
-                mediaType = MediaType.parseMediaType("text/csv");
-            }
-            case "pdf" -> {
-                resource = new InputStreamResource(solicitacaoService.exportarPdf(filtro));
-                filename = "solicitacoes.pdf";
-                mediaType = MediaType.APPLICATION_PDF;
-            }
-            default -> throw new IllegalArgumentException("Tipo de relatório inválido: " + tipo);
-        }
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
-                .contentType(mediaType)
-                .body(resource);
-    }
 
 
 }

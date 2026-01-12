@@ -20,7 +20,7 @@ import { CarrosRelatorioComponent } from './components/relatorios/carros/carros-
 import { MotoristasRelatorioComponent } from './components/relatorios/motoristas/motoristas-relatorio.component';
 import { DestinosRelatorioComponent } from './components/relatorios/destinos/destinos-relatorio.component';
 import { SetorRelatorioComponent } from './components/relatorios/setor/setor-relatorio.component';
-import { SolicitacoesRelatorioComponent } from './components/relatorios/solicitacao/solicitacao-relatorio.component';
+import { SolicitacaoRelatorioComponent } from './components/relatorios/solicitacao/solicitacao-relatorio.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { SobreComponent } from './components/sobre/sobre.component';
 
@@ -153,7 +153,7 @@ export const routes: Routes = [
           },
           {
             path: 'relatorio',
-            component: SolicitacoesRelatorioComponent,
+            component: SolicitacaoRelatorioComponent,
             data: { roles: ['ADMIN', 'GERENTE'] },
           },
         ],
