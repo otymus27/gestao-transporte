@@ -10,6 +10,8 @@ services:
         MYSQL_ROOT_PASSWORD: root
       ports:
         - "3306:3306"
+      volumes:
+        - mysql_volume:/var/lib/mysql
       networks: [ otymus_net ]
       healthcheck:
         test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-proot" ]
@@ -53,6 +55,17 @@ services:
         networks:
             - otymus_net
 
+# ===========================
+# Volumes (persistência)
+# ===========================
+volumes:
+  mysql_volume:
+
+# ===========================
+# Redes
+# ===========================
 networks:
     otymus_net:
         external: true
+
+
