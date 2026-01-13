@@ -2,7 +2,7 @@
 <jasperReport name="rel_motorista" language="java" columnCount="1" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2ad15a25-912c-4128-92ae-7752d34ae560">
 	<parameter name="NOME_USUARIO" class="java.lang.String"/>
 	<parameter name="FILTRO_DESCRICAO" class="java.lang.String"/>
-    <parameter name="LOGO" class="java.io.InputStream"/>
+	<parameter name="LOGO" class="java.io.InputStream"/>
 	<field name="id" class="java.lang.Long"/>
 	<field name="matricula" class="java.lang.String"/>
 	<field name="nome" class="java.lang.String"/>
@@ -16,7 +16,7 @@
 			<text><![CDATA[Sistema de Controle de Requisição]]></text>
 		</element>
 		<element kind="image" uuid="9c873df0-cb72-4288-b79b-11917270e3ee" x="-1" y="5" width="61" height="25">
-            <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+			<expression><![CDATA[$P{LOGO}]]></expression>
 		</element>
 	</title>
 	<pageHeader height="48">
@@ -75,10 +75,17 @@
 		</band>
 	</detail>
 	<pageFooter height="32" splitType="Stretch">
-		<element kind="textField" uuid="0e754864-8a5f-4831-8092-e6e066a9802a" stretchType="NoStretch" x="200" y="6" width="155" height="20" fontSize="8.0" hTextAlign="Center">
-			<expression><![CDATA["Página " + $V{PAGE_NUMBER} + " de " + $V{PAGE_COUNT}]]></expression>
-		</element>
 		<element kind="line" uuid="c50d59f1-e665-4c74-93aa-3b79014c1738" x="0" y="4" width="560" height="1"/>
+		<element kind="textField" uuid="6f8a0c1d-2e3f-4a5b-9c6d-7e8f9a0b1c2d" x="200" y="8" width="110" height="20" fontSize="8.0" hTextAlign="Right">
+			<expression><![CDATA[
+                "Página " + $V{PAGE_NUMBER} + " de  "
+            ]]></expression>
+		</element>
+		<element kind="textField" uuid="3c2b1a0f-9e8d-7c6b-5a4f-3e2d1c0b9a8f" x="317" y="8" width="45" height="20" fontSize="8.0" evaluationTime="Report" hTextAlign="Left">
+			<expression><![CDATA[
+                 $V{PAGE_NUMBER}
+            ]]></expression>
+		</element>
 	</pageFooter>
 	<summary height="53">
 		<element kind="staticText" uuid="23470d58-7734-49cf-9610-69a1a8fde3fe" x="0" y="23" width="100" height="30">

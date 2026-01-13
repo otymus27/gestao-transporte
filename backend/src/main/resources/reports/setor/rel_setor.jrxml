@@ -2,6 +2,7 @@
 <jasperReport name="rel_setor" language="java" columnCount="1" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c8d21e19-3c2a-4f47-9b0f-0a2b3a3c1d55">
 	<parameter name="NOME_USUARIO" class="java.lang.String"/>
 	<parameter name="FILTRO_DESCRICAO" class="java.lang.String"/>
+	<parameter name="LOGO" class="java.io.InputStream"/>
 	<field name="id" class="java.lang.Long"/>
 	<field name="nome" class="java.lang.String"/>
 	<variable name="TOTAL_SETORES" calculation="Count" class="java.lang.Integer">
@@ -12,7 +13,7 @@
 			<text><![CDATA[Sistema de Controle de Requisição]]></text>
 		</element>
 		<element kind="image" uuid="23468aa7-de75-4382-a5e6-1516c5757e26" x="0" y="5" width="60" height="25">
-			<expression><![CDATA["D:/PRODUÇÃO/gestao-transporte/backend/src/main/resources/static/images/logo_hrg.png"]]></expression>
+			<expression><![CDATA[$P{LOGO}]]></expression>
 		</element>
 	</title>
 	<pageHeader height="48">
@@ -54,11 +55,16 @@
 			</element>
 		</band>
 	</detail>
-	<pageFooter height="32">
-		<element kind="line" uuid="d9eddb57-727d-4cba-b943-772710e640bb" x="0" y="4" width="560" height="1"/>
-		<element kind="textField" uuid="4e96139b-2c38-4c0a-a51d-bd924acbb48c" x="200" y="8" width="155" height="20" fontSize="8.0" hTextAlign="Center">
+	<pageFooter height="35">
+		<element kind="line" uuid="c50d59f1-e665-4c74-93aa-3b79014c1738" x="0" y="4" width="560" height="1"/>
+		<element kind="textField" uuid="6f8a0c1d-2e3f-4a5b-9c6d-7e8f9a0b1c2d" x="200" y="8" width="110" height="20" fontSize="8.0" hTextAlign="Right">
 			<expression><![CDATA[
-                "Página " + $V{PAGE_NUMBER} + " de " + $V{PAGE_COUNT}
+                "Página " + $V{PAGE_NUMBER} + " de  "
+            ]]></expression>
+		</element>
+		<element kind="textField" uuid="3c2b1a0f-9e8d-7c6b-5a4f-3e2d1c0b9a8f" x="317" y="8" width="45" height="20" fontSize="8.0" evaluationTime="Report" hTextAlign="Left">
+			<expression><![CDATA[
+                 $V{PAGE_NUMBER}
             ]]></expression>
 		</element>
 	</pageFooter>

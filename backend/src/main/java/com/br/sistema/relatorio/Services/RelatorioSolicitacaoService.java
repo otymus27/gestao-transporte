@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 public class RelatorioSolicitacaoService {
 
     // ✅ PADRÃO SIMPLES: só carrega .jasper (não compila jrxml em runtime)
-    private static final String CAMINHO_RELATORIO = "reports/solicitacoes/rel_motorista.jasper";
+    private static final String CAMINHO_RELATORIO = "reports/solicitacoes/rel_solicitacao.jasper";
 
     private final SolicitacaoRepository solicitacaoRepository;
 
@@ -175,26 +176,56 @@ public class RelatorioSolicitacaoService {
         return gerarExcel(dados, filtroDescricao);
     }
 
+
+    // ==========================
+    // CORE (CARREGA + FILL + EXPORT)
+    // ==========================
+
+    private JasperReport carregarRelatorio() {
+        try {
+            ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
+
+            if (!resource.exists()) {
+                // ✅ Erro claro (resolve 90% dos "não gera relatório")
+                throw new RuntimeException("Relatório .jasper não encontrado no classpath: " + CAMINHO_RELATORIO);
+            }
+
+            try (InputStream is = resource.getInputStream()) {
+                return (JasperReport) JRLoader.loadObject(is);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao carregar relatório .jasper: " + CAMINHO_RELATORIO + " - " + e.getMessage(), e);
+        }
+    }
+
+    private Map<String, Object> montarParams(String filtroDescricao) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("NOME_USUARIO", obterNomeUsuarioLogado());
+            params.put("FILTRO_DESCRICAO", (filtroDescricao != null && !filtroDescricao.isBlank()) ? filtroDescricao : "Sem filtros aplicados");
+            params.put("LOGO", new ClassPathResource("reports/images/logo_hrg.png").getInputStream());
+            return params;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao carregar logo do relatório: " + e.getMessage(), e);
+        }
+    }
+
+
+
     private byte[] gerarPdf(List<SolicitacaoRelatorioDTO> dados, String filtroDescricao) {
         try {
             if (dados == null || dados.isEmpty()) {
                 log.warn("Nenhum dado encontrado para o relatório de solicitações (PDF).");
             }
 
-            ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
+            JasperReport jasperReport = carregarRelatorio();
+            Map<String, Object> params = montarParams(filtroDescricao);
 
-            try (InputStream jrxmlStream = resource.getInputStream()) {
-                JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
 
-                Map<String, Object> params = new HashMap<>();
-                params.put("NOME_USUARIO", obterNomeUsuarioLogado());
-                params.put("FILTRO_DESCRICAO", filtroDescricao);
+            return JasperExportManager.exportReportToPdf(jasperPrint);
 
-                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
-                JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-
-                return JasperExportManager.exportReportToPdf(jasperPrint);
-            }
         } catch (Exception e) {
             log.error("Erro ao gerar relatório de solicitações em PDF", e);
             throw new RuntimeException("Erro ao gerar relatório de solicitações em PDF: " + e.getMessage(), e);
@@ -207,20 +238,13 @@ public class RelatorioSolicitacaoService {
                 log.warn("Nenhum dado encontrado para o relatório de solicitações (Excel).");
             }
 
-            ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
+            JasperReport jasperReport = carregarRelatorio();
+            Map<String, Object> params = montarParams(filtroDescricao);
 
-            try (InputStream jrxmlStream = resource.getInputStream();
-                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
 
-                JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
-
-                Map<String, Object> params = new HashMap<>();
-                params.put("NOME_USUARIO", obterNomeUsuarioLogado());
-                params.put("FILTRO_DESCRICAO", filtroDescricao);
-
-                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
-                JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 JRXlsxExporter exporter = new JRXlsxExporter();
                 exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
                 exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
@@ -284,7 +308,7 @@ public class RelatorioSolicitacaoService {
     }
 
     // ==========================
-    // HELPERS
+    // AUXILIARES
     // ==========================
 
     private List<Solicitacao> aplicarFiltroDatas(List<Solicitacao> base, LocalDate inicio, LocalDate fim) {

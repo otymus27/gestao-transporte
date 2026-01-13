@@ -4,7 +4,7 @@ services:
     # ===========================
     mysql:
       image: mysql:8.0
-      container_name: mysql
+      container_name: mysql_nutran
       environment:
         MYSQL_DATABASE: db_nutran
         MYSQL_ROOT_PASSWORD: root
