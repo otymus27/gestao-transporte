@@ -132,11 +132,9 @@
             <version>5.9</version>
         </dependency>
 
-        <!-- Spring Data REST (⚠️ versão antiga, pode ser problema) -->
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-rest-webmvc</artifactId>
-            <version>1.0.0.RELEASE</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-rest</artifactId>
         </dependency>
 
         <dependency>
@@ -164,6 +162,13 @@
             <artifactId>jasperreports-pdf</artifactId>
             <version>7.0.3</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>ecj</artifactId>
+            <version>3.33.0</version>
+        </dependency>
+
 
     </dependencies>
 
@@ -218,7 +223,9 @@
                     </nonFilteredFileExtensions>
                 </configuration>
             </plugin>
-		</plugins>
+
+
+        </plugins>
 	</build>
 
 </project>

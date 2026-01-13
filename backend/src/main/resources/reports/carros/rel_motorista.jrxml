@@ -2,7 +2,6 @@
 <jasperReport name="rel_motorista" language="java" columnCount="1" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2ad15a25-912c-4128-92ae-7752d34ae560">
 	<parameter name="NOME_USUARIO" class="java.lang.String"/>
 	<parameter name="FILTRO_DESCRICAO" class="java.lang.String"/>
-    <parameter name="LOGO" class="java.io.InputStream"/>
 	<field name="id" class="java.lang.Long"/>
 	<field name="matricula" class="java.lang.String"/>
 	<field name="nome" class="java.lang.String"/>
@@ -16,7 +15,7 @@
 			<text><![CDATA[Sistema de Controle de Requisição]]></text>
 		</element>
 		<element kind="image" uuid="9c873df0-cb72-4288-b79b-11917270e3ee" x="-1" y="5" width="61" height="25">
-            <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+			<expression><![CDATA["D:/PRODUÇÃO/gestao-transporte/backend/src/main/resources/static/images/logo_hrg.png"]]></expression>
 		</element>
 	</title>
 	<pageHeader height="48">

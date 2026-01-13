@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RelatorioSolicitacaoService {
 
-    private static final String CAMINHO_RELATORIO = "reports/solicitacoes/rel_solicitacao.jrxml";
+    // ✅ PADRÃO SIMPLES: só carrega .jasper (não compila jrxml em runtime)
+    private static final String CAMINHO_RELATORIO = "reports/solicitacoes/rel_motorista.jasper";
 
     private final SolicitacaoRepository solicitacaoRepository;
 

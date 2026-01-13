@@ -1,5 +1,23 @@
 services:
     # ===========================
+    # Banco de Dados - MySql
+    # ===========================
+    mysql:
+      image: mysql:8.0
+      container_name: mysql
+      environment:
+        MYSQL_DATABASE: db_nutran
+        MYSQL_ROOT_PASSWORD: root
+      ports:
+        - "3306:3306"
+      networks: [ otymus_net ]
+      healthcheck:
+        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-proot" ]
+        interval: 5s
+        timeout: 3s
+        retries: 30
+
+    # ===========================
     # Backend - Spring Boot
     # ===========================
     api:
@@ -7,8 +25,18 @@ services:
         container_name: api-transporte
         env_file:
             - .env
+        depends_on:
+          mysql:
+            condition: service_healthy
         ports:
-            - "8084:8080"
+          - "8084:8080"
+        environment:
+          DB_HOST: mysql
+          DB_PORT: 3306
+          DB_NAME: db_nutran
+          DB_USER: root
+          DB_PASSWORD: root
+          SPRING_PROFILES_ACTIVE: prod
         networks:
             - otymus_net
 
