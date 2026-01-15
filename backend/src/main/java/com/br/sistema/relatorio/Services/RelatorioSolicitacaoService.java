@@ -2,6 +2,7 @@ package com.br.sistema.relatorio.Services;
 
 import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoRelatorioDTO;
 import com.br.sistema.entities.Solicitacao.Solicitacao;
+import com.br.sistema.relatorio.enums.TipoRelatorioSolicitacao;
 import com.br.sistema.repositories.SolicitacaoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,170 +32,167 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RelatorioSolicitacaoService {
 
-    // ✅ PADRÃO SIMPLES: só carrega .jasper (não compila jrxml em runtime)
-    private static final String CAMINHO_RELATORIO = "reports/solicitacoes/rel_solicitacao.jasper";
+    // ✅ Template padrão (mantém compatibilidade com endpoints antigos)
+    private static final TipoRelatorioSolicitacao TIPO_PADRAO = TipoRelatorioSolicitacao.SIMPLES;
+
+    // ✅ Mapa dos relatórios compilados (.jasper)
+    // ⚠️ AJUSTE os nomes exatamente como estão no seu resources
+    private static final Map<TipoRelatorioSolicitacao, String> RELATORIOS = Map.of(
+            TipoRelatorioSolicitacao.SIMPLES, "reports/solicitacoes/rel_solicitacao.jasper",
+            TipoRelatorioSolicitacao.POR_SETOR,     "reports/solicitacoes/rel_solicitacao_agrupado_por_setor.jasper",
+            TipoRelatorioSolicitacao.POR_MOTORISTA, "reports/solicitacoes/rel_solicitacao_agrupado_por_motorista.jasper",
+            TipoRelatorioSolicitacao.POR_CARRO,     "reports/solicitacoes/rel_solicitacao_agrupado_por_carro.jasper",
+            TipoRelatorioSolicitacao.POR_DESTINO,   "reports/solicitacoes/rel_solicitacao_agrupado_por_destino.jasper"
+    );
+
+    private static final String LOGO_PATH = "reports/images/logo_hrg.png";
 
     private final SolicitacaoRepository solicitacaoRepository;
 
     // ==========================
-    // RELATÓRIO SIMPLES (PDF)
+    // COMPATIBILIDADE (ANTIGOS)
     // ==========================
 
     /**
-     * Mantido para compatibilidade.
-     * Gera o PDF usando usuário logado e sem filtro específico.
+     * Mantido: gera PDF "simples" (tipo padrão) sem filtros.
      */
     @Transactional(Transactional.TxType.REQUIRED)
     public byte[] gerarRelatorioSolicitacoesSimples() {
-        return gerarRelatorioSolicitacoesPdf(null);
+        return gerarRelatorioSolicitacoesPdfFiltrado(TIPO_PADRAO, null, null, null);
     }
 
     /**
-     * Gera PDF de solicitações sem filtro (todas).
-     * OBS: se a base for grande, prefira os métodos filtrados.
+     * Mantido: gera PDF filtrado (tipo padrão).
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] gerarRelatorioSolicitacoesPdf(String filtroDescricao) {
+    public byte[] gerarRelatorioSolicitacoesPdfFiltrado(String filtro, LocalDate dataInicio, LocalDate dataFim) {
+        return gerarRelatorioSolicitacoesPdfFiltrado(TIPO_PADRAO, filtro, dataInicio, dataFim);
+    }
+
+    /**
+     * Mantido: gera Excel filtrado (tipo padrão).
+     */
+    @Transactional(Transactional.TxType.REQUIRED)
+    public byte[] gerarRelatorioSolicitacoesExcelFiltrado(String filtro, LocalDate dataInicio, LocalDate dataFim) {
+        return gerarRelatorioSolicitacoesExcelFiltrado(TIPO_PADRAO, filtro, dataInicio, dataFim);
+    }
+
+    // ==========================
+    // NOVOS (COM TIPO)
+    // ==========================
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public byte[] gerarRelatorioSolicitacoesPdfFiltrado(
+            TipoRelatorioSolicitacao tipo,
+            String filtro,
+            LocalDate dataInicio,
+            LocalDate dataFim
+    ) {
+        List<SolicitacaoRelatorioDTO> dados = consultarSolicitacoesParaRelatorio(filtro, dataInicio, dataFim);
+        String filtroDescricao = montarDescricaoFiltro(filtro, dataInicio, dataFim);
+        return gerarPdf(tipo, dados, filtroDescricao);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public byte[] gerarRelatorioSolicitacoesExcelFiltrado(
+            TipoRelatorioSolicitacao tipo,
+            String filtro,
+            LocalDate dataInicio,
+            LocalDate dataFim
+    ) {
+        List<SolicitacaoRelatorioDTO> dados = consultarSolicitacoesParaRelatorio(filtro, dataInicio, dataFim);
+        String filtroDescricao = montarDescricaoFiltro(filtro, dataInicio, dataFim);
+        return gerarExcel(tipo, dados, filtroDescricao);
+    }
+
+    // ==========================
+    // CORE (FILL + EXPORT)
+    // ==========================
+
+    private byte[] gerarPdf(TipoRelatorioSolicitacao tipo, List<SolicitacaoRelatorioDTO> dados, String filtroDescricao) {
         try {
-            // 1) Busca dados (tudo)
-            List<Solicitacao> solicitacoes = solicitacaoRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-            List<SolicitacaoRelatorioDTO> dados = mapearParaDTO(solicitacoes);
-
-            if (dados.isEmpty()) {
-                log.warn("Nenhum dado encontrado para o relatório de solicitações (PDF).");
+            if (dados == null || dados.isEmpty()) {
+                log.warn("Nenhum dado encontrado para o relatório (PDF). tipo={}", tipo);
             }
 
-            // 2) Carrega JRXML
-            ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
+            // ✅ importante para o Jasper agrupar corretamente
+            ordenarParaAgrupamento(dados, tipo);
 
-            try (InputStream jrxmlStream = resource.getInputStream()) {
-                // 3) Compila
-                JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+            JasperReport jasperReport = carregarRelatorio(tipo);
+            Map<String, Object> params = montarParams(filtroDescricao);
 
-                // 4) Params
-                Map<String, Object> params = new HashMap<>();
-                params.put("NOME_USUARIO", obterNomeUsuarioLogado());
-                params.put("FILTRO_DESCRICAO",
-                        filtroDescricao != null && !filtroDescricao.isBlank()
-                                ? filtroDescricao
-                                : "Sem filtros aplicados");
+            JasperPrint jasperPrint = JasperFillManager.fillReport(
+                    jasperReport,
+                    params,
+                    new JRBeanCollectionDataSource(dados)
+            );
 
-                // 5) DataSource
-                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
-
-                // 6) Preenche
-                JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-
-                // 7) Exporta PDF
-                return JasperExportManager.exportReportToPdf(jasperPrint);
-            }
+            return JasperExportManager.exportReportToPdf(jasperPrint);
 
         } catch (Exception e) {
-            log.error("Erro ao gerar relatório de solicitações em PDF", e);
-            throw new RuntimeException("Erro ao gerar relatório de solicitações em PDF: " + e.getMessage(), e);
+            log.error("Erro ao gerar relatório PDF tipo={}", tipo, e);
+            throw new RuntimeException("Erro ao gerar relatório PDF (" + tipo + "): " + e.getMessage(), e);
         }
     }
 
-    // ==========================
-    // RELATÓRIO SIMPLES (EXCEL)
-    // ==========================
-
-    /**
-     * Gera o relatório de solicitações em Excel (XLSX).
-     */
-    @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] gerarRelatorioSolicitacoesExcel(String filtroDescricao) {
+    private byte[] gerarExcel(TipoRelatorioSolicitacao tipo, List<SolicitacaoRelatorioDTO> dados, String filtroDescricao) {
         try {
-            // 1) Busca dados
-            List<Solicitacao> solicitacoes = solicitacaoRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-            List<SolicitacaoRelatorioDTO> dados = mapearParaDTO(solicitacoes);
-
-            if (dados.isEmpty()) {
-                log.warn("Nenhum dado encontrado para o relatório de solicitações (Excel).");
+            if (dados == null || dados.isEmpty()) {
+                log.warn("Nenhum dado encontrado para o relatório (Excel). tipo={}", tipo);
             }
 
-            // 2) Carrega JRXML
-            ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
+            // ✅ importante para o Jasper agrupar corretamente
+            ordenarParaAgrupamento(dados, tipo);
 
-            try (InputStream jrxmlStream = resource.getInputStream();
-                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            JasperReport jasperReport = carregarRelatorio(tipo);
+            Map<String, Object> params = montarParams(filtroDescricao);
 
-                // 3) Compila
-                JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(
+                    jasperReport,
+                    params,
+                    new JRBeanCollectionDataSource(dados)
+            );
 
-                // 4) Params
-                Map<String, Object> params = new HashMap<>();
-                params.put("NOME_USUARIO", obterNomeUsuarioLogado());
-                params.put("FILTRO_DESCRICAO",
-                        filtroDescricao != null && !filtroDescricao.isBlank()
-                                ? filtroDescricao
-                                : "Sem filtros aplicados");
-
-                // 5) DataSource
-                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
-
-                // 6) Preenche
-                JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-
-                // 7) Exporta XLSX
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 JRXlsxExporter exporter = new JRXlsxExporter();
                 exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
                 exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
 
-                SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
-                configuration.setDetectCellType(true);
-                configuration.setCollapseRowSpan(false);
-                configuration.setWhitePageBackground(false);
-                configuration.setRemoveEmptySpaceBetweenRows(true);
-                exporter.setConfiguration(configuration);
+                SimpleXlsxReportConfiguration conf = new SimpleXlsxReportConfiguration();
+                conf.setDetectCellType(true);
+                conf.setCollapseRowSpan(false);
+                conf.setWhitePageBackground(false);
+                conf.setRemoveEmptySpaceBetweenRows(true);
+                exporter.setConfiguration(conf);
 
                 exporter.exportReport();
                 return out.toByteArray();
             }
 
         } catch (Exception e) {
-            log.error("Erro ao gerar relatório de solicitações em Excel", e);
-            throw new RuntimeException("Erro ao gerar relatório de solicitações em Excel: " + e.getMessage(), e);
+            log.error("Erro ao gerar relatório Excel tipo={}", tipo, e);
+            throw new RuntimeException("Erro ao gerar relatório Excel (" + tipo + "): " + e.getMessage(), e);
         }
     }
 
-    // ==========================
-    // RELATÓRIO FILTRADO (PDF/EXCEL)
-    // ==========================
+    private JasperReport carregarRelatorio(TipoRelatorioSolicitacao tipo) {
+        String caminho = RELATORIOS.get(tipo);
+        if (caminho == null) {
+            throw new RuntimeException("Tipo de relatório não mapeado: " + tipo);
+        }
 
-    @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] gerarRelatorioSolicitacoesPdfFiltrado(String filtro, LocalDate dataInicio, LocalDate dataFim) {
-        List<SolicitacaoRelatorioDTO> dados = consultarSolicitacoesParaRelatorio(filtro, dataInicio, dataFim);
-        String filtroDescricao = montarDescricaoFiltro(filtro, dataInicio, dataFim);
-        return gerarPdf(dados, filtroDescricao);
-    }
-
-    @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] gerarRelatorioSolicitacoesExcelFiltrado(String filtro, LocalDate dataInicio, LocalDate dataFim) {
-        List<SolicitacaoRelatorioDTO> dados = consultarSolicitacoesParaRelatorio(filtro, dataInicio, dataFim);
-        String filtroDescricao = montarDescricaoFiltro(filtro, dataInicio, dataFim);
-        return gerarExcel(dados, filtroDescricao);
-    }
-
-
-    // ==========================
-    // CORE (CARREGA + FILL + EXPORT)
-    // ==========================
-
-    private JasperReport carregarRelatorio() {
         try {
-            ClassPathResource resource = new ClassPathResource(CAMINHO_RELATORIO);
-
+            ClassPathResource resource = new ClassPathResource(caminho);
             if (!resource.exists()) {
-                // ✅ Erro claro (resolve 90% dos "não gera relatório")
-                throw new RuntimeException("Relatório .jasper não encontrado no classpath: " + CAMINHO_RELATORIO);
+                throw new RuntimeException("Relatório .jasper não encontrado no classpath: " + caminho);
             }
 
             try (InputStream is = resource.getInputStream()) {
                 return (JasperReport) JRLoader.loadObject(is);
             }
+
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao carregar relatório .jasper: " + CAMINHO_RELATORIO + " - " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao carregar relatório .jasper: " + caminho + " - " + e.getMessage(), e);
         }
     }
 
@@ -202,71 +200,20 @@ public class RelatorioSolicitacaoService {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("NOME_USUARIO", obterNomeUsuarioLogado());
-            params.put("FILTRO_DESCRICAO", (filtroDescricao != null && !filtroDescricao.isBlank()) ? filtroDescricao : "Sem filtros aplicados");
-            params.put("LOGO", new ClassPathResource("reports/images/logo_hrg.png").getInputStream());
+            params.put("FILTRO_DESCRICAO",
+                    (filtroDescricao != null && !filtroDescricao.isBlank()) ? filtroDescricao : "Sem filtros aplicados");
+
+            // ✅ Logo opcional (se falhar, lança erro claro)
+            params.put("LOGO", new ClassPathResource(LOGO_PATH).getInputStream());
             return params;
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao carregar logo do relatório: " + e.getMessage(), e);
-        }
-    }
-
-
-
-    private byte[] gerarPdf(List<SolicitacaoRelatorioDTO> dados, String filtroDescricao) {
-        try {
-            if (dados == null || dados.isEmpty()) {
-                log.warn("Nenhum dado encontrado para o relatório de solicitações (PDF).");
-            }
-
-            JasperReport jasperReport = carregarRelatorio();
-            Map<String, Object> params = montarParams(filtroDescricao);
-
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-
-            return JasperExportManager.exportReportToPdf(jasperPrint);
 
         } catch (Exception e) {
-            log.error("Erro ao gerar relatório de solicitações em PDF", e);
-            throw new RuntimeException("Erro ao gerar relatório de solicitações em PDF: " + e.getMessage(), e);
-        }
-    }
-
-    private byte[] gerarExcel(List<SolicitacaoRelatorioDTO> dados, String filtroDescricao) {
-        try {
-            if (dados == null || dados.isEmpty()) {
-                log.warn("Nenhum dado encontrado para o relatório de solicitações (Excel).");
-            }
-
-            JasperReport jasperReport = carregarRelatorio();
-            Map<String, Object> params = montarParams(filtroDescricao);
-
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dados);
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                JRXlsxExporter exporter = new JRXlsxExporter();
-                exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-                exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
-
-                SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
-                configuration.setDetectCellType(true);
-                configuration.setCollapseRowSpan(false);
-                configuration.setWhitePageBackground(false);
-                configuration.setRemoveEmptySpaceBetweenRows(true);
-                exporter.setConfiguration(configuration);
-
-                exporter.exportReport();
-                return out.toByteArray();
-            }
-        } catch (Exception e) {
-            log.error("Erro ao gerar relatório de solicitações em Excel", e);
-            throw new RuntimeException("Erro ao gerar relatório de solicitações em Excel: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao montar parâmetros do relatório: " + e.getMessage(), e);
         }
     }
 
     // ==========================
-    // CONSULTA (LISTA / PÁGINA) PARA TELA DE RELATÓRIO
+    // CONSULTA (LISTA / PÁGINA)
     // ==========================
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -276,18 +223,10 @@ public class RelatorioSolicitacaoService {
             LocalDate dataFim
     ) {
         List<Solicitacao> base = solicitacaoRepository.filtrarSemPaginacao(filtro);
-
-        // filtro por datas (LocalDate)
         List<Solicitacao> filtradas = aplicarFiltroDatas(base, dataInicio, dataFim);
-
-        // map DTO
         return mapearParaDTO(filtradas);
     }
 
-    /**
-     * Paginação em memória (no mesmo padrão do template).
-     * Se a base crescer muito, a gente cria uma query paginada projetando direto em DTO.
-     */
     @Transactional(Transactional.TxType.REQUIRED)
     public Page<SolicitacaoRelatorioDTO> consultarSolicitacoesParaRelatorioPaginado(
             String filtro,
@@ -302,41 +241,59 @@ public class RelatorioSolicitacaoService {
         int end = Math.min(start + size, dados.size());
 
         List<SolicitacaoRelatorioDTO> content = dados.subList(start, end);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        var pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return new PageImpl<>(content, pageable, dados.size());
     }
 
     // ==========================
-    // AUXILIARES
+    // ORDENAÇÃO (GROUP DO JASPER)
+    // ==========================
+
+    private void ordenarParaAgrupamento(List<SolicitacaoRelatorioDTO> dados, TipoRelatorioSolicitacao tipo) {
+        if (dados == null || dados.isEmpty()) return;
+
+        // ✅ SEM AGRUPAMENTO → ordenação simples
+        if (tipo == TipoRelatorioSolicitacao.SIMPLES) {
+            dados.sort(
+                    Comparator.comparing(SolicitacaoRelatorioDTO::getDataSolicitacao, Comparator.nullsLast(LocalDate::compareTo))
+                            .thenComparing(SolicitacaoRelatorioDTO::getId, Comparator.nullsLast(Long::compareTo))
+            );
+            return;
+        }
+
+        // 🔽 AGRUPADOS
+        Comparator<SolicitacaoRelatorioDTO> porGrupo = switch (tipo) {
+            case POR_SETOR -> Comparator.comparing(SolicitacaoRelatorioDTO::getSetor, Comparator.nullsLast(String::compareToIgnoreCase));
+            case POR_MOTORISTA -> Comparator.comparing(SolicitacaoRelatorioDTO::getMotorista, Comparator.nullsLast(String::compareToIgnoreCase));
+            case POR_CARRO -> Comparator.comparing(SolicitacaoRelatorioDTO::getCarro, Comparator.nullsLast(String::compareToIgnoreCase));
+            case POR_DESTINO -> Comparator.comparing(SolicitacaoRelatorioDTO::getDestino, Comparator.nullsLast(String::compareToIgnoreCase));
+            default -> Comparator.comparing(SolicitacaoRelatorioDTO::getId);
+        };
+
+        Comparator<SolicitacaoRelatorioDTO> base = Comparator
+                .comparing(SolicitacaoRelatorioDTO::getDataSolicitacao, Comparator.nullsLast(LocalDate::compareTo))
+                .thenComparing(SolicitacaoRelatorioDTO::getId, Comparator.nullsLast(Long::compareTo));
+
+        dados.sort(porGrupo.thenComparing(base));
+    }
+
+    // ==========================
+    // AUXILIARES (FILTRO / DTO)
     // ==========================
 
     private List<Solicitacao> aplicarFiltroDatas(List<Solicitacao> base, LocalDate inicio, LocalDate fim) {
         if (base == null || base.isEmpty()) return Collections.emptyList();
 
-        if (inicio != null && fim != null) {
-            return base.stream()
-                    .filter(s -> s.getDataSolicitacao() != null
-                            && !s.getDataSolicitacao().isBefore(inicio)
-                            && !s.getDataSolicitacao().isAfter(fim))
-                    .collect(Collectors.toList());
-        }
-
-        if (inicio != null) {
-            return base.stream()
-                    .filter(s -> s.getDataSolicitacao() != null
-                            && !s.getDataSolicitacao().isBefore(inicio))
-                    .collect(Collectors.toList());
-        }
-
-        if (fim != null) {
-            return base.stream()
-                    .filter(s -> s.getDataSolicitacao() != null
-                            && !s.getDataSolicitacao().isAfter(fim))
-                    .collect(Collectors.toList());
-        }
-
-        return base;
+        return base.stream()
+                .filter(s -> {
+                    LocalDate d = s.getDataSolicitacao();
+                    if (d == null) return false;
+                    if (inicio != null && d.isBefore(inicio)) return false;
+                    if (fim != null && d.isAfter(fim)) return false;
+                    return true;
+                })
+                .collect(Collectors.toList());
     }
 
     private List<SolicitacaoRelatorioDTO> mapearParaDTO(List<Solicitacao> solicitacoes) {
@@ -349,14 +306,12 @@ public class RelatorioSolicitacaoService {
             dto.setDataSolicitacao(s.getDataSolicitacao());
             dto.setStatus(s.getStatus());
 
-            // --- Relacionamentos (texto pronto pro relatório)
             dto.setCarro(montarDescricaoCarro(s));
             dto.setMotorista(s.getMotorista() != null ? s.getMotorista().getNome() : "-");
             dto.setUsuario(s.getUsuario() != null ? s.getUsuario().getNome() : "-");
             dto.setSetor(s.getSetor() != null ? s.getSetor().getNome() : "-");
             dto.setDestino(s.getDestino() != null ? s.getDestino().getNome() : "-");
 
-            // --- Campos de quilometragem e horários (ajuste os getters conforme sua entidade)
             dto.setKmInicial(s.getKmInicial());
             dto.setKmFinal(s.getKmFinal());
             dto.setHoraSaida(s.getHoraSaida());
@@ -373,7 +328,6 @@ public class RelatorioSolicitacaoService {
         String marca = safe(s.getCarro().getMarca());
         String modelo = safe(s.getCarro().getModelo());
 
-        // Ex.: "ABC-1234 - FIAT - UNO"
         String base = String.join(" - ", placa, marca, modelo).replaceAll("(\\s*-\\s*)+$", "");
         return base.isBlank() ? "-" : base;
     }
@@ -385,22 +339,15 @@ public class RelatorioSolicitacaoService {
     private String montarDescricaoFiltro(String filtro, LocalDate inicio, LocalDate fim) {
         List<String> partes = new ArrayList<>();
 
-        if (filtro != null && !filtro.isBlank()) {
-            partes.add("Filtro=" + filtro);
-        }
-        if (inicio != null) {
-            partes.add("Data Início=" + inicio);
-        }
-        if (fim != null) {
-            partes.add("Data Fim=" + fim);
-        }
+        if (filtro != null && !filtro.isBlank()) partes.add("Filtro=" + filtro);
+        if (inicio != null) partes.add("Data Início=" + inicio);
+        if (fim != null) partes.add("Data Fim=" + fim);
 
-        return partes.isEmpty() ? "Sem filtros aplicados" : "Filtros: " + String.join(" | ", partes);
+        return partes.isEmpty()
+                ? "Sem filtros aplicados"
+                : "Filtros: " + String.join(" | ", partes);
     }
 
-    /**
-     * Obtém o nome do usuário logado a partir do SecurityContext.
-     */
     private String obterNomeUsuarioLogado() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -410,13 +357,12 @@ public class RelatorioSolicitacaoService {
             }
 
             Object principal = auth.getPrincipal();
-
             if (principal instanceof UserDetails userDetails) {
                 return userDetails.getUsername();
             }
 
             String name = auth.getName();
-            return name != null ? name : "Usuário não autenticado";
+            return (name != null) ? name : "Usuário não autenticado";
 
         } catch (Exception e) {
             log.warn("Não foi possível obter o usuário logado para o relatório", e);

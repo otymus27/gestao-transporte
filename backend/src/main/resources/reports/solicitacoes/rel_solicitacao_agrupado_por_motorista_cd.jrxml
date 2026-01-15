@@ -1,0 +1,183 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="solicitacoes_por_motorista_sql" language="java" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c5f3c7b2-2f65-4b51-9aa8-4d9c7ddc2b11">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="conexao"/>
+	<parameter name="LOGO" class="java.io.InputStream"/>
+	<query language="SQL"><![CDATA[SELECT
+    s.id                                       AS id,
+    s.data_solicitacao                         AS data_solicitacao,
+    s.status                                   AS status,
+
+    -- carro (ajuste como você preferir)
+    CONCAT(c.placa, ' - ', c.marca, ' ', c.modelo) AS carro,
+
+    m.nome                                     AS motorista,
+    u.username                                 AS usuario,
+    se.nome                                    AS setor,
+    d.nome                                     AS destino,
+
+    s.km_inicial                               AS km_inicial,
+    s.km_final                                 AS km_final,
+
+    -- km total numérico (pra somar)
+    CASE
+      WHEN s.km_inicial IS NULL OR s.km_final IS NULL THEN 0
+      ELSE (s.km_final - s.km_inicial)
+    END                                        AS km_total_num,
+
+    -- km total texto (pra exibir "-" quando não tem)
+    CASE
+      WHEN s.km_inicial IS NULL OR s.km_final IS NULL THEN '-'
+      ELSE CAST((s.km_final - s.km_inicial) AS CHAR)
+    END                                        AS km_total_txt
+
+FROM db_nutran.tb_solicitacao s
+LEFT JOIN db_nutran.tb_carro c      ON c.id  = s.id_carro
+LEFT JOIN db_nutran.tb_motorista m  ON m.id  = s.id_motorista
+LEFT JOIN db_nutran.tb_usuarios u   ON u.id  = s.id_usuario
+LEFT JOIN db_nutran.tb_setor se     ON se.id = s.id_setor
+LEFT JOIN db_nutran.tb_destino d    ON d.id  = s.id_destino
+
+ORDER BY m.nome ASC, s.data_solicitacao ASC, s.id ASC]]></query>
+	<field name="id" class="java.lang.Long"/>
+	<field name="data_solicitacao" class="java.sql.Date"/>
+	<field name="status" class="java.lang.String"/>
+	<field name="carro" class="java.lang.String"/>
+	<field name="motorista" class="java.lang.String"/>
+	<field name="usuario" class="java.lang.String"/>
+	<field name="setor" class="java.lang.String"/>
+	<field name="destino" class="java.lang.String"/>
+	<field name="km_inicial" class="java.lang.Integer"/>
+	<field name="km_final" class="java.lang.Integer"/>
+	<field name="km_total_num" class="java.lang.Integer"/>
+	<field name="km_total_txt" class="java.lang.String"/>
+	<variable name="TOTAL_SOLICITACOES" calculation="Count" class="java.lang.Integer">
+		<expression><![CDATA[$F{id}]]></expression>
+	</variable>
+	<variable name="KM_TOTAL_MOTORISTA" resetType="Group" calculation="Sum" resetGroup="grpMotorista" class="java.lang.Integer">
+		<expression><![CDATA[$F{km_total_num} == null ? 0 : $F{km_total_num}]]></expression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="KM_TOTAL_GERAL" calculation="Sum" class="java.lang.Integer">
+		<expression><![CDATA[$F{km_total_num} == null ? 0 : $F{km_total_num}]]></expression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<group name="grpMotorista">
+		<expression><![CDATA[$F{motorista}]]></expression>
+		<groupHeader>
+			<band height="28">
+				<element kind="staticText" uuid="be9e4f33-6a39-4b7f-a7a2-5bb2bda0a111" x="0" y="0" width="80" height="18" fontSize="12.0" bold="true">
+					<text><![CDATA[Motorista:]]></text>
+				</element>
+				<element kind="textField" uuid="0a1b2c3d-4e5f-4c6a-8b9c-0d1e2f3a4b5c" x="80" y="0" width="722" height="18" fontSize="12.0" bold="true">
+					<expression><![CDATA[$F{motorista}]]></expression>
+				</element>
+				<element kind="line" uuid="b10d2c0a-0f4c-4e3a-9c8d-1a2b3c4d5e6f" x="0" y="22" width="802" height="1"/>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="26">
+				<element kind="line" uuid="f2a3b4c5-d6e7-4f89-9a01-2b3c4d5e6f70" x="0" y="0" width="802" height="1"/>
+				<element kind="staticText" uuid="1dcbf8d0-5a16-4ae8-8e40-e9c5d5a6f1a2" x="520" y="6" width="180" height="18" bold="true" hTextAlign="Right">
+					<text><![CDATA[KM Total do Motorista:]]></text>
+				</element>
+				<element kind="textField" uuid="c7a01f3e-8c0e-4ac5-9b6f-3d2b1a0f9e8d" x="700" y="6" width="102" height="18" pattern="#,##0" bold="true" hTextAlign="Right">
+					<expression><![CDATA[$V{KM_TOTAL_MOTORISTA}]]></expression>
+				</element>
+			</band>
+		</groupFooter>
+	</group>
+	<title height="60">
+		<element kind="image" uuid="fe9d1a44-6b1b-4d38-8c25-0a8d5c2b1f11" x="0" y="0" width="90" height="40">
+			<expression><![CDATA[$P{LOGO}]]></expression>
+		</element>
+		<element kind="staticText" uuid="cb901a4c-0fbb-4f71-8a4f-7bc18b23b8a2" x="100" y="0" width="702" height="24" fontSize="16.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Sistema de Controle de Requisição]]></text>
+		</element>
+		<element kind="line" uuid="9b8a7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d" x="0" y="52" width="802" height="1"/>
+	</title>
+	<pageHeader height="50">
+		<element kind="textField" uuid="c542ccc2-7131-4db0-87db-8f5c47d57cb3" x="636" y="0" width="155" height="18" pattern="MMMMM dd, yyyy" hTextAlign="Right">
+			<expression><![CDATA["Impresso em: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new Date())]]></expression>
+		</element>
+		<element kind="staticText" uuid="7e476054-a3fb-4b1b-bd6d-8ff4ea72fc3d" stretchType="NoStretch" x="-1" y="5" width="320" height="15" fontSize="10.0" bold="true" italic="false" hTextAlign="Left" vTextAlign="Top">
+			<text><![CDATA[Relatório de Solicitações - Agrupado por Motorista]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="23">
+		<element kind="staticText" uuid="1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d" x="0" y="0" width="40" height="18" bold="true">
+			<text><![CDATA[ID]]></text>
+		</element>
+		<element kind="staticText" uuid="2b3c4d5e-6f70-4a81-9b02-1c2d3e4f5a6b" x="45" y="0" width="64" height="18" bold="true">
+			<text><![CDATA[Data]]></text>
+		</element>
+		<element kind="staticText" uuid="4d5e6f70-8192-4aa3-9b24-3c4d5e6f7a8b" x="120" y="0" width="50" height="18" bold="true">
+			<text><![CDATA[Carro]]></text>
+		</element>
+		<element kind="staticText" uuid="5e6f7081-92a3-4ab4-9b35-4c5d6e7f8a9b" x="280" y="0" width="99" height="18" bold="true">
+			<text><![CDATA[Setor]]></text>
+		</element>
+		<element kind="staticText" uuid="6f708192-a3b4-4ac5-9b46-5c6d7e8f9a0b" x="460" y="0" width="71" height="18" bold="true">
+			<text><![CDATA[Destino]]></text>
+		</element>
+		<element kind="staticText" uuid="708192a3-b4c5-4ad6-9b57-6c7d8e9f0a1b" x="750" y="0" width="52" height="18" bold="true" hTextAlign="Center">
+			<text><![CDATA[Total KM]]></text>
+		</element>
+		<element kind="staticText" uuid="efa90f71-afda-492f-ba92-cde8f5f74954" x="590" y="0" width="62" height="18" bold="true" hTextAlign="Center">
+			<text><![CDATA[KM Inicial]]></text>
+		</element>
+		<element kind="staticText" uuid="6fb86e2f-dbb7-49f2-9739-fadc659bb392" x="680" y="0" width="46" height="18" bold="true" hTextAlign="Right">
+			<text><![CDATA[KM Final]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="23">
+			<element kind="textField" uuid="a111b222-c333-4d44-8e55-f66677788899" x="0" y="0" width="40" height="18">
+				<expression><![CDATA[$F{id}]]></expression>
+			</element>
+			<element kind="textField" uuid="b111c222-d333-4e44-8f55-a66677788890" x="45" y="0" width="64" height="18" pattern="dd/MM/yyyy">
+				<expression><![CDATA[$F{data_solicitacao}]]></expression>
+			</element>
+			<element kind="textField" uuid="d111e222-f333-4044-8155-c66677788892" x="120" y="0" width="150" height="18">
+				<expression><![CDATA[$F{carro}]]></expression>
+			</element>
+			<element kind="textField" uuid="e111f222-a333-4144-8255-d66677788893" x="280" y="0" width="170" height="18">
+				<expression><![CDATA[$F{setor}]]></expression>
+			</element>
+			<element kind="textField" uuid="f111a222-b333-4244-8355-e66677788894" x="460" y="0" width="130" height="18">
+				<expression><![CDATA[$F{destino}]]></expression>
+			</element>
+			<element kind="textField" uuid="0111b222-c333-4344-8455-f66677788895" x="760" y="0" width="42" height="18" hTextAlign="Center">
+				<expression><![CDATA[$F{km_total_txt}]]></expression>
+			</element>
+			<element kind="textField" uuid="025903a2-110a-4eb2-8f93-289f7ec46a93" x="590" y="0" width="70" height="18">
+				<expression><![CDATA[$F{km_inicial}]]></expression>
+			</element>
+			<element kind="textField" uuid="75211641-6e64-4c33-adee-9758e958c347" x="683" y="0" width="60" height="18">
+				<expression><![CDATA[$F{km_final}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<pageFooter height="50">
+		<element kind="textField" uuid="5e0e12d2-129a-4d21-a900-523040f9d7c4" x="330" y="0" width="100" height="30" hTextAlign="Right">
+			<expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+		<element kind="textField" uuid="69920873-c0c8-4804-8abb-35d9171f2b96" x="440" y="0" width="100" height="30" evaluationTime="Report" hTextAlign="Left">
+			<expression><![CDATA[" de " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+	</pageFooter>
+	<summary height="53">
+		<element kind="line" uuid="1b2c3d4e-5f60-4a71-8b82-9c0d1e2f3a4b" x="0" y="0" width="802" height="1"/>
+		<element kind="staticText" uuid="2c3d4e5f-6071-4a82-9b93-0c1d2e3f4a5b" x="520" y="6" width="180" height="18" fontSize="12.0" bold="true" hTextAlign="Right">
+			<text><![CDATA[KM Total Geral:]]></text>
+		</element>
+		<element kind="textField" uuid="3d4e5f60-7182-4a93-9ba4-1c2d3e4f5a6b" x="700" y="6" width="102" height="18" fontSize="12.0" pattern="#,##0" bold="true" hTextAlign="Right">
+			<expression><![CDATA[$V{KM_TOTAL_GERAL}]]></expression>
+		</element>
+		<element kind="staticText" uuid="818512db-5c61-48d5-846b-634afa1a8978" x="0" y="23" width="100" height="30">
+			<text><![CDATA[Total de solicitações:]]></text>
+		</element>
+		<element kind="textField" uuid="f1e5f011-54dd-4fa1-9d48-a10068c3368d" x="110" y="23" width="60" height="30" fontSize="10.0" bold="true" hTextAlign="Left">
+			<expression><![CDATA[$V{TOTAL_SOLICITACOES}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

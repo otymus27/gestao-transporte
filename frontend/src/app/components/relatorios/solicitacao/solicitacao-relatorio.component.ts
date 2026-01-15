@@ -2,7 +2,11 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SolicitacaoService } from '../../../services/solicitacao.service';
-import { RelatorioSolicitacaoService } from '../../../services/relatorios/relatorio-solicitacao.service';
+import {
+  RelatorioSolicitacaoService,
+  FiltroSolicitacaoRelatorio,
+  TipoRelatorioSolicitacao,
+} from '../../../services/relatorios/relatorio-solicitacao.service';
 
 type ExportTipo = 'pdf' | 'excel' | 'csv';
 
@@ -18,10 +22,25 @@ export class SolicitacaoRelatorioComponent {
     private relatorioService: RelatorioSolicitacaoService
   ) {}
 
-  filtros = {
+  // ✅ opções pro select (pode mover pro html direto se preferir)
+  tiposRelatorio: { value: TipoRelatorioSolicitacao; label: string }[] = [
+    { value: 'SIMPLES', label: 'Sem agrupamento' },
+    { value: 'POR_SETOR', label: 'Agrupado por Setor' },
+    { value: 'POR_MOTORISTA', label: 'Agrupado por Motorista' },
+    { value: 'POR_CARRO', label: 'Agrupado por Carro' },
+    { value: 'POR_DESTINO', label: 'Agrupado por Destino' },
+  ];
+
+  filtros: {
+    tipo: TipoRelatorioSolicitacao;
+    filtro: string;
+    dataInicio: string; // yyyy-MM-dd
+    dataFim: string;    // yyyy-MM-dd
+  } = {
+    tipo: 'SIMPLES', // ✅ default (você pode trocar para POR_SETOR se quiser)
     filtro: '',
-    dataInicio: '', // yyyy-MM-dd
-    dataFim: '', // yyyy-MM-dd
+    dataInicio: '',
+    dataFim: '',
   };
 
   resultados: any[] = [];
@@ -37,7 +56,7 @@ export class SolicitacaoRelatorioComponent {
     this.page = page;
 
     const filtrosApi: any = {
-      filtro: this.filtros.filtro,
+      filtro: this.filtros.filtro?.trim() || null,
       dataInicio: this.filtros.dataInicio || null,
       dataFim: this.filtros.dataFim || null,
     };
@@ -64,7 +83,13 @@ export class SolicitacaoRelatorioComponent {
   }
 
   limpar(): void {
-    this.filtros = { filtro: '', dataInicio: '', dataFim: '' };
+    this.filtros = {
+      tipo: 'SIMPLES',
+      filtro: '',
+      dataInicio: '',
+      dataFim: '',
+    };
+
     this.resultados = [];
     this.page = 0;
     this.totalPages = 0;
@@ -72,10 +97,18 @@ export class SolicitacaoRelatorioComponent {
   }
 
   exportar(tipo: ExportTipo): void {
-    if (!this.resultados || this.resultados.length === 0) return;
+    // ✅ CSV depende dos dados da tabela (front)
+    if (tipo === 'csv') {
+      if (!this.resultados || this.resultados.length === 0) return;
+      this.exportarCsv();
+      return;
+    }
 
-    const filtrosExport: any = {
-      filtro: this.filtros.filtro,
+    // ✅ PDF/Excel NÃO precisam depender da tabela.
+    // Você pode exportar mesmo sem consultar antes.
+    const filtrosExport: FiltroSolicitacaoRelatorio = {
+      tipo: this.filtros.tipo, // ✅ aqui entra o agrupamento
+      filtro: this.filtros.filtro?.trim() || null,
       dataInicio: this.filtros.dataInicio || null,
       dataFim: this.filtros.dataFim || null,
     };
@@ -83,7 +116,7 @@ export class SolicitacaoRelatorioComponent {
     if (tipo === 'pdf') {
       this.relatorioService.exportarPdf(filtrosExport).subscribe({
         next: (blob) =>
-          this.baixarArquivo(blob, 'rel_solicitacoes.pdf', 'application/pdf'),
+          this.baixarArquivo(blob, this.nomeArquivo('pdf'), 'application/pdf'),
         error: (err) => {
           console.error('Erro ao exportar PDF', err);
           alert('Erro ao exportar PDF.');
@@ -97,7 +130,7 @@ export class SolicitacaoRelatorioComponent {
         next: (blob) =>
           this.baixarArquivo(
             blob,
-            'rel_solicitacoes.xlsx',
+            this.nomeArquivo('xlsx'),
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
           ),
         error: (err) => {
@@ -107,9 +140,12 @@ export class SolicitacaoRelatorioComponent {
       });
       return;
     }
+  }
 
-    // CSV (gerado no front a partir dos resultados da consulta)
-    this.exportarCsv();
+  private nomeArquivo(ext: 'pdf' | 'xlsx'): string {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const tipo = (this.filtros.tipo || 'SEM_AGRUPAMENTO').toLowerCase();
+    return `rel_solicitacoes_${tipo}_${hoje}.${ext}`;
   }
 
   private exportarCsv(): void {
@@ -140,7 +176,7 @@ export class SolicitacaoRelatorioComponent {
       r.destino,
       r.kmInicial,
       r.kmFinal,
-      r.kmTotal, // getter no DTO (Jasper) - aqui depende se o backend retorna
+      r.kmTotal,
       r.horaSaida,
       r.horaChegada,
     ]);

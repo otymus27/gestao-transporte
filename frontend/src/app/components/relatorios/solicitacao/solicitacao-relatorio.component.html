@@ -36,7 +36,20 @@
           />
         </div>
 
-        <div class="col-sm-3 d-flex gap-2">
+        <!-- ✅ AGRUPAMENTO -->
+        <div class="col-md-2">
+          <select
+            class="form-select"
+            [(ngModel)]="filtros.tipo"
+            title="Agrupar por"
+          >
+            <option *ngFor="let t of tiposRelatorio" [ngValue]="t.value">
+              {{ t.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-sm-2 d-flex gap-2">
           <button class="btn btn-primary flex-grow-1" (click)="consultar(0)">
             <i class="bi bi-search"></i> Consultar
           </button>
@@ -47,17 +60,22 @@
       </div>
 
       <!-- Exportação -->
-      <div
-        *ngIf="resultados.length > 0"
-        class="d-flex justify-content-st gap-2 mb-2"
-      >
+      <div class="d-flex justify-content-start gap-2 mb-2">
+        <!-- ✅ PDF/Excel podem exportar sem depender da tabela -->
         <button class="btn btn-danger btn-sm" (click)="exportar('pdf')">
           <i class="bi bi-file-earmark-pdf"></i> PDF
         </button>
         <button class="btn btn-success btn-sm" (click)="exportar('excel')">
           <i class="bi bi-file-earmark-excel"></i> Excel
         </button>
-        <button class="btn btn-secondary btn-sm" (click)="exportar('csv')">
+
+        <!-- ✅ CSV depende dos resultados em tela -->
+        <button
+          class="btn btn-secondary btn-sm"
+          (click)="exportar('csv')"
+          [disabled]="!resultados || resultados.length === 0"
+          title="CSV é gerado a partir da tabela exibida"
+        >
           <i class="bi bi-file-earmark-text"></i> CSV
         </button>
       </div>
@@ -86,18 +104,21 @@
           <tbody>
             <tr *ngFor="let s of resultados">
               <td>{{ s.id }}</td>
+
+              <!-- ✅ se quiser formatar, troque para: {{ s.dataSolicitacao | date:'dd/MM/yyyy' }} -->
               <td>{{ s.dataSolicitacao }}</td>
+
               <td>{{ s.status }}</td>
               <td>{{ s.carro }}</td>
               <td>{{ s.motorista }}</td>
               <td>{{ s.usuario }}</td>
               <td>{{ s.setor }}</td>
               <td>{{ s.destino }}</td>
-              <td>{{ s.kmInicial ?? '-' }}</td>
-              <td>{{ s.kmFinal ?? '-' }}</td>
-              <td>{{ s.kmTotal ?? '-' }}</td>
-              <td>{{ s.horaSaida ?? '-' }}</td>
-              <td>{{ s.horaChegada ?? '-' }}</td>
+              <td>{{ s.kmInicial ?? "-" }}</td>
+              <td>{{ s.kmFinal ?? "-" }}</td>
+              <td>{{ s.kmTotal ?? "-" }}</td>
+              <td>{{ s.horaSaida ?? "-" }}</td>
+              <td>{{ s.horaChegada ?? "-" }}</td>
             </tr>
           </tbody>
         </table>
