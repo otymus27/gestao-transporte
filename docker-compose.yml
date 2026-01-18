@@ -25,20 +25,13 @@ services:
     api:
         build: ./backend
         container_name: api-transporte
+        restart: unless-stopped  # Reinicia sempre, exceto se você parar o container
         env_file:
             - .env
-        depends_on:
-          mysql:
-            condition: service_healthy
         ports:
           - "8084:8080"
         networks:
             - otymus_net
-        # Politica de reinicio:
-        restart: always # Sempre reinicia, mesmo se voce parar manualmente (ate o 'down')
-        # restart: on-failure # So reinicia se o container sair com codigo de erro (diferente de zero)
-        # restart: unless-stopped # Reinicia sempre, exceto se vocÃª explicitamente der 'stop'
-        # restart: no # Padrao: nunca reinicia
 
   # ===========================
     # Frontend - Angular + Nginx
@@ -46,17 +39,14 @@ services:
     frontend:
         build: ./frontend
         container_name: frontend-transporte
+        restart: unless-stopped  # Reinicia sempre, exceto se você parar o container
         ports:
             - "85:80"
         depends_on:
             - api
         networks:
             - otymus_net
-      # Politica de reinicio:
-        restart: always # Sempre reinicia, mesmo se voce parar manualmente (ate o 'down')
-      # restart: on-failure # So reinicia se o container sair com codigo de erro (diferente de zero)
-      # restart: unless-stopped # Reinicia sempre, exceto se vocÃª explicitamente der 'stop'
-      # restart: no # Padrao: nunca reinicia
+
 
 # ===========================
 # Volumes (persistência)
