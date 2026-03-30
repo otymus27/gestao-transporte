@@ -1,10 +1,9 @@
 package com.br.sistema.services;
 
-
 import com.br.sistema.entities.Destino.Destino;
+import com.br.sistema.entities.FichaSolicitacao.*;
 import com.br.sistema.entities.FichaSolicitacao.DTO.FichaSolicitacaoRequestDTO;
 import com.br.sistema.entities.FichaSolicitacao.DTO.FichaSolicitacaoResponseDTO;
-import com.br.sistema.entities.FichaSolicitacao.FichaSolicitacao;
 import com.br.sistema.entities.Motorista.Motorista;
 import com.br.sistema.entities.Setor.Setor;
 import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoItemDTO;
@@ -27,42 +26,62 @@ import java.util.List;
 public class FichaSolicitacaoService {
 
     private final FichaSolicitacaoRepository fichaRepository;
-    private final MotoristaRepository motoristaRepository;
-    private final SetorRepository setorRepository;
-    private final DestinoRepository destinoRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final MotoristaRepository        motoristaRepository;
+    private final SetorRepository            setorRepository;
+    private final DestinoRepository          destinoRepository;
+    // UsuarioRepository REMOVIDO das solicitações — usuario vem do token via controller
 
     // =========================================================
-    // SALVAR FICHA COM TODAS AS SOLICITAÇÕES DE UMA VEZ SÓ
+    // SALVAR — persiste ficha + todas as solicitações de uma vez
     // =========================================================
 
     @Transactional
-    public FichaSolicitacaoResponseDTO salvar(FichaSolicitacaoRequestDTO dto, Usuario usuarioLogado) {
-
-        // 1. Monta a ficha (master)
+    public FichaSolicitacaoResponseDTO salvar(FichaSolicitacaoRequestDTO dto,
+                                              Usuario usuarioLogado) {
         FichaSolicitacao ficha = new FichaSolicitacao();
         ficha.setDataViagem(dto.dataViagem());
         ficha.setPlacaVeiculo(dto.placaVeiculo().toUpperCase());
         ficha.setDataCriacao(LocalDateTime.now());
-        ficha.setCriadoPor(usuarioLogado);
+        ficha.setUsuario(usuarioLogado); // usuário logado é dono da ficha
 
-        // 2. Mapeia cada item do DTO para a entidade Solicitacao
         List<Solicitacao> solicitacoes = dto.solicitacoes().stream()
                 .map(item -> montarSolicitacao(item, ficha, dto.dataViagem()))
                 .toList();
 
-        // 3. Vincula as solicitações à ficha
         ficha.setSolicitacoes(solicitacoes);
 
-        // 4. Um único save persiste a ficha + todas as solicitações
-        //    graças ao CascadeType.ALL definido na entidade
-        FichaSolicitacao salva = fichaRepository.save(ficha);
-
-        return FichaSolicitacaoResponseDTO.fromEntity(salva);
+        return FichaSolicitacaoResponseDTO.fromEntity(fichaRepository.save(ficha));
     }
 
     // =========================================================
-    // CONSULTAS
+    // ATUALIZAR — atualiza dados da ficha e substitui solicitações
+    // =========================================================
+
+    @Transactional
+    public FichaSolicitacaoResponseDTO atualizar(Long id,
+                                                 FichaSolicitacaoRequestDTO dto,
+                                                 Usuario usuarioLogado) {
+        FichaSolicitacao ficha = buscarEntidade(id);
+
+        ficha.setDataViagem(dto.dataViagem());
+        ficha.setPlacaVeiculo(dto.placaVeiculo().toUpperCase());
+        ficha.setDataAtualizacao(LocalDateTime.now());
+        ficha.setUsuario(usuarioLogado); // atualiza o responsável
+
+        // orphanRemoval=true remove as antigas automaticamente
+        ficha.getSolicitacoes().clear();
+
+        List<Solicitacao> novas = dto.solicitacoes().stream()
+                .map(item -> montarSolicitacao(item, ficha, dto.dataViagem()))
+                .toList();
+
+        ficha.getSolicitacoes().addAll(novas);
+
+        return FichaSolicitacaoResponseDTO.fromEntity(fichaRepository.save(ficha));
+    }
+
+    // =========================================================
+    // LISTAGEM / CONSULTAS
     // =========================================================
 
     @Transactional(readOnly = true)
@@ -73,11 +92,11 @@ public class FichaSolicitacaoService {
 
     @Transactional(readOnly = true)
     public FichaSolicitacaoResponseDTO buscarPorId(Long id) {
-        FichaSolicitacao ficha = fichaRepository.findByIdComSolicitacoes(id);
-        if (ficha == null) {
-            throw new EntityNotFoundException("Ficha de solicitação não encontrada com id: " + id);
-        }
-        return FichaSolicitacaoResponseDTO.fromEntity(ficha);
+        return FichaSolicitacaoResponseDTO.fromEntity(
+                fichaRepository.findByIdComSolicitacoes(id) != null
+                        ? fichaRepository.findByIdComSolicitacoes(id)
+                        : throwNotFound(id)
+        );
     }
 
     @Transactional(readOnly = true)
@@ -98,50 +117,50 @@ public class FichaSolicitacaoService {
 
     @Transactional
     public void excluir(Long id) {
-        FichaSolicitacao ficha = fichaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ficha não encontrada com id: " + id));
-        // ON DELETE CASCADE no banco + orphanRemoval=true na entidade
-        // garantem que as solicitações filhas também sejam removidas
-        fichaRepository.delete(ficha);
+        fichaRepository.delete(buscarEntidade(id));
     }
 
     // =========================================================
-    // MÉTODO PRIVADO: monta cada Solicitacao a partir do DTO
+    // PRIVATE
     // =========================================================
 
     private Solicitacao montarSolicitacao(SolicitacaoItemDTO item,
                                           FichaSolicitacao ficha,
                                           LocalDate dataViagem) {
-
         Motorista motorista = motoristaRepository.findById(item.motoristaId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Motorista não encontrado com id: " + item.motoristaId()));
+                        "Motorista não encontrado: id=" + item.motoristaId()));
 
         Setor setor = setorRepository.findById(item.setorId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Setor não encontrado com id: " + item.setorId()));
+                        "Setor não encontrado: id=" + item.setorId()));
 
         Destino destino = destinoRepository.findById(item.destinoId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Destino não encontrado com id: " + item.destinoId()));
+                        "Destino não encontrado: id=" + item.destinoId()));
 
-        Usuario usuario = usuarioRepository.findById(item.usuarioId())
+        Solicitacao sol = new Solicitacao();
+        sol.setDataSolicitacao(dataViagem);
+        sol.setStatus(item.status() != null ? item.status() : "PENDENTE");
+        sol.setKmInicial(item.kmInicial());
+        sol.setKmFinal(item.kmFinal());
+        sol.setHoraSaida(item.horaSaida());
+        sol.setHoraChegada(item.horaChegada());
+        sol.setMotorista(motorista);
+        sol.setSetor(setor);
+        sol.setDestino(destino);
+        sol.setFicha(ficha);
+
+        return sol;
+    }
+
+    private FichaSolicitacao buscarEntidade(Long id) {
+        return fichaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Usuário não encontrado com id: " + item.usuarioId()));
+                        "Ficha não encontrada: id=" + id));
+    }
 
-        Solicitacao solicitacao = new Solicitacao();
-        solicitacao.setDataSolicitacao(dataViagem);
-        solicitacao.setStatus(item.status() != null ? item.status() : "PENDENTE");
-        solicitacao.setKmInicial(item.kmInicial());
-        solicitacao.setKmFinal(item.kmFinal());
-        solicitacao.setHoraSaida(item.horaSaida());
-        solicitacao.setHoraChegada(item.horaChegada());
-        solicitacao.setMotorista(motorista);
-        solicitacao.setSetor(setor);
-        solicitacao.setDestino(destino);
-        solicitacao.setUsuario(usuario);
-        solicitacao.setFicha(ficha); // vínculo com o master
-
-        return solicitacao;
+    private FichaSolicitacao throwNotFound(Long id) {
+        throw new EntityNotFoundException("Ficha não encontrada: id=" + id);
     }
 }

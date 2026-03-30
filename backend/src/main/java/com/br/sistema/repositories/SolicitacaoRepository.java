@@ -22,34 +22,20 @@ import java.util.List;
 public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> {
 
     // =========================
-    // CONSULTAS BÁSICAS (PAGINADAS)
+    // CONSULTAS BÁSICAS
     // =========================
 
     Page<Solicitacao> findByStatus(String status, Pageable pageable);
-
     Page<Solicitacao> findBySetor_Id(Long setorId, Pageable pageable);
-
     Page<Solicitacao> findByMotorista_Id(Long motoristaId, Pageable pageable);
-
-    // findByCarro_Id REMOVIDO — carro não existe mais na Solicitacao
-
-    Page<Solicitacao> findByUsuario_Id(Long usuarioId, Pageable pageable);
-
     Page<Solicitacao> findByDestino_Id(Long destinoId, Pageable pageable);
-
-    Page<Solicitacao> findAllById(Long id, Pageable pageable);
-
     Page<Solicitacao> findById(Long id, Pageable pageable);
-
     Page<Solicitacao> findByDataSolicitacaoBetween(LocalDate inicio, LocalDate fim, Pageable pageable);
-
     long countByStatus(String status);
 
-    @Query("SELECT s FROM Solicitacao s WHERE LOWER(s.usuario.username) LIKE LOWER(CONCAT('%', :username, '%'))")
-    Page<Solicitacao> findByUsernameContainingIgnoreCase(@Param("username") String username, Pageable pageable);
-
-    @Query("SELECT s FROM Solicitacao s WHERE LOWER(s.usuario.nome) LIKE LOWER(CONCAT('%', :nome, '%'))")
-    Page<Solicitacao> findByUsuarioNomeContainingIgnoreCase(@Param("nome") String nome, Pageable pageable);
+    // Busca por usuário agora é via ficha
+    @Query("SELECT s FROM Solicitacao s WHERE s.ficha.usuario.id = :usuarioId")
+    Page<Solicitacao> findByFichaUsuarioId(@Param("usuarioId") Long usuarioId, Pageable pageable);
 
     // =========================
     // DASHBOARD / AGRUPAMENTOS
@@ -71,8 +57,7 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
         SELECT new com.br.sistema.entities.Dashboard.DTO.RankingItemDTO(
             se.nome, COUNT(s)
         )
-        FROM Solicitacao s
-        JOIN s.setor se
+        FROM Solicitacao s JOIN s.setor se
         GROUP BY se.nome
         ORDER BY COUNT(s) DESC
     """)
@@ -82,21 +67,17 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
         SELECT new com.br.sistema.entities.Dashboard.DTO.RankingItemDTO(
             m.nome, COUNT(s)
         )
-        FROM Solicitacao s
-        JOIN s.motorista m
+        FROM Solicitacao s JOIN s.motorista m
         GROUP BY m.nome
         ORDER BY COUNT(s) DESC
     """)
     List<RankingItemDTO> topMotoristas();
 
-    // topCarros REMOVIDO — carro não existe mais na Solicitacao
-
     @Query("""
         SELECT new com.br.sistema.entities.Motorista.DTO.SolicitacaoPorMotoristaDTO(
             m.id, m.nome, COUNT(s)
         )
-        FROM Solicitacao s
-        JOIN s.motorista m
+        FROM Solicitacao s JOIN s.motorista m
         GROUP BY m.id, m.nome
         ORDER BY COUNT(s) DESC
     """)
@@ -106,19 +87,18 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
         SELECT new com.br.sistema.entities.Setor.DTO.SolicitacaoPorSetorDTO(
             se.id, se.nome, COUNT(s)
         )
-        FROM Solicitacao s
-        JOIN s.setor se
+        FROM Solicitacao s JOIN s.setor se
         GROUP BY se.id, se.nome
         ORDER BY COUNT(s) DESC
     """)
     List<SolicitacaoPorSetorDTO> buscarPorSetor();
 
+    // Agrupamento por usuário agora é via ficha
     @Query("""
         SELECT new com.br.sistema.entities.Usuario.DTO.SolicitacaoPorUsuarioDTO(
             u.id, u.nome, COUNT(s)
         )
-        FROM Solicitacao s
-        JOIN s.usuario u
+        FROM Solicitacao s JOIN s.ficha f JOIN f.usuario u
         GROUP BY u.id, u.nome
         ORDER BY COUNT(s) DESC
     """)
@@ -148,25 +128,24 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
 
     // =========================
     // RELATÓRIO SEM PAGINAÇÃO
-    // JOIN FETCH s.carro REMOVIDO — placa está na FichaSolicitacao
-    // Filtros por c.marca, c.modelo, c.placa REMOVIDOS
+    // usuario agora via s.ficha.usuario
     // =========================
 
     @Query("""
         SELECT DISTINCT s
         FROM Solicitacao s
         JOIN FETCH s.motorista m
-        JOIN FETCH s.usuario u
         JOIN FETCH s.setor se
         JOIN FETCH s.destino d
-        LEFT JOIN FETCH s.ficha f
+        JOIN FETCH s.ficha f
+        JOIN FETCH f.usuario u
         WHERE (:filtro IS NULL OR :filtro = '' OR
-                LOWER(m.nome)   LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-                LOWER(u.nome)   LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-                LOWER(se.nome)  LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-                LOWER(d.nome)   LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-                LOWER(s.status) LIKE LOWER(CONCAT('%', :filtro, '%')) OR
-                LOWER(f.placaVeiculo) LIKE LOWER(CONCAT('%', :filtro, '%'))
+                LOWER(m.nome)          LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(u.nome)          LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(se.nome)         LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(d.nome)          LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(s.status)        LIKE LOWER(CONCAT('%', :filtro, '%')) OR
+                LOWER(f.placaVeiculo)  LIKE LOWER(CONCAT('%', :filtro, '%'))
         )
         ORDER BY s.id DESC
     """)
@@ -189,7 +168,8 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
                                            @Param("fim") LocalDate fim);
 
     // =========================
-    // FILTRO DINÂMICO — carroId REMOVIDO
+    // FILTRO DINÂMICO
+    // username/usuarioId REMOVIDOS — filtrar por usuário é via ficha
     // =========================
 
     @Query("SELECT s FROM Solicitacao s WHERE " +
@@ -197,7 +177,6 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
             "(:status IS NULL OR s.status = :status) AND " +
             "(:motoristaId IS NULL OR s.motorista.id = :motoristaId) AND " +
             "(:setorId IS NULL OR s.setor.id = :setorId) AND " +
-            "(:username IS NULL OR LOWER(s.usuario.username) LIKE LOWER(CONCAT('%', :username, '%'))) AND " +
             "(:destinoId IS NULL OR s.destino.id = :destinoId) AND " +
             "(:inicio IS NULL OR s.dataSolicitacao >= :inicio) AND " +
             "(:fim IS NULL OR s.dataSolicitacao <= :fim)")
@@ -206,7 +185,6 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
             @Param("status")      String status,
             @Param("motoristaId") Long motoristaId,
             @Param("setorId")     Long setorId,
-            @Param("username")    String username,
             @Param("destinoId")   Long destinoId,
             @Param("inicio")      LocalDate inicio,
             @Param("fim")         LocalDate fim,

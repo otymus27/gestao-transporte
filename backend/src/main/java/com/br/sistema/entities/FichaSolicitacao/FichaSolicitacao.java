@@ -35,12 +35,12 @@ public class FichaSolicitacao {
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
+    // Usuário responsável pela ficha — vem do token (logado)
+    // Movido da Solicitacao para cá: um usuário é dono da ficha inteira
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "criado_por_id")
-    private Usuario criadoPor;
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
 
-    // CascadeType.ALL garante que todas as solicitações
-    // sejam salvas/excluídas junto com a ficha numa única transação
     @OneToMany(mappedBy = "ficha", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Solicitacao> solicitacoes = new ArrayList<>();

@@ -179,8 +179,7 @@ public class SolicitacaoController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long motoristaId,
             @RequestParam(required = false) Long setorId,
-            @RequestParam(required = false) String username,
-            @RequestParam(required = false) Long destinoId,
+            @RequestParam(required = false) Long destinoId,        // mantém
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
             Pageable pageable,
@@ -189,7 +188,7 @@ public class SolicitacaoController {
         try {
             return ResponseEntity.ok(
                     solicitacaoService.filtrarGenerico(
-                            id, status, motoristaId, setorId, username, destinoId, inicio, fim, pageable
+                            id, status, motoristaId, setorId, destinoId, inicio, fim, pageable
                     )
             );
         } catch (Exception e) {
@@ -197,7 +196,6 @@ public class SolicitacaoController {
             return erroInterno(request);
         }
     }
-
     // =========================================================
     // CONSULTAS PARA DASHBOARDS
     // =========================================================

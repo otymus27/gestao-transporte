@@ -13,34 +13,35 @@ import java.time.LocalDate;
 @Repository
 public interface FichaSolicitacaoRepository extends JpaRepository<FichaSolicitacao, Long> {
 
-    // Listar todas com paginação
+    // Listagem paginada básica
     Page<FichaSolicitacao> findAll(Pageable pageable);
 
-    // Buscar por placa
+    // Busca por placa
     Page<FichaSolicitacao> findByPlacaVeiculoContainingIgnoreCase(String placa, Pageable pageable);
 
-    // Buscar por período
+    // Busca por período
     Page<FichaSolicitacao> findByDataViagemBetween(LocalDate inicio, LocalDate fim, Pageable pageable);
 
-    // Buscar por usuário que criou
-    Page<FichaSolicitacao> findByCriadoPorId(Long usuarioId, Pageable pageable);
+    // Busca por usuário responsável — agora na ficha
+    Page<FichaSolicitacao> findByUsuarioId(Long usuarioId, Pageable pageable);
 
-    // Buscar ficha com todas as solicitações carregadas (evita N+1)
+    // Busca ficha com solicitações carregadas (evita N+1)
     @Query("SELECT DISTINCT f FROM FichaSolicitacao f " +
             "LEFT JOIN FETCH f.solicitacoes " +
             "WHERE f.id = :id")
     FichaSolicitacao findByIdComSolicitacoes(@Param("id") Long id);
 
     // Filtro dinâmico combinado
+    // usuarioId agora filtra por f.usuario.id (usuario está na ficha)
     @Query("SELECT f FROM FichaSolicitacao f WHERE " +
             "(:placa IS NULL OR LOWER(f.placaVeiculo) LIKE LOWER(CONCAT('%', :placa, '%'))) AND " +
             "(:inicio IS NULL OR f.dataViagem >= :inicio) AND " +
             "(:fim IS NULL OR f.dataViagem <= :fim) AND " +
-            "(:usuarioId IS NULL OR f.criadoPor.id = :usuarioId)")
+            "(:usuarioId IS NULL OR f.usuario.id = :usuarioId)")
     Page<FichaSolicitacao> filtrar(
-            @Param("placa") String placa,
-            @Param("inicio") LocalDate inicio,
-            @Param("fim") LocalDate fim,
+            @Param("placa")     String placa,
+            @Param("inicio")    LocalDate inicio,
+            @Param("fim")       LocalDate fim,
             @Param("usuarioId") Long usuarioId,
             Pageable pageable
     );

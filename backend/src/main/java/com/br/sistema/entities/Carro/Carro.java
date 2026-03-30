@@ -1,12 +1,8 @@
 package com.br.sistema.entities.Carro;
 
-import com.br.sistema.entities.Solicitacao.Solicitacao;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.List;
 
 @Entity
 @Table(name = "tb_carro")
@@ -31,8 +27,6 @@ public class Carro {
     @Column(nullable = false)
     private String tipo;
 
-    //Relacionamento com Solicitacao - um carro pode estar vinculado a várias solicitações
-    @OneToMany(mappedBy = "carro")
-    @JsonBackReference("carro-solicitacoes")
-    private List<Solicitacao> solicitacoes;
+    // @OneToMany REMOVIDO — Solicitacao não referencia mais Carro
+    // A placa do veículo agora está em FichaSolicitacao.placaVeiculo
 }

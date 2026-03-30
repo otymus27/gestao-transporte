@@ -13,13 +13,11 @@ import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoRequestDTO;
 import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoResponseDTO;
 import com.br.sistema.entities.Solicitacao.Solicitacao;
 import com.br.sistema.entities.Usuario.DTO.SolicitacaoPorUsuarioDTO;
-import com.br.sistema.entities.Usuario.DTO.UsuarioDetalhadoDTO;
 import com.br.sistema.entities.Usuario.Usuario;
 import com.br.sistema.repositories.DestinoRepository;
 import com.br.sistema.repositories.MotoristaRepository;
 import com.br.sistema.repositories.SetorRepository;
 import com.br.sistema.repositories.SolicitacaoRepository;
-import com.br.sistema.repositories.UsuarioRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -42,21 +40,19 @@ public class SolicitacaoService {
 
     private final SolicitacaoRepository solicitacaoRepository;
     private final MotoristaRepository   motoristaRepository;
-    private final UsuarioRepository     usuarioRepository;
     private final SetorRepository       setorRepository;
     private final DestinoRepository     destinoRepository;
 
-    // CarroRepository REMOVIDO — placa está na FichaSolicitacao
+    // UsuarioRepository REMOVIDO — usuario está na ficha, não na solicitação
+    // CarroRepository   REMOVIDO — placa está na ficha
     public SolicitacaoService(
             SolicitacaoRepository solicitacaoRepository,
             MotoristaRepository   motoristaRepository,
-            UsuarioRepository     usuarioRepository,
             SetorRepository       setorRepository,
             DestinoRepository     destinoRepository
     ) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.motoristaRepository   = motoristaRepository;
-        this.usuarioRepository     = usuarioRepository;
         this.setorRepository       = setorRepository;
         this.destinoRepository     = destinoRepository;
     }
@@ -68,23 +64,22 @@ public class SolicitacaoService {
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> listarTodosPaginado(Pageable pageable) {
         return solicitacaoRepository.findAll(pageable)
-                .map(this::toResponseDTO);
+                .map(SolicitacaoResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public SolicitacaoResponseDTO buscarPorId(Long id) {
-        return toResponseDTO(buscarEntidadePorId(id));
+        return SolicitacaoResponseDTO.fromEntity(buscarEntidade(id));
     }
 
     @Transactional(readOnly = true)
     public SolicitacaoDetalhadaDTO buscarDetalhado(Long id) {
-        return toDetalhadaDTO(buscarEntidadePorId(id));
+        return toDetalhadaDTO(buscarEntidade(id));
     }
 
     // =========================================================
-    // ESCRITA
+    // ESCRITA INDIVIDUAL
     // Criação em lote → FichaSolicitacaoService
-    // Aqui: cadastro avulso, atualização e exclusão individual
     // =========================================================
 
     @Transactional(noRollbackFor = EntityExistsException.class)
@@ -93,17 +88,16 @@ public class SolicitacaoService {
         validarAutenticacao(usuarioLogado);
         validarPermissao(usuarioLogado, ROLES_ESCRITA);
 
-        Solicitacao solicitacao = new Solicitacao();
-        preencherCampos(solicitacao, dto, usuarioLogado);
-
+        Solicitacao sol = new Solicitacao();
+        preencherCampos(sol, dto);
 
         try {
-            solicitacaoRepository.save(solicitacao);
+            solicitacaoRepository.save(sol);
         } catch (DataIntegrityViolationException e) {
             throw new EntityExistsException("Erro ao salvar: solicitação já existe.");
         }
 
-        return toResponseDTO(solicitacao);
+        return SolicitacaoResponseDTO.fromEntity(sol);
     }
 
     @Transactional
@@ -113,11 +107,11 @@ public class SolicitacaoService {
         validarAutenticacao(usuarioLogado);
         validarPermissao(usuarioLogado, ROLES_ESCRITA);
 
-        Solicitacao solicitacao = buscarEntidadePorId(id);
-        preencherCampos(solicitacao, dto, usuarioLogado);
-        solicitacaoRepository.save(solicitacao);
+        Solicitacao sol = buscarEntidade(id);
+        preencherCampos(sol, dto);
+        solicitacaoRepository.save(sol);
 
-        return toResponseDTO(solicitacao);
+        return SolicitacaoResponseDTO.fromEntity(sol);
     }
 
     @Transactional(noRollbackFor = EntityNotFoundException.class)
@@ -125,17 +119,15 @@ public class SolicitacaoService {
         validarAutenticacao(usuarioLogado);
         validarPermissao(usuarioLogado, ROLES_EXCLUSAO);
 
-        Solicitacao solicitacao = buscarEntidadePorId(id);
-
         try {
-            solicitacaoRepository.delete(solicitacao);
+            solicitacaoRepository.delete(buscarEntidade(id));
         } catch (DataIntegrityViolationException e) {
             throw new IllegalStateException("Não é possível excluir: há vínculos de integridade.");
         }
     }
 
     // =========================================================
-    // ATUALIZAÇÃO DE STATUS (aprovar / recusar)
+    // ATUALIZAÇÃO DE STATUS
     // =========================================================
 
     @Transactional
@@ -145,15 +137,15 @@ public class SolicitacaoService {
         validarAutenticacao(usuarioLogado);
         validarPermissao(usuarioLogado, Set.of("ADMIN", "GERENTE"));
 
-        Solicitacao solicitacao = buscarEntidadePorId(id);
-        solicitacao.setStatus(novoStatus);
-        solicitacaoRepository.save(solicitacao);
+        Solicitacao sol = buscarEntidade(id);
+        sol.setStatus(novoStatus);
+        solicitacaoRepository.save(sol);
 
-        return toResponseDTO(solicitacao);
+        return SolicitacaoResponseDTO.fromEntity(sol);
     }
 
     // =========================================================
-    // FILTROS — carroId REMOVIDO
+    // FILTROS
     // =========================================================
 
     @Transactional(readOnly = true)
@@ -162,15 +154,14 @@ public class SolicitacaoService {
             String status,
             Long motoristaId,
             Long setorId,
-            String username,
             Long destinoId,
             LocalDate inicio,
             LocalDate fim,
             Pageable pageable
     ) {
         return solicitacaoRepository
-                .filtrarDinamico(id, status, motoristaId, setorId, username, destinoId, inicio, fim, pageable)
-                .map(this::toResponseDTO);
+                .filtrarDinamico(id, status, motoristaId, setorId, destinoId, inicio, fim, pageable)
+                .map(SolicitacaoResponseDTO::fromEntity);
     }
 
     // =========================================================
@@ -205,84 +196,54 @@ public class SolicitacaoService {
     }
 
     // =========================================================
-    // PRIVATE — validação
+    // PRIVATE
     // =========================================================
 
-    private void validarAutenticacao(Usuario usuarioLogado) {
-        if (usuarioLogado == null) {
-            throw new SecurityException("Usuário não autenticado.");
-        }
+    private void validarAutenticacao(Usuario u) {
+        if (u == null) throw new SecurityException("Usuário não autenticado.");
     }
 
-    private void validarPermissao(Usuario usuarioLogado,
-                                  Set<String> rolesPermitidas) throws AccessDeniedException {
-        boolean permitido = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> rolesPermitidas.contains(r.getNome()));
-        if (!permitido) {
-            throw new AccessDeniedException("Usuário sem permissão para esta operação.");
-        }
+    private void validarPermissao(Usuario u, Set<String> roles) throws AccessDeniedException {
+        boolean ok = u.getRoles().stream().anyMatch(r -> roles.contains(r.getNome()));
+        if (!ok) throw new AccessDeniedException("Usuário sem permissão para esta operação.");
     }
 
-    private Solicitacao buscarEntidadePorId(Long id) {
+    private Solicitacao buscarEntidade(Long id) {
         return solicitacaoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Solicitação não encontrada."));
     }
 
-    // =========================================================
-    // PRIVATE — preenchimento
-    // Não preenche: dataSolicitacao (vem da ficha), carro/placa (vem da ficha)
-    // =========================================================
+    /**
+     * Preenche campos editáveis da solicitação.
+     * NÃO preenche: dataSolicitacao, usuario, carro/placa — todos na ficha.
+     */
+    private void preencherCampos(Solicitacao sol, SolicitacaoRequestDTO dto) {
+        sol.setStatus(dto.status());
+        sol.setKmInicial(dto.kmInicial());
+        sol.setKmFinal(dto.kmFinal());
+        sol.setHoraSaida(dto.horaSaida() != null ? LocalTime.parse(dto.horaSaida()) : null);
+        sol.setHoraChegada(dto.horaChegada() != null ? LocalTime.parse(dto.horaChegada()) : null);
 
-    private void preencherCampos(Solicitacao solicitacao, SolicitacaoRequestDTO dto, Usuario usuarioLogado) {
-        solicitacao.setStatus(dto.status());
-        solicitacao.setKmInicial(dto.kmInicial());
-        solicitacao.setKmFinal(dto.kmFinal());
-        solicitacao.setHoraSaida(dto.horaSaida() != null ? LocalTime.parse(dto.horaSaida()) : null);
-        solicitacao.setHoraChegada(dto.horaChegada() != null ? LocalTime.parse(dto.horaChegada()) : null);
-
-        solicitacao.setMotorista(motoristaRepository.findById(dto.idMotorista())
+        sol.setMotorista(motoristaRepository.findById(dto.idMotorista())
                 .orElseThrow(() -> new EntityNotFoundException("Motorista não encontrado.")));
-        solicitacao.setSetor(setorRepository.findById(dto.idSetor())
+        sol.setSetor(setorRepository.findById(dto.idSetor())
                 .orElseThrow(() -> new EntityNotFoundException("Setor não encontrado.")));
-        solicitacao.setDestino(destinoRepository.findById(dto.idDestino())
+        sol.setDestino(destinoRepository.findById(dto.idDestino())
                 .orElseThrow(() -> new EntityNotFoundException("Destino não encontrado.")));
-        solicitacao.setUsuario(usuarioLogado); // vem do token, não do DTO
-    }
-
-    // =========================================================
-    // PRIVATE — mapeamentos
-    // Placa buscada via ficha master — null-safe para solicitações avulsas
-    // =========================================================
-
-    private SolicitacaoResponseDTO toResponseDTO(Solicitacao s) {
-        return new SolicitacaoResponseDTO(
-                s.getId(),
-                s.getStatus(),
-                s.getKmInicial(),
-                s.getKmFinal(),
-                s.getHoraSaida(),
-                s.getHoraChegada(),
-                s.getMotorista().getId(),
-                s.getMotorista().getNome(),
-                s.getSetor().getId(),
-                s.getSetor().getNome(),
-                s.getDestino().getId(),
-                s.getDestino().getNome(),
-                s.getUsuario().getId(),
-                s.getUsuario().getNome()
-        );
     }
 
     private SolicitacaoDetalhadaDTO toDetalhadaDTO(Solicitacao s) {
-        String placa = s.getFicha() != null ? s.getFicha().getPlacaVeiculo() : null;
+        String placa    = s.getFicha() != null ? s.getFicha().getPlacaVeiculo() : null;
+        String usuario  = s.getFicha() != null && s.getFicha().getUsuario() != null
+                ? s.getFicha().getUsuario().getNome() : null;
 
         return new SolicitacaoDetalhadaDTO(
                 s.getId(),
                 s.getDataSolicitacao(),
                 s.getStatus(),
                 placa,
+                usuario,
                 MotoristaDetalhadoDTO.fromEntity(s.getMotorista(), false),
-                UsuarioDetalhadoDTO.fromEntity(s.getUsuario(), false),
                 SetorDetalhadoDTO.fromEntity(s.getSetor(), false),
                 DestinoDetalhadoDTO.fromEntity(s.getDestino(), false),
                 s.getKmInicial(),
@@ -293,7 +254,9 @@ public class SolicitacaoService {
     }
 
     private SolicitacaoRelatorioDTO toRelatorioDTO(Solicitacao s) {
-        String placa = s.getFicha() != null ? s.getFicha().getPlacaVeiculo() : null;
+        String placa   = s.getFicha() != null ? s.getFicha().getPlacaVeiculo() : null;
+        String usuario = s.getFicha() != null && s.getFicha().getUsuario() != null
+                ? s.getFicha().getUsuario().getNome() : null;
 
         return new SolicitacaoRelatorioDTO(
                 s.getId(),
@@ -301,7 +264,7 @@ public class SolicitacaoService {
                 s.getStatus(),
                 placa,
                 s.getMotorista().getNome(),
-                s.getUsuario().getNome(),
+                usuario,
                 s.getSetor().getNome(),
                 s.getDestino().getNome(),
                 s.getKmInicial(),

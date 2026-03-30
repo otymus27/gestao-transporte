@@ -1,22 +1,14 @@
 package com.br.sistema.entities.Usuario;
 
 import com.br.sistema.entities.Role.Role;
-import com.br.sistema.entities.Solicitacao.Solicitacao;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
-
-/**
- * Representa o usuário do sistema, com suas informações pessoais e de acesso.
- */
 
 @Entity
 @Table(name = "tb_usuarios")
@@ -31,35 +23,29 @@ public class Usuario implements UserDetails {
 
     @Column(unique = true)
     private String username;
+
     private String password;
-    // ✅ Novo campo: Nome completo do usuário
+
     @Column(name = "nome_completo", nullable = false, length = 150)
     private String nome;
 
-    /**
-     * Indica se a senha atual é provisória.
-     * Usada para forçar o usuário a alterá-la no próximo login.
-     */
     @Column(nullable = false)
     private boolean senhaProvisoria = false;
 
     @Column(nullable = false)
-    private boolean ativo = true; // ✅ Campo para ativar ou desativar usuario
+    private boolean ativo = true;
 
-    @ManyToMany(fetch = FetchType.EAGER) // ✅ FetchType.EAGER para carregar as permissões imediatamente
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "tb_usuarios_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-
     private Set<Role> roles;
 
-    @OneToMany(mappedBy = "usuario")
-    @JsonManagedReference
-    private List<Solicitacao> solicitacoes = new ArrayList<>();
-
-    // ✅ Métodos da interface UserDetails
+    // @OneToMany(mappedBy = "usuario") REMOVIDO
+    // Usuario não referencia mais Solicitacao diretamente.
+    // O vínculo agora é Usuario → FichaSolicitacao → Solicitacao.
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -78,19 +64,16 @@ public class Usuario implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        // Por padrão, retorne 'true' para indicar que a conta não está expirada.
         return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        // Por padrão, retorne 'true' para indicar que a conta não está bloqueada.
         return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        // Por padrão, retorne 'true' para indicar que as credenciais não estão expiradas.
         return true;
     }
 
@@ -99,10 +82,6 @@ public class Usuario implements UserDetails {
         return this.ativo;
     }
 
-    /**
-     * Verifica se o usuário possui a role de administrador.
-     * @return true se o usuário for um administrador, false caso contrário.
-     */
     public boolean isAdmin() {
         return this.roles.stream()
                 .anyMatch(role -> "ADMIN".equals(role.getNome()));

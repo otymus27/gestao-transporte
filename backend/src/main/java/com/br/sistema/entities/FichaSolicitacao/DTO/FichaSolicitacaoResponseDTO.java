@@ -12,8 +12,11 @@ public record FichaSolicitacaoResponseDTO(
         LocalDate dataViagem,
         String placaVeiculo,
         LocalDateTime dataCriacao,
-        Long criadoPorId,
-        String criadoPorNome,
+        LocalDateTime dataAtualizacao,
+        // Usuário responsável pela ficha inteira
+        Long usuarioId,
+        String usuarioNome,
+        String usuarioUsername,
         List<SolicitacaoResponseDTO> solicitacoes
 ) {
     public static FichaSolicitacaoResponseDTO fromEntity(FichaSolicitacao f) {
@@ -22,8 +25,10 @@ public record FichaSolicitacaoResponseDTO(
                 f.getDataViagem(),
                 f.getPlacaVeiculo(),
                 f.getDataCriacao(),
-                f.getCriadoPor() != null ? f.getCriadoPor().getId() : null,
-                f.getCriadoPor() != null ? f.getCriadoPor().getNome() : null,
+                f.getDataAtualizacao(),
+                f.getUsuario() != null ? f.getUsuario().getId() : null,
+                f.getUsuario() != null ? f.getUsuario().getNome() : null,
+                f.getUsuario() != null ? f.getUsuario().getUsername() : null,
                 f.getSolicitacoes().stream()
                         .map(SolicitacaoResponseDTO::fromEntity)
                         .toList()
