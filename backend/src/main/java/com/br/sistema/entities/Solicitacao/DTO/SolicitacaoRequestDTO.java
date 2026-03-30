@@ -4,15 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record SolicitacaoRequestDTO(
-        LocalDate dataSolicitacao,
-        String status,
-        Long carroId,
-        Long motoristaId,
-        Long usuarioId,
-        Long setorId,
-        Long destinoId,
+        Long idCarro,
+        Long idMotorista,
+        Long idSetor,
+        Long idDestino,
         Integer kmInicial,
         Integer kmFinal,
-        LocalTime horaSaida,
-        LocalTime horaChegada
+        String horaSaida,    // "HH:mm"
+        String horaChegada,  // "HH:mm"
+        String status        // "PENDENTE" por default
 ) {}

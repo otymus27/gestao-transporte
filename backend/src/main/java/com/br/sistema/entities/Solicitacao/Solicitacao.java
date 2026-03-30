@@ -2,6 +2,7 @@ package com.br.sistema.entities.Solicitacao;
 
 import com.br.sistema.entities.Carro.Carro;
 import com.br.sistema.entities.Destino.Destino;
+import com.br.sistema.entities.FichaSolicitacao.FichaSolicitacao;
 import com.br.sistema.entities.Motorista.Motorista;
 import com.br.sistema.entities.Setor.Setor;
 import com.br.sistema.entities.Usuario.Usuario;
@@ -62,5 +63,11 @@ public class Solicitacao {
 
     @Column(name = "hora_chegada")
     private LocalTime horaChegada;
+
+    // Adicione este campo na Solicitacao existente
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ficha")
+    @JsonBackReference("ficha-solicitacao")
+    private FichaSolicitacao ficha;
 
 }

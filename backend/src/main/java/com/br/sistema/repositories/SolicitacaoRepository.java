@@ -227,4 +227,25 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     List<QuantidadePorMesDTO> contarPorMes(@Param("inicio") LocalDate inicio,
                                            @Param("fim") LocalDate fim);
 
+    @Query("SELECT s FROM Solicitacao s WHERE " +
+            "(:id IS NULL OR s.id = :id) AND " +
+            "(:status IS NULL OR s.status = :status) AND " +
+            "(:motoristaId IS NULL OR s.motorista.id = :motoristaId) AND " +
+            "(:carroId IS NULL OR s.carro.id = :carroId) AND " +
+            "(:setorId IS NULL OR s.setor.id = :setorId) AND " +
+            "(:username IS NULL OR LOWER(s.usuario.username) LIKE LOWER(CONCAT('%', :username, '%'))) AND " +
+            "(:destinoId IS NULL OR s.destino.id = :destinoId) AND " +
+            "(:inicio IS NULL OR s.dataSolicitacao >= :inicio) AND " +
+            "(:fim IS NULL OR s.dataSolicitacao <= :fim)")
+    Page<Solicitacao> filtrarDinamico(@Param("id") Long id,
+                                      @Param("status") String status,
+                                      @Param("motoristaId") Long motoristaId,
+                                      @Param("carroId") Long carroId,
+                                      @Param("setorId") Long setorId,
+                                      @Param("username") String username,
+                                      @Param("destinoId") Long destinoId,
+                                      @Param("inicio") LocalDate inicio,
+                                      @Param("fim") LocalDate fim,
+                                      Pageable pageable);
+
 }
