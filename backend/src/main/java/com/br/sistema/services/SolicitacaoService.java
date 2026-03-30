@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
@@ -93,7 +94,8 @@ public class SolicitacaoService {
         validarPermissao(usuarioLogado, ROLES_ESCRITA);
 
         Solicitacao solicitacao = new Solicitacao();
-        preencherCampos(solicitacao, dto);
+        preencherCampos(solicitacao, dto, usuarioLogado);
+
 
         try {
             solicitacaoRepository.save(solicitacao);
@@ -112,7 +114,7 @@ public class SolicitacaoService {
         validarPermissao(usuarioLogado, ROLES_ESCRITA);
 
         Solicitacao solicitacao = buscarEntidadePorId(id);
-        preencherCampos(solicitacao, dto);
+        preencherCampos(solicitacao, dto, usuarioLogado);
         solicitacaoRepository.save(solicitacao);
 
         return toResponseDTO(solicitacao);
@@ -231,21 +233,20 @@ public class SolicitacaoService {
     // Não preenche: dataSolicitacao (vem da ficha), carro/placa (vem da ficha)
     // =========================================================
 
-    private void preencherCampos(Solicitacao solicitacao, SolicitacaoRequestDTO dto) {
+    private void preencherCampos(Solicitacao solicitacao, SolicitacaoRequestDTO dto, Usuario usuarioLogado) {
         solicitacao.setStatus(dto.status());
         solicitacao.setKmInicial(dto.kmInicial());
         solicitacao.setKmFinal(dto.kmFinal());
-        solicitacao.setHoraSaida(dto.horaSaida());
-        solicitacao.setHoraChegada(dto.horaChegada());
+        solicitacao.setHoraSaida(dto.horaSaida() != null ? LocalTime.parse(dto.horaSaida()) : null);
+        solicitacao.setHoraChegada(dto.horaChegada() != null ? LocalTime.parse(dto.horaChegada()) : null);
 
-        solicitacao.setMotorista(motoristaRepository.findById(dto.motoristaId())
+        solicitacao.setMotorista(motoristaRepository.findById(dto.idMotorista())
                 .orElseThrow(() -> new EntityNotFoundException("Motorista não encontrado.")));
-        solicitacao.setUsuario(usuarioRepository.findById(dto.usuarioId())
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado.")));
-        solicitacao.setSetor(setorRepository.findById(dto.setorId())
+        solicitacao.setSetor(setorRepository.findById(dto.idSetor())
                 .orElseThrow(() -> new EntityNotFoundException("Setor não encontrado.")));
-        solicitacao.setDestino(destinoRepository.findById(dto.destinoId())
+        solicitacao.setDestino(destinoRepository.findById(dto.idDestino())
                 .orElseThrow(() -> new EntityNotFoundException("Destino não encontrado.")));
+        solicitacao.setUsuario(usuarioLogado); // vem do token, não do DTO
     }
 
     // =========================================================
@@ -254,26 +255,21 @@ public class SolicitacaoService {
     // =========================================================
 
     private SolicitacaoResponseDTO toResponseDTO(Solicitacao s) {
-        String placa = s.getFicha() != null ? s.getFicha().getPlacaVeiculo() : null;
-
         return new SolicitacaoResponseDTO(
                 s.getId(),
-                s.getDataSolicitacao(),
                 s.getStatus(),
-                placa,
+                s.getKmInicial(),
+                s.getKmFinal(),
+                s.getHoraSaida(),
+                s.getHoraChegada(),
                 s.getMotorista().getId(),
                 s.getMotorista().getNome(),
-                s.getUsuario().getId(),
-                s.getUsuario().getNome(),
-                s.getUsuario().getUsername(),
                 s.getSetor().getId(),
                 s.getSetor().getNome(),
                 s.getDestino().getId(),
                 s.getDestino().getNome(),
-                s.getKmInicial(),
-                s.getKmFinal(),
-                s.getHoraSaida(),
-                s.getHoraChegada()
+                s.getUsuario().getId(),
+                s.getUsuario().getNome()
         );
     }
 
@@ -310,8 +306,8 @@ public class SolicitacaoService {
                 s.getDestino().getNome(),
                 s.getKmInicial(),
                 s.getKmFinal(),
-                s.getHoraSaida() != null ? s.getHoraSaida().toString() : null,
-                s.getHoraChegada() != null ? s.getHoraChegada().toString() : null
+                s.getHoraSaida(),
+                s.getHoraChegada()
         );
     }
 }
