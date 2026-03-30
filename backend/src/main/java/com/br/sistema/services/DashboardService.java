@@ -15,44 +15,41 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DashboardService {
 
-    private final UsuarioRepository usuarioRepository;
-    private final CarroRepository carroRepository;
-    private final MotoristaRepository motoristaRepository;
-    private final SetorRepository setorRepository;
+    private final UsuarioRepository     usuarioRepository;
+    private final CarroRepository       carroRepository;
+    private final MotoristaRepository   motoristaRepository;
+    private final SetorRepository       setorRepository;
     private final SolicitacaoRepository solicitacaoRepository;
-
-    // ⚡ Se você tiver SessionTracker para usuários ativos
-    private final SessionTracker sessionTracker;
+    private final SessionTracker        sessionTracker;
 
     @Transactional(readOnly = true)
     public DashboardDTO getDashboard() {
-        // 📊 Totais
-        long totalUsuarios = usuarioRepository.count();
-        long totalCarros = carroRepository.count();
-        long totalMotoristas = motoristaRepository.count();
-        long totalSetores = setorRepository.count();
+
+        // Totais
+        long totalUsuarios     = usuarioRepository.count();
+        long totalCarros       = carroRepository.count();
+        long totalMotoristas   = motoristaRepository.count();
+        long totalSetores      = setorRepository.count();
         long totalSolicitacoes = solicitacaoRepository.count();
 
-        // 📊 Solicitações por status
+        // Solicitações por status
         long solicitacoesEmAndamento = solicitacaoRepository.countByStatus("EM_ANDAMENTO");
         long solicitacoesFinalizadas = solicitacaoRepository.countByStatus("FINALIZADA");
-        long solicitacoesCanceladas = solicitacaoRepository.countByStatus("CANCELADA");
+        long solicitacoesCanceladas  = solicitacaoRepository.countByStatus("CANCELADA");
 
-        // 📊 Usuários
-        long usuariosAtivosAgora = sessionTracker.getUsuariosAtivosAgora(); // baseado em sessões
+        // Usuários ativos
+        long usuariosAtivosAgora = sessionTracker.getUsuariosAtivosAgora();
         long usuariosLogaramHoje = sessionTracker.getUsuariosLogaramHoje();
 
-        // 📊 Tendência últimos 7 dias
+        // Tendência últimos 7 dias
         LocalDate hoje = LocalDate.now();
         List<SolicitacaoPorDiaDTO> solicitacoesPorDia =
                 solicitacaoRepository.countByDia(hoje.minusDays(6), hoje);
 
-        // 📊 Rankings
-        List<RankingItemDTO> topSetores = solicitacaoRepository.topSetores();
+        // Rankings — topCarros REMOVIDO (placa está na FichaSolicitacao)
+        List<RankingItemDTO> topSetores    = solicitacaoRepository.topSetores();
         List<RankingItemDTO> topMotoristas = solicitacaoRepository.topMotoristas();
-        List<RankingItemDTO> topCarros = solicitacaoRepository.topCarros();
 
-        // ✅ Consolidado
         return new DashboardDTO(
                 totalUsuarios,
                 totalCarros,
@@ -66,9 +63,8 @@ public class DashboardService {
                 usuariosLogaramHoje,
                 solicitacoesPorDia,
                 topSetores,
-                topMotoristas,
-                topCarros
+                topMotoristas
+                // topCarros REMOVIDO
         );
     }
 }
-

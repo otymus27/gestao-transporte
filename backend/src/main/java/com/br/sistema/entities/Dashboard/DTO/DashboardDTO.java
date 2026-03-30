@@ -26,7 +26,7 @@ public record DashboardDTO(
 
         // Ranking
         List<RankingItemDTO> topSetores,
-        List<RankingItemDTO> topMotoristas,
-        List<RankingItemDTO> topCarros
+        List<RankingItemDTO> topMotoristas
+
 ) {}
 

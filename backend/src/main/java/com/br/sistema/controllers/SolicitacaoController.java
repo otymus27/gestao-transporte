@@ -102,6 +102,30 @@ public class SolicitacaoController {
     }
 
     // =========================================================
+    // ATUALIZAÇÃO DE STATUS (aprovar / recusar)
+    // PATCH /api/solicitacao/{id}/status?valor=APROVADA
+    // =========================================================
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    public ResponseEntity<?> atualizarStatus(@PathVariable Long id,
+                                             @RequestParam String valor,
+                                             Authentication authentication,
+                                             HttpServletRequest request) {
+        try {
+            Usuario usuarioLogado = authService.getUsuarioLogado(authentication);
+            SolicitacaoResponseDTO atualizada = solicitacaoService.atualizarStatus(id, valor, usuarioLogado);
+            return ResponseEntity.ok(atualizada);
+
+        } catch (EntityNotFoundException e) {
+            return erro(HttpStatus.NOT_FOUND, "Solicitação não encontrada", e.getMessage(), request);
+        } catch (Exception e) {
+            logger.error("Erro ao atualizar status da solicitação id={}", id, e);
+            return erroInterno(request);
+        }
+    }
+
+    // =========================================================
     // CONSULTAS
     // =========================================================
 
@@ -142,21 +166,18 @@ public class SolicitacaoController {
 
     /**
      * Endpoint único de busca com filtros opcionais combinados.
-     * Substitui os antigos: /buscar/status, /buscar/motorista,
-     * /buscar/carro, /buscar/setor, /buscar/usuario, /buscar/destino.
+     * carroId REMOVIDO — placa agora está na FichaSolicitacao.
      *
      * Exemplos:
      *   GET /api/solicitacao/buscar?status=PENDENTE
-     *   GET /api/solicitacao/buscar?motoristaId=3
+     *   GET /api/solicitacao/buscar?motoristaId=3&setorId=1
      *   GET /api/solicitacao/buscar?inicio=2024-01-01&fim=2024-12-31
-     *   GET /api/solicitacao/buscar?status=APROVADA&setorId=2
      */
     @GetMapping("/buscar")
     public ResponseEntity<?> buscar(
             @RequestParam(required = false) Long id,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long motoristaId,
-            @RequestParam(required = false) Long carroId,
             @RequestParam(required = false) Long setorId,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) Long destinoId,
@@ -168,7 +189,7 @@ public class SolicitacaoController {
         try {
             return ResponseEntity.ok(
                     solicitacaoService.filtrarGenerico(
-                            id, status, motoristaId, carroId, setorId, username, destinoId, inicio, fim, pageable
+                            id, status, motoristaId, setorId, username, destinoId, inicio, fim, pageable
                     )
             );
         } catch (Exception e) {
@@ -209,7 +230,7 @@ public class SolicitacaoController {
     }
 
     // =========================================================
-    // HELPERS PRIVADOS
+    // HELPERS
     // =========================================================
 
     private ResponseEntity<ErrorMessage> erro(HttpStatus status, String erro,

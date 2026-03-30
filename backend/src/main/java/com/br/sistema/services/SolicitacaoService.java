@@ -1,18 +1,25 @@
 package com.br.sistema.services;
 
-import com.br.sistema.entities.Carro.DTO.CarroDetalhadoDTO;
 import com.br.sistema.entities.DTO.SolicitacaoPorDiaDTO;
 import com.br.sistema.entities.Destino.DTO.DestinoDetalhadoDTO;
 import com.br.sistema.entities.Motorista.DTO.MotoristaDetalhadoDTO;
 import com.br.sistema.entities.Motorista.DTO.SolicitacaoPorMotoristaDTO;
 import com.br.sistema.entities.Setor.DTO.SetorDetalhadoDTO;
 import com.br.sistema.entities.Setor.DTO.SolicitacaoPorSetorDTO;
-import com.br.sistema.entities.Solicitacao.DTO.*;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoDetalhadaDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoPorStatusDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoRelatorioDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoRequestDTO;
+import com.br.sistema.entities.Solicitacao.DTO.SolicitacaoResponseDTO;
 import com.br.sistema.entities.Solicitacao.Solicitacao;
 import com.br.sistema.entities.Usuario.DTO.SolicitacaoPorUsuarioDTO;
 import com.br.sistema.entities.Usuario.DTO.UsuarioDetalhadoDTO;
 import com.br.sistema.entities.Usuario.Usuario;
-import com.br.sistema.repositories.*;
+import com.br.sistema.repositories.DestinoRepository;
+import com.br.sistema.repositories.MotoristaRepository;
+import com.br.sistema.repositories.SetorRepository;
+import com.br.sistema.repositories.SolicitacaoRepository;
+import com.br.sistema.repositories.UsuarioRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,33 +36,32 @@ import java.util.Set;
 @Service
 public class SolicitacaoService {
 
-    private static final Set<String> ROLES_PERMITIDAS = Set.of("ADMIN", "GERENTE", "BASIC");
+    private static final Set<String> ROLES_ESCRITA  = Set.of("ADMIN", "GERENTE", "BASIC");
+    private static final Set<String> ROLES_EXCLUSAO = Set.of("ADMIN");
 
     private final SolicitacaoRepository solicitacaoRepository;
-    private final CarroRepository carroRepository;
-    private final MotoristaRepository motoristaRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final SetorRepository setorRepository;
-    private final DestinoRepository destinoRepository;
+    private final MotoristaRepository   motoristaRepository;
+    private final UsuarioRepository     usuarioRepository;
+    private final SetorRepository       setorRepository;
+    private final DestinoRepository     destinoRepository;
 
+    // CarroRepository REMOVIDO — placa está na FichaSolicitacao
     public SolicitacaoService(
             SolicitacaoRepository solicitacaoRepository,
-            CarroRepository carroRepository,
-            MotoristaRepository motoristaRepository,
-            UsuarioRepository usuarioRepository,
-            SetorRepository setorRepository,
-            DestinoRepository destinoRepository
+            MotoristaRepository   motoristaRepository,
+            UsuarioRepository     usuarioRepository,
+            SetorRepository       setorRepository,
+            DestinoRepository     destinoRepository
     ) {
         this.solicitacaoRepository = solicitacaoRepository;
-        this.carroRepository = carroRepository;
-        this.motoristaRepository = motoristaRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.setorRepository = setorRepository;
-        this.destinoRepository = destinoRepository;
+        this.motoristaRepository   = motoristaRepository;
+        this.usuarioRepository     = usuarioRepository;
+        this.setorRepository       = setorRepository;
+        this.destinoRepository     = destinoRepository;
     }
 
     // =========================================================
-    // CRUD
+    // LEITURA
     // =========================================================
 
     @Transactional(readOnly = true)
@@ -74,10 +80,17 @@ public class SolicitacaoService {
         return toDetalhadaDTO(buscarEntidadePorId(id));
     }
 
+    // =========================================================
+    // ESCRITA
+    // Criação em lote → FichaSolicitacaoService
+    // Aqui: cadastro avulso, atualização e exclusão individual
+    // =========================================================
+
     @Transactional(noRollbackFor = EntityExistsException.class)
-    public SolicitacaoResponseDTO cadastrar(SolicitacaoRequestDTO dto, Usuario usuarioLogado) throws AccessDeniedException {
+    public SolicitacaoResponseDTO cadastrar(SolicitacaoRequestDTO dto,
+                                            Usuario usuarioLogado) throws AccessDeniedException {
         validarAutenticacao(usuarioLogado);
-        validarPermissao(usuarioLogado, ROLES_PERMITIDAS);
+        validarPermissao(usuarioLogado, ROLES_ESCRITA);
 
         Solicitacao solicitacao = new Solicitacao();
         preencherCampos(solicitacao, dto);
@@ -92,9 +105,11 @@ public class SolicitacaoService {
     }
 
     @Transactional
-    public SolicitacaoResponseDTO atualizar(Long id, SolicitacaoRequestDTO dto, Usuario usuarioLogado) throws AccessDeniedException {
+    public SolicitacaoResponseDTO atualizar(Long id,
+                                            SolicitacaoRequestDTO dto,
+                                            Usuario usuarioLogado) throws AccessDeniedException {
         validarAutenticacao(usuarioLogado);
-        validarPermissao(usuarioLogado, ROLES_PERMITIDAS);
+        validarPermissao(usuarioLogado, ROLES_ESCRITA);
 
         Solicitacao solicitacao = buscarEntidadePorId(id);
         preencherCampos(solicitacao, dto);
@@ -106,7 +121,7 @@ public class SolicitacaoService {
     @Transactional(noRollbackFor = EntityNotFoundException.class)
     public void deletar(Long id, Usuario usuarioLogado) throws AccessDeniedException {
         validarAutenticacao(usuarioLogado);
-        validarPermissao(usuarioLogado, Set.of("ADMIN"));
+        validarPermissao(usuarioLogado, ROLES_EXCLUSAO);
 
         Solicitacao solicitacao = buscarEntidadePorId(id);
 
@@ -118,7 +133,25 @@ public class SolicitacaoService {
     }
 
     // =========================================================
-    // FILTROS
+    // ATUALIZAÇÃO DE STATUS (aprovar / recusar)
+    // =========================================================
+
+    @Transactional
+    public SolicitacaoResponseDTO atualizarStatus(Long id,
+                                                  String novoStatus,
+                                                  Usuario usuarioLogado) throws AccessDeniedException {
+        validarAutenticacao(usuarioLogado);
+        validarPermissao(usuarioLogado, Set.of("ADMIN", "GERENTE"));
+
+        Solicitacao solicitacao = buscarEntidadePorId(id);
+        solicitacao.setStatus(novoStatus);
+        solicitacaoRepository.save(solicitacao);
+
+        return toResponseDTO(solicitacao);
+    }
+
+    // =========================================================
+    // FILTROS — carroId REMOVIDO
     // =========================================================
 
     @Transactional(readOnly = true)
@@ -126,7 +159,6 @@ public class SolicitacaoService {
             Long id,
             String status,
             Long motoristaId,
-            Long carroId,
             Long setorId,
             String username,
             Long destinoId,
@@ -134,22 +166,14 @@ public class SolicitacaoService {
             LocalDate fim,
             Pageable pageable
     ) {
-        // Delega ao repository a query dinâmica com todos os filtros combinados
         return solicitacaoRepository
-                .filtrarDinamico(id, status, motoristaId, carroId, setorId, username, destinoId, inicio, fim, pageable)
+                .filtrarDinamico(id, status, motoristaId, setorId, username, destinoId, inicio, fim, pageable)
                 .map(this::toResponseDTO);
     }
 
     // =========================================================
-    // RELATÓRIOS / DASHBOARDS
+    // DASHBOARDS / RELATÓRIOS
     // =========================================================
-
-    @Transactional(readOnly = true)
-    public List<SolicitacaoRelatorioDTO> gerarRelatorio(String filtro) {
-        return solicitacaoRepository.filtrarSemPaginacao(filtro).stream()
-                .map(this::toRelatorioDTO)
-                .toList();
-    }
 
     public List<SolicitacaoPorDiaDTO> buscarPorIntervalo(LocalDate inicio, LocalDate fim) {
         return solicitacaoRepository.buscarPorDatas(inicio, fim);
@@ -171,46 +195,49 @@ public class SolicitacaoService {
         return solicitacaoRepository.buscarPorStatus();
     }
 
+    @Transactional(readOnly = true)
+    public List<SolicitacaoRelatorioDTO> gerarRelatorio(String filtro) {
+        return solicitacaoRepository.filtrarSemPaginacao(filtro).stream()
+                .map(this::toRelatorioDTO)
+                .toList();
+    }
+
     // =========================================================
-    // MÉTODOS PRIVADOS
+    // PRIVATE — validação
     // =========================================================
 
-    /** Garante que o usuário está autenticado. */
     private void validarAutenticacao(Usuario usuarioLogado) {
         if (usuarioLogado == null) {
             throw new SecurityException("Usuário não autenticado.");
         }
     }
 
-    /** Garante que o usuário possui ao menos uma das roles exigidas. */
-    private void validarPermissao(Usuario usuarioLogado, Set<String> rolesPermitidas) throws AccessDeniedException {
+    private void validarPermissao(Usuario usuarioLogado,
+                                  Set<String> rolesPermitidas) throws AccessDeniedException {
         boolean permitido = usuarioLogado.getRoles().stream()
                 .anyMatch(r -> rolesPermitidas.contains(r.getNome()));
         if (!permitido) {
-            throw new AccessDeniedException("Usuário não tem permissão para realizar esta operação.");
+            throw new AccessDeniedException("Usuário sem permissão para esta operação.");
         }
     }
 
-    /** Busca a entidade pelo ID ou lança exceção padronizada. */
     private Solicitacao buscarEntidadePorId(Long id) {
         return solicitacaoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Solicitação não encontrada."));
     }
 
-    /**
-     * Preenche os campos da entidade a partir do DTO.
-     * Usado tanto no cadastro quanto na atualização — elimina duplicação.
-     */
+    // =========================================================
+    // PRIVATE — preenchimento
+    // Não preenche: dataSolicitacao (vem da ficha), carro/placa (vem da ficha)
+    // =========================================================
+
     private void preencherCampos(Solicitacao solicitacao, SolicitacaoRequestDTO dto) {
-        // dataSolicitacao removido daqui — vem da FichaSolicitacao
         solicitacao.setStatus(dto.status());
         solicitacao.setKmInicial(dto.kmInicial());
         solicitacao.setKmFinal(dto.kmFinal());
         solicitacao.setHoraSaida(dto.horaSaida());
         solicitacao.setHoraChegada(dto.horaChegada());
 
-        solicitacao.setCarro(carroRepository.findById(dto.carroId())
-                .orElseThrow(() -> new EntityNotFoundException("Carro não encontrado.")));
         solicitacao.setMotorista(motoristaRepository.findById(dto.motoristaId())
                 .orElseThrow(() -> new EntityNotFoundException("Motorista não encontrado.")));
         solicitacao.setUsuario(usuarioRepository.findById(dto.usuarioId())
@@ -221,14 +248,19 @@ public class SolicitacaoService {
                 .orElseThrow(() -> new EntityNotFoundException("Destino não encontrado.")));
     }
 
+    // =========================================================
+    // PRIVATE — mapeamentos
+    // Placa buscada via ficha master — null-safe para solicitações avulsas
+    // =========================================================
+
     private SolicitacaoResponseDTO toResponseDTO(Solicitacao s) {
+        String placa = s.getFicha() != null ? s.getFicha().getPlacaVeiculo() : null;
+
         return new SolicitacaoResponseDTO(
                 s.getId(),
                 s.getDataSolicitacao(),
                 s.getStatus(),
-                s.getCarro().getId(),
-                s.getCarro().getPlaca(),
-                s.getCarro().getModelo(),
+                placa,
                 s.getMotorista().getId(),
                 s.getMotorista().getNome(),
                 s.getUsuario().getId(),
@@ -246,11 +278,13 @@ public class SolicitacaoService {
     }
 
     private SolicitacaoDetalhadaDTO toDetalhadaDTO(Solicitacao s) {
+        String placa = s.getFicha() != null ? s.getFicha().getPlacaVeiculo() : null;
+
         return new SolicitacaoDetalhadaDTO(
                 s.getId(),
                 s.getDataSolicitacao(),
                 s.getStatus(),
-                CarroDetalhadoDTO.fromEntity(s.getCarro(), false),
+                placa,
                 MotoristaDetalhadoDTO.fromEntity(s.getMotorista(), false),
                 UsuarioDetalhadoDTO.fromEntity(s.getUsuario(), false),
                 SetorDetalhadoDTO.fromEntity(s.getSetor(), false),
@@ -263,19 +297,21 @@ public class SolicitacaoService {
     }
 
     private SolicitacaoRelatorioDTO toRelatorioDTO(Solicitacao s) {
+        String placa = s.getFicha() != null ? s.getFicha().getPlacaVeiculo() : null;
+
         return new SolicitacaoRelatorioDTO(
                 s.getId(),
                 s.getDataSolicitacao(),
                 s.getStatus(),
-                s.getCarro().getPlaca(),
+                placa,
                 s.getMotorista().getNome(),
                 s.getUsuario().getNome(),
                 s.getSetor().getNome(),
                 s.getDestino().getNome(),
                 s.getKmInicial(),
                 s.getKmFinal(),
-                s.getHoraSaida(),
-                s.getHoraChegada()
+                s.getHoraSaida() != null ? s.getHoraSaida().toString() : null,
+                s.getHoraChegada() != null ? s.getHoraChegada().toString() : null
         );
     }
 }
