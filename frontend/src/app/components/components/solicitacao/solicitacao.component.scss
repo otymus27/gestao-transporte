@@ -1,0 +1,198 @@
+/* ======== LAYOUT GERAL ======== */
+.container {
+  margin-top: 5px;
+  max-width: 100%;
+  margin-bottom: 5px;
+}
+
+.card {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: none;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-body h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ======== BOTÕES ======== */
+.btn-rounded {
+  border-radius: 25px;
+}
+
+.btn-shadow {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+  background: #0d6efd;
+  border: none;
+  transition: 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #0b5ed7;
+}
+
+.btn-warning,
+.btn-danger {
+  color: #fff;
+}
+
+.btn-success {
+  background: #198754;
+  border: none;
+}
+
+.btn-success:hover {
+  background: #157347;
+}
+
+/* ======== INPUTS E FORM ======== */
+input.form-control,
+select.form-select {
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+input.form-control:focus,
+select.form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 6px rgba(13, 110, 253, 0.4);
+}
+
+/* ======== TABELA ======== */
+.table {
+  font-size: 0.9rem;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table thead th {
+  background: #f8f9fa;
+  font-weight: 600;
+  padding: 12px;
+  text-align: center;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table tbody tr:hover {
+  background: #f1f3f5;
+  transition: 0.2s;
+}
+
+/* ======== BADGES STATUS ======== */
+.badge {
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+/* ======== PAGINAÇÃO ======== */
+.pagination .page-link {
+  border-radius: 6px;
+  margin: 0 2px;
+  color: #0d6efd;
+}
+
+.pagination .page-item.active .page-link {
+  background: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+}
+
+/* ======== MODAL ======== */
+.modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+}
+
+.modal-title {
+  font-weight: 600;
+}
+
+.modal-body label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.modal-body .form-control {
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+/* ======== AUTOCOMPLETE ======== */
+.autocomplete {
+  position: relative;
+}
+
+.autocomplete .panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 200px;
+  overflow: auto;
+  z-index: 1056;
+}
+
+.autocomplete .option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.autocomplete .option:hover {
+  background: #f1f1f1;
+}
+
+/* ======== RESPONSIVIDADE ======== */
+@media (max-width: 768px) {
+  .card-body h1 {
+    font-size: 1.3rem;
+  }
+
+  .d-flex {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px;
+  }
+
+  .pagination {
+    justify-content: center;
+  }
+}
+
+table thead tr {
+  background-color: #212529 !important;
+  color: #fff !important;
+}
+
+table thead tr th {
+  background-color: #212529 !important;
+  color: #fff !important;
+}

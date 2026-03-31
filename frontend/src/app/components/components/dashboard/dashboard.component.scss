@@ -1,0 +1,43 @@
+.dashboard-container {
+  max-width: 1440px;
+}
+
+.dashboard-card {
+  border-radius: 22px !important;
+  border: 0 !important;
+  overflow: hidden;
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+}
+
+.dashboard-card.bg-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+}
+
+.dashboard-card.bg-success {
+  background: linear-gradient(135deg, #0f766e, #14b8a6) !important;
+}
+
+.dashboard-card.bg-warning {
+  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
+}
+
+.dashboard-card.bg-info {
+  background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
+}
+
+.card {
+  border-radius: 22px !important;
+}
+
+apx-chart {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .fs-2 { font-size: 1.45rem !important; }
+  .fs-3 { font-size: 1.2rem !important; }
+}

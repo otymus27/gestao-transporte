@@ -1,0 +1,21 @@
+.footer-bar {
+  margin-left: var(--sidebar-width);
+  padding: 10px 22px 18px;
+  color: var(--text-soft);
+  font-size: .86rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.footer-muted {
+  opacity: .9;
+}
+
+@media (max-width: 991.98px) {
+  .footer-bar {
+    margin-left: 0;
+    padding: 8px 14px 18px;
+    flex-direction: column;
+  }
+}

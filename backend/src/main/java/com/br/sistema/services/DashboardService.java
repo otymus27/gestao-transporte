@@ -15,27 +15,29 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DashboardService {
 
-    private final UsuarioRepository     usuarioRepository;
-    private final CarroRepository       carroRepository;
-    private final MotoristaRepository   motoristaRepository;
-    private final SetorRepository       setorRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final CarroRepository carroRepository;
+    private final MotoristaRepository motoristaRepository;
+    private final SetorRepository setorRepository;
     private final SolicitacaoRepository solicitacaoRepository;
-    private final SessionTracker        sessionTracker;
+    private final SessionTracker sessionTracker;
+    private final FichaSolicitacaoService fichaSolicitacaoService;
 
     @Transactional(readOnly = true)
     public DashboardDTO getDashboard() {
 
         // Totais
-        long totalUsuarios     = usuarioRepository.count();
-        long totalCarros       = carroRepository.count();
-        long totalMotoristas   = motoristaRepository.count();
-        long totalSetores      = setorRepository.count();
+        long totalUsuarios = usuarioRepository.count();
+        long totalCarros = carroRepository.count();
+        long totalMotoristas = motoristaRepository.count();
+        long totalSetores = setorRepository.count();
         long totalSolicitacoes = solicitacaoRepository.count();
+        long totalFichas = fichaSolicitacaoService.contarFichas();
 
         // Solicitações por status
         long solicitacoesEmAndamento = solicitacaoRepository.countByStatus("EM_ANDAMENTO");
         long solicitacoesFinalizadas = solicitacaoRepository.countByStatus("FINALIZADA");
-        long solicitacoesCanceladas  = solicitacaoRepository.countByStatus("CANCELADA");
+        long solicitacoesCanceladas = solicitacaoRepository.countByStatus("CANCELADA");
 
         // Usuários ativos
         long usuariosAtivosAgora = sessionTracker.getUsuariosAtivosAgora();
@@ -46,8 +48,8 @@ public class DashboardService {
         List<SolicitacaoPorDiaDTO> solicitacoesPorDia =
                 solicitacaoRepository.countByDia(hoje.minusDays(6), hoje);
 
-        // Rankings — topCarros REMOVIDO (placa está na FichaSolicitacao)
-        List<RankingItemDTO> topSetores    = solicitacaoRepository.topSetores();
+        // Rankings
+        List<RankingItemDTO> topSetores = solicitacaoRepository.topSetores();
         List<RankingItemDTO> topMotoristas = solicitacaoRepository.topMotoristas();
 
         return new DashboardDTO(
@@ -56,6 +58,7 @@ public class DashboardService {
                 totalMotoristas,
                 totalSetores,
                 totalSolicitacoes,
+                totalFichas,
                 solicitacoesEmAndamento,
                 solicitacoesFinalizadas,
                 solicitacoesCanceladas,
@@ -64,7 +67,6 @@ public class DashboardService {
                 solicitacoesPorDia,
                 topSetores,
                 topMotoristas
-                // topCarros REMOVIDO
         );
     }
 }

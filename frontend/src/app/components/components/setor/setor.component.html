@@ -1,0 +1,235 @@
+<div class="container">
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded">
+        <h1>Gerenciamento de Setores</h1>
+        <button
+          class="btn btn-primary btn-rounded btn-shadow me-2"
+          (click)="cadastrarModal()"
+        >
+          <i class="bi bi-plus-circle me-1"></i> Novo Setor
+        </button>
+      </div>
+
+      <!-- Barra de pesquisa -->
+      <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div class="d-flex flex-grow-1 me-2 gap-2">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Filtrar por nome"
+            [(ngModel)]="filtroNome"
+            (keyup.enter)="aplicarFiltros()"
+          />
+        </div>
+
+        <button class="btn btn-primary ms-2" (click)="aplicarFiltros()">
+          <i class="bi bi-search"></i> Pesquisar
+        </button>
+        <button class="btn btn-secondary ms-2" (click)="limparFiltros()">
+          Limpar
+        </button>
+      </div>
+
+      <!-- Tabela de Setores -->
+      <table class="table table-striped mt-3">
+        <thead>
+          <tr>
+            <th (click)="ordenarPor('id')" style="cursor: pointer">
+              ID
+              <i
+                *ngIf="colunaOrdenada === 'id'"
+                class="bi"
+                [ngClass]="{
+                  'bi-caret-up-fill': ordem === 'asc',
+                  'bi-caret-down-fill': ordem === 'desc'
+                }"
+              ></i>
+            </th>
+            <th (click)="ordenarPor('nome')" style="cursor: pointer">
+              Nome
+              <i
+                *ngIf="colunaOrdenada === 'nome'"
+                class="bi"
+                [ngClass]="{
+                  'bi-caret-up-fill': ordem === 'asc',
+                  'bi-caret-down-fill': ordem === 'desc'
+                }"
+              ></i>
+            </th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (setor of lista; track setor.id) {
+          <tr>
+            <td>{{ setor.id }}</td>
+            <td>{{ setor.nome }}</td>
+            <td>
+              <button
+                class="btn btn-warning btn-sm btn-shadow me-1"
+                (click)="editarModal(setor)"
+                title="Editar Setor"
+              >
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button
+                class="btn btn-danger btn-sm btn-shadow"
+                (click)="excluir(setor)"
+                title="Excluir Setor"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="3" class="text-center">Nenhum setor encontrado.</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Paginação -->
+      <div
+        class="d-flex justify-content-between align-items-center mt-4 flex-wrap bg-light text-black p-3 rounded"
+      >
+        <div class="me-3">
+          <small>
+            Exibindo página <strong>{{ page + 1 }}</strong> de
+            <strong>{{ totalPages }}</strong> — Total de registros:
+            <strong>{{ totalElements }}</strong>
+          </small>
+        </div>
+
+        <nav>
+          <ul class="pagination mb-0">
+            <li class="page-item" [class.disabled]="page === 0">
+              <button
+                class="page-link"
+                (click)="paginaAnterior()"
+                [disabled]="page === 0"
+              >
+                ‹ Anterior
+              </button>
+            </li>
+
+            <li
+              *ngFor="let p of [].constructor(totalPages); let i = index"
+              class="page-item"
+              [class.active]="i === page"
+            >
+              <button class="page-link" (click)="irParaPagina(i)">
+                {{ i + 1 }}
+              </button>
+            </li>
+
+            <li class="page-item" [class.disabled]="page + 1 >= totalPages">
+              <button
+                class="page-link"
+                (click)="proximaPagina()"
+                [disabled]="page + 1 >= totalPages"
+              >
+                Próxima ›
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Cadastro/Edição -->
+<ng-template #modalSetorDetalhe>
+  <div class="modal-header bg-primary text-white">
+    <h5 class="modal-title fw-bold">
+      {{ registroSelecionado.id > 0 ? "Editar Setor" : "Novo Setor" }}
+    </h5>
+    <button type="button" class="btn-close" (click)="cancelarModal()"></button>
+  </div>
+
+  <div class="modal-body">
+    <form #setorForm="ngForm" (ngSubmit)="salvarSetor(registroSelecionado)">
+      <div class="mb-3">
+        <label class="form-label fw-bold">Nome do Setor:</label>
+        <input
+          mdbInput
+          [(ngModel)]="registroSelecionado.nome"
+          #nome="ngModel"
+          name="nome"
+          required
+          class="form-control"
+        />
+        <div
+          *ngIf="nome.invalid && (nome.dirty || nome.touched)"
+          class="text-danger mt-1"
+        >
+          O campo Nome é obrigatório.
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer bg-light">
+    <button
+      class="btn btn-primary"
+      [disabled]="setorForm.invalid"
+      (click)="salvarSetor(registroSelecionado)"
+    >
+      Salvar
+    </button>
+    <button type="button" class="btn btn-secondary" (click)="cancelarModal()">
+      Cancelar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal de Confirmação de Exclusão -->
+<ng-template #modalConfirmacaoExclusao>
+  <div class="modal-header bg-danger text-white">
+    <h5 class="modal-title fw-bold">Confirmação de Exclusão</h5>
+    <button type="button" class="btn-close" (click)="cancelarModal()"></button>
+  </div>
+
+  <div class="modal-body">
+    <p>
+      Tem certeza que deseja excluir o setor
+      <strong>{{ registroSelecionado.nome }}</strong>?
+    </p>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancelarModal()">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-danger" (click)="excluirConfirmado()">
+      Excluir
+    </button>
+  </div>
+</ng-template>
+
+<!-- Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  @for (toast of toastService.messages$ | async; track toast) {
+  <div
+    class="toast show"
+    [ngClass]="{
+      'bg-success': toast.type === 'success',
+      'bg-danger': toast.type === 'danger',
+      'bg-info': toast.type === 'info'
+    }"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    <div class="toast-header border-0 bg-transparent text-white">
+      <strong class="me-auto text-capitalize">{{ toast.type }}</strong>
+    </div>
+    <div class="toast-body text-white">
+      {{ toast.message }}
+    </div>
+  </div>
+  }
+</div>
+

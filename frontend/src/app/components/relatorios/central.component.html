@@ -1,0 +1,403 @@
+<div class="relatorio-page">
+  <!-- Cabeçalho -->
+  <div class="relatorio-header">
+    <span class="relatorio-label">SISTEMA</span>
+    <h4 class="relatorio-title">
+      <i class="bi bi-file-earmark-bar-graph me-2"></i>Relatórios
+    </h4>
+  </div>
+
+  <!-- Cards de módulos -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md" *ngFor="let m of modulos">
+      <div
+        class="modulo-card modulo-{{ m.cor }}"
+        [class.ativo]="moduloAtivo === m.key"
+        (click)="selecionarModulo(m.key)"
+      >
+        <div class="modulo-check" *ngIf="moduloAtivo === m.key">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+
+        <div class="modulo-icon">
+          <i class="bi {{ m.icon }}"></i>
+        </div>
+
+        <div class="modulo-info">
+          <div class="modulo-nome">{{ m.label }}</div>
+          <div class="modulo-sub">{{ getSubtituloModulo(m.key) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout dois painéis -->
+  <div class="relatorio-layout">
+    <!-- Filtros -->
+    <div class="filtros-panel">
+      <div class="filtros-titulo">
+        <i class="bi bi-funnel me-1"></i> FILTROS
+      </div>
+
+      <!-- === SOLICITAÇÕES === -->
+      <ng-container *ngIf="moduloAtivo === 'solicitacoes'">
+        <div class="filtro-grupo">
+          <label>Agrupamento</label>
+          <select
+            class="form-select form-select-sm"
+            [(ngModel)]="filtroSol.tipo"
+          >
+            <option *ngFor="let t of tiposSolicitacao" [ngValue]="t.value">
+              {{ t.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Busca livre</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Motorista, setor, destino..."
+            [(ngModel)]="filtroSol.filtro"
+            (keyup.enter)="consultar(0)"
+          />
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Data Início</label>
+          <input
+            type="date"
+            class="form-control form-control-sm"
+            [(ngModel)]="filtroSol.dataInicio"
+          />
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Data Fim</label>
+          <input
+            type="date"
+            class="form-control form-control-sm"
+            [(ngModel)]="filtroSol.dataFim"
+          />
+        </div>
+      </ng-container>
+
+      <!-- === MOTORISTAS === -->
+      <ng-container *ngIf="moduloAtivo === 'motoristas'">
+        <div class="filtro-grupo">
+          <label>Nome</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Nome do motorista"
+            [(ngModel)]="filtroMot.nome"
+            (keyup.enter)="consultar(0)"
+          />
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Matrícula</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Matrícula"
+            [(ngModel)]="filtroMot.matricula"
+            (keyup.enter)="consultar(0)"
+          />
+        </div>
+      </ng-container>
+
+      <!-- === CARROS === -->
+      <ng-container *ngIf="moduloAtivo === 'carros'">
+        <div class="filtro-grupo">
+          <label>Placa</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Placa"
+            [(ngModel)]="filtroCar.placa"
+            (keyup.enter)="consultar(0)"
+          />
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Marca</label>
+          <select
+            class="form-select form-select-sm"
+            [(ngModel)]="filtroCar.marca"
+          >
+            <option value="">Todas</option>
+            <option *ngFor="let m of marcasCarro" [value]="m">
+              {{ m }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Modelo</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Modelo"
+            [(ngModel)]="filtroCar.modelo"
+            (keyup.enter)="consultar(0)"
+          />
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Tipo</label>
+          <select
+            class="form-select form-select-sm"
+            [(ngModel)]="filtroCar.tipo"
+          >
+            <option value="">Todos</option>
+            <option *ngFor="let t of tiposCarro" [value]="t">
+              {{ t }}
+            </option>
+          </select>
+        </div>
+      </ng-container>
+
+      <!-- === SETORES === -->
+      <ng-container *ngIf="moduloAtivo === 'setores'">
+        <div class="filtro-grupo">
+          <label>Nome</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Nome do setor"
+            [(ngModel)]="filtroSet.nome"
+            (keyup.enter)="consultar(0)"
+          />
+        </div>
+      </ng-container>
+
+      <!-- === DESTINOS === -->
+      <ng-container *ngIf="moduloAtivo === 'destinos'">
+        <div class="filtro-grupo">
+          <label>Nome</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Nome do destino"
+            [(ngModel)]="filtroDest.nome"
+            (keyup.enter)="consultar(0)"
+          />
+        </div>
+      </ng-container>
+
+      <button class="btn-buscar" (click)="consultar(0)" [disabled]="carregando">
+        <i class="bi bi-search me-1"></i>
+        {{ carregando ? "Buscando..." : "Buscar dados" }}
+      </button>
+
+      <button class="btn-limpar" (click)="limpar()">
+        <i class="bi bi-x me-1"></i> Limpar
+      </button>
+
+      <!-- Exportar -->
+      <div class="exportacao" *ngIf="resultados.length > 0">
+        <div class="exportacao-label">EXPORTAR COMO</div>
+
+        <div class="d-flex flex-column gap-2">
+          <button class="btn-export btn-export-pdf" (click)="exportar('pdf')">
+            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+          </button>
+
+          <button
+            class="btn-export btn-export-excel"
+            (click)="exportar('excel')"
+          >
+            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+          </button>
+
+          <button class="btn-export btn-export-csv" (click)="exportarCsv()">
+            <i class="bi bi-file-earmark-text me-1"></i> CSV
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="resultados-panel">
+      <!-- Inicial -->
+      <div *ngIf="!consultado && !carregando" class="estado-vazio">
+        <i class="bi bi-search estado-icone"></i>
+        <p>Configure os filtros e clique em <strong>Buscar dados</strong></p>
+      </div>
+
+      <!-- Carregando -->
+      <div *ngIf="carregando" class="estado-vazio">
+        <div
+          class="spinner-border text-primary mb-3"
+          style="width: 2.5rem; height: 2.5rem"
+          role="status"
+        ></div>
+        <p class="text-muted">Carregando...</p>
+      </div>
+
+      <!-- Sem resultados -->
+      <div
+        *ngIf="consultado && !carregando && resultados.length === 0"
+        class="estado-vazio"
+      >
+        <i class="bi bi-inbox estado-icone text-muted"></i>
+        <p class="text-muted">Nenhum registro encontrado.</p>
+      </div>
+
+      <!-- Tabela -->
+      <div *ngIf="resultados.length > 0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted small">
+            <strong>{{ totalElements }}</strong> registros — Página
+            <strong>{{ page + 1 }}</strong> de <strong>{{ totalPages }}</strong>
+          </span>
+
+          <div class="d-flex align-items-center gap-2">
+            <label class="text-muted small mb-0">Por página:</label>
+            <select
+              class="form-select form-select-sm"
+              style="width: 75px"
+              (change)="mudarTamanho($event)"
+            >
+              <option [selected]="size === 10" value="10">10</option>
+              <option [selected]="size === 20" value="20">20</option>
+              <option [selected]="size === 50" value="50">50</option>
+              <option [selected]="size === 100" value="100">100</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th
+                  *ngFor="let col of colunas"
+                  [class.text-center]="col.center"
+                >
+                  {{ col.label }}
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let row of resultados">
+                <td
+                  *ngFor="let col of colunas"
+                  [class.text-center]="col.center"
+                >
+                  <!-- Status -->
+                  <ng-container *ngIf="col.key === 'status'; else cellDefault">
+                    <span
+                      class="badge"
+                      [ngClass]="{
+                        'bg-warning text-dark': row[col.key] === 'PENDENTE',
+                        'bg-primary': row[col.key] === 'EM_ANDAMENTO',
+                        'bg-success': row[col.key] === 'CONCLUIDO',
+                        'bg-danger': row[col.key] === 'CANCELADO'
+                      }"
+                    >
+                      {{ row[col.key] }}
+                    </span>
+                  </ng-container>
+
+                  <!-- Carro / Placa -->
+                  <ng-container
+                    *ngIf="
+                      col.key === 'carro' || col.key === 'placa';
+                      else notPlaca
+                    "
+                  >
+                    <span class="badge bg-secondary">{{
+                      row[col.key] || "-"
+                    }}</span>
+                  </ng-container>
+                  <ng-template #notPlaca></ng-template>
+
+                  <!-- Ativo -->
+                  <ng-container *ngIf="col.key === 'ativo'; else notAtivo">
+                    <span
+                      class="badge"
+                      [ngClass]="row[col.key] ? 'bg-success' : 'bg-secondary'"
+                    >
+                      {{ row[col.key] ? "Sim" : "Não" }}
+                    </span>
+                  </ng-container>
+                  <ng-template #notAtivo></ng-template>
+
+                  <!-- Data -->
+                  <ng-container
+                    *ngIf="col.key === 'dataSolicitacao'; else notData"
+                  >
+                    {{ row[col.key] | date : "dd/MM/yyyy" }}
+                  </ng-container>
+                  <ng-template #notData></ng-template>
+
+                  <!-- Default -->
+                  <ng-template #cellDefault>
+                    <ng-container
+                      *ngIf="
+                        col.key !== 'status' &&
+                        col.key !== 'carro' &&
+                        col.key !== 'placa' &&
+                        col.key !== 'ativo' &&
+                        col.key !== 'dataSolicitacao'
+                      "
+                    >
+                      {{ row[col.key] ?? "-" }}
+                    </ng-container>
+                  </ng-template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginação -->
+        <div class="d-flex justify-content-end mt-3">
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="page === 0">
+                <button
+                  class="page-link"
+                  (click)="irPara(page - 1)"
+                  [disabled]="page === 0"
+                >
+                  ‹
+                </button>
+              </li>
+
+              <ng-container *ngFor="let p of paginasVisiveis">
+                <li *ngIf="p === null" class="page-item disabled">
+                  <span class="page-link">…</span>
+                </li>
+
+                <li
+                  *ngIf="p !== null"
+                  class="page-item"
+                  [class.active]="p === page"
+                >
+                  <button class="page-link" (click)="irPara(p!)">
+                    {{ p! + 1 }}
+                  </button>
+                </li>
+              </ng-container>
+
+              <li class="page-item" [class.disabled]="page + 1 >= totalPages">
+                <button
+                  class="page-link"
+                  (click)="irPara(page + 1)"
+                  [disabled]="page + 1 >= totalPages"
+                >
+                  ›
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

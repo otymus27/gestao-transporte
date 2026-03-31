@@ -24,6 +24,7 @@ import { SolicitacaoRelatorioComponent } from './components/relatorios/solicitac
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { SobreComponent } from './components/sobre/sobre.component';
 import { FichaComponent } from './components/ficha/ficha.component';
+import { RelatorioCentralComponent } from './components/relatorios/central.component';
 
 export const routes: Routes = [
   // --- Rotas Públicas ---
@@ -173,6 +174,23 @@ export const routes: Routes = [
             path: 'gerenciar',
             component: FichaComponent,
             data: { roles: ['ADMIN', 'GERENTE', 'BASIC'] },
+          },
+        ],
+      },
+
+      // 🔹 Relatórios Central
+      {
+        path: 'relatorios',
+        children: [
+          {
+            path: '',
+            component: RelatorioCentralComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
+          },
+          {
+            path: 'geral',
+            component: RelatorioCentralComponent,
+            data: { roles: ['ADMIN', 'GERENTE'] },
           },
         ],
       },

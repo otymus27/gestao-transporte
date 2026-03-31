@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SolicitacaoService } from '../../../services/solicitacao.service';
+import { DashboardService } from '../../../services/dashboard.service';
 import {
   RelatorioSolicitacaoService,
   FiltroSolicitacaoRelatorio,
@@ -12,32 +13,34 @@ type ExportTipo = 'pdf' | 'excel' | 'csv';
 
 @Component({
   selector: 'app-solicitacao-relatorio',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './solicitacao-relatorio.component.html',
   styleUrl: './solicitacao-relatorio.component.scss',
 })
-export class SolicitacaoRelatorioComponent {
+export class SolicitacaoRelatorioComponent implements OnInit {
   constructor(
     private solicitacaoService: SolicitacaoService,
-    private relatorioService: RelatorioSolicitacaoService
+    private relatorioService: RelatorioSolicitacaoService,
+    private dashboardService: DashboardService
   ) {}
 
-  // ✅ opções pro select (pode mover pro html direto se preferir)
+  // Cards de resumo
+  totalSolicitacoes = 0;
+  totalConcluidas = 0;
+  totalPendentes = 0;
+  totalCanceladas = 0;
+
   tiposRelatorio: { value: TipoRelatorioSolicitacao; label: string }[] = [
     { value: 'SIMPLES', label: 'Sem agrupamento' },
     { value: 'POR_SETOR', label: 'Agrupado por Setor' },
     { value: 'POR_MOTORISTA', label: 'Agrupado por Motorista' },
-    { value: 'POR_CARRO', label: 'Agrupado por Carro' },
+    { value: 'POR_CARRO', label: 'Agrupado por Veículo' },
     { value: 'POR_DESTINO', label: 'Agrupado por Destino' },
   ];
 
-  filtros: {
-    tipo: TipoRelatorioSolicitacao;
-    filtro: string;
-    dataInicio: string; // yyyy-MM-dd
-    dataFim: string;    // yyyy-MM-dd
-  } = {
-    tipo: 'SIMPLES', // ✅ default (você pode trocar para POR_SETOR se quiser)
+  filtros = {
+    tipo: 'SIMPLES' as TipoRelatorioSolicitacao,
     filtro: '',
     dataInicio: '',
     dataFim: '',
@@ -45,24 +48,43 @@ export class SolicitacaoRelatorioComponent {
 
   resultados: any[] = [];
   carregando = false;
+  consultado = false;
 
   page = 0;
   size = 10;
   totalPages = 0;
   totalElements = 0;
 
-  consultar(page: number = 0): void {
+  ngOnInit(): void {
+    this.carregarResumo();
+  }
+
+  carregarResumo(): void {
+    this.dashboardService.getDashboard().subscribe({
+      next: (d) => {
+        this.totalSolicitacoes = d.totalSolicitacoes;
+        this.totalConcluidas = d.solicitacoesFinalizadas;
+        this.totalPendentes = d.solicitacoesEmAndamento;
+        this.totalCanceladas = d.solicitacoesCanceladas;
+      },
+    });
+  }
+
+  consultar(page = 0): void {
     this.carregando = true;
+    this.consultado = true;
     this.page = page;
 
-    const filtrosApi: any = {
-      filtro: this.filtros.filtro?.trim() || null,
-      dataInicio: this.filtros.dataInicio || null,
-      dataFim: this.filtros.dataFim || null,
-    };
-
     this.solicitacaoService
-      .consultarParaRelatorio(filtrosApi, this.page, this.size)
+      .consultarParaRelatorio(
+        {
+          filtro: this.filtros.filtro?.trim() || null,
+          dataInicio: this.filtros.dataInicio || null,
+          dataFim: this.filtros.dataFim || null,
+        },
+        this.page,
+        this.size
+      )
       .subscribe({
         next: (resp) => {
           this.resultados = resp.content ?? [];
@@ -71,100 +93,90 @@ export class SolicitacaoRelatorioComponent {
           this.page = resp.number ?? 0;
           this.size = resp.size ?? this.size;
         },
-        error: (err) => {
-          console.error('Erro ao consultar paginado', err);
-          alert('Erro ao consultar dados.');
+        error: () => {
           this.resultados = [];
           this.totalPages = 0;
-          this.totalElements = 0;
         },
         complete: () => (this.carregando = false),
       });
   }
 
   limpar(): void {
-    this.filtros = {
-      tipo: 'SIMPLES',
-      filtro: '',
-      dataInicio: '',
-      dataFim: '',
-    };
-
+    this.filtros = { tipo: 'SIMPLES', filtro: '', dataInicio: '', dataFim: '' };
     this.resultados = [];
     this.page = 0;
     this.totalPages = 0;
-    this.totalElements = 0;
+    this.consultado = false;
   }
 
   exportar(tipo: ExportTipo): void {
-    // ✅ CSV depende dos dados da tabela (front)
     if (tipo === 'csv') {
-      if (!this.resultados || this.resultados.length === 0) return;
+      if (!this.resultados.length) return;
       this.exportarCsv();
       return;
     }
 
-    // ✅ PDF/Excel NÃO precisam depender da tabela.
-    // Você pode exportar mesmo sem consultar antes.
     const filtrosExport: FiltroSolicitacaoRelatorio = {
-      tipo: this.filtros.tipo, // ✅ aqui entra o agrupamento
+      tipo: this.filtros.tipo,
       filtro: this.filtros.filtro?.trim() || null,
       dataInicio: this.filtros.dataInicio || null,
       dataFim: this.filtros.dataFim || null,
     };
 
-    if (tipo === 'pdf') {
-      this.relatorioService.exportarPdf(filtrosExport).subscribe({
-        next: (blob) =>
-          this.baixarArquivo(blob, this.nomeArquivo('pdf'), 'application/pdf'),
-        error: (err) => {
-          console.error('Erro ao exportar PDF', err);
-          alert('Erro ao exportar PDF.');
-        },
-      });
-      return;
-    }
+    const obs$ =
+      tipo === 'pdf'
+        ? this.relatorioService.exportarPdf(filtrosExport)
+        : this.relatorioService.exportarExcel(filtrosExport);
 
-    if (tipo === 'excel') {
-      this.relatorioService.exportarExcel(filtrosExport).subscribe({
-        next: (blob) =>
-          this.baixarArquivo(
-            blob,
-            this.nomeArquivo('xlsx'),
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          ),
-        error: (err) => {
-          console.error('Erro ao exportar Excel', err);
-          alert('Erro ao exportar Excel.');
-        },
-      });
-      return;
-    }
+    const ext = tipo === 'pdf' ? 'pdf' : 'xlsx';
+    const contentType =
+      tipo === 'pdf'
+        ? 'application/pdf'
+        : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+    obs$.subscribe({
+      next: (blob) =>
+        this.baixarArquivo(blob, this.nomeArquivo(ext as any), contentType),
+      error: (err) => console.error('Erro ao exportar', err),
+    });
+  }
+
+  mudarTamanho(event: Event): void {
+    this.size = Number((event.target as HTMLSelectElement).value);
+    this.consultar(0);
+  }
+
+  irPara(p: number): void {
+    if (p < 0 || p >= this.totalPages) return;
+    this.consultar(p);
+  }
+
+  get percentualConcluidas(): string {
+    if (!this.totalSolicitacoes) return '0';
+    return ((this.totalConcluidas / this.totalSolicitacoes) * 100).toFixed(0);
   }
 
   private nomeArquivo(ext: 'pdf' | 'xlsx'): string {
     const hoje = new Date().toISOString().slice(0, 10);
-    const tipo = (this.filtros.tipo || 'SEM_AGRUPAMENTO').toLowerCase();
-    return `rel_solicitacoes_${tipo}_${hoje}.${ext}`;
+    return `rel_solicitacoes_${this.filtros.tipo.toLowerCase()}_${hoje}.${ext}`;
   }
 
   private exportarCsv(): void {
     const header = [
       'ID',
-      'Data Solicitação',
+      'Data',
       'Status',
-      'Carro',
+      'Veículo',
       'Motorista',
       'Usuário',
       'Setor',
       'Destino',
-      'Km Inicial',
-      'Km Final',
-      'Km Total',
-      'Hora Saída',
-      'Hora Chegada',
+      'KM Ini',
+      'KM Fin',
+      'KM Total',
+      'Saída',
+      'Chegada',
     ];
-
     const rows = this.resultados.map((r) => [
       r.id,
       r.dataSolicitacao,
@@ -180,37 +192,26 @@ export class SolicitacaoRelatorioComponent {
       r.horaSaida,
       r.horaChegada,
     ]);
-
     const csv = [header, ...rows]
-      .map((cols) =>
-        cols.map((v) => `"${String(v ?? '').replaceAll('"', '""')}"`).join(';')
+      .map((c) =>
+        c.map((v) => `"${String(v ?? '').replaceAll('"', '""')}"`).join(';')
       )
       .join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    this.baixarArquivo(blob, 'rel_solicitacoes.csv', 'text/csv');
+    this.baixarArquivo(
+      new Blob([csv], { type: 'text/csv;charset=utf-8;' }),
+      'rel_solicitacoes.csv',
+      'text/csv'
+    );
   }
 
   private baixarArquivo(blob: Blob, nome: string, contentType: string): void {
-    const blobObj = new Blob([blob], { type: contentType });
-    const url = window.URL.createObjectURL(blobObj);
-
+    const url = window.URL.createObjectURL(
+      new Blob([blob], { type: contentType })
+    );
     const a = document.createElement('a');
     a.href = url;
     a.download = nome;
     a.click();
-
     window.URL.revokeObjectURL(url);
-  }
-
-  mudarTamanho(event: Event): void {
-    const val = Number((event.target as HTMLSelectElement).value);
-    this.size = val;
-    this.consultar(0);
-  }
-
-  irPara(p: number): void {
-    if (p < 0 || p >= this.totalPages) return;
-    this.consultar(p);
   }
 }

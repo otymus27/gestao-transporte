@@ -1,178 +1,174 @@
-<div class="container-fluid px-4 py-3 dashboard-container">
+<div class="dashboard-page">
+  <div class="dashboard-header">
+    <div>
+      <div class="dashboard-kicker">PAINEL DE CONTROLE</div>
+      <h1 class="dashboard-title">Dashboard</h1>
+      <p class="dashboard-subtitle">
+        Acompanhe os principais módulos do sistema e acesse rapidamente cada área.
+      </p>
+    </div>
 
-  <!-- Cabeçalho -->
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <h4 class="mb-0 fw-bold"><i class="bi bi-speedometer2 me-2"></i>Painel de Controle</h4>
-    <div class="d-flex align-items-center gap-3">
-      <span class="text-muted small">
-        <i class="bi bi-clock me-1"></i>
-        Atualizado: <strong>{{ lastUpdated | date: 'dd/MM/yyyy HH:mm:ss' }}</strong>
-      </span>
-      <button class="btn btn-outline-primary btn-sm" (click)="carregarDashboard()">
-        <i class="bi bi-arrow-clockwise me-1"></i> Atualizar
-      </button>
+    <a routerLink="/admin/relatorios/geral" class="btn-dashboard-action">
+      <i class="bi bi-bar-chart-line-fill"></i>
+      <span>Ver relatórios</span>
+    </a>
+  </div>
+
+  <!-- Cards de resumo -->
+  <div class="dashboard-stats">
+    <a class="stat-card stat-blue" routerLink="/admin/carros/gerenciar">
+      <div class="stat-icon">
+        <i class="bi bi-car-front-fill"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ totalCarros }}</span>
+        <span class="stat-label">Carros</span>
+      </div>
+    </a>
+
+    <a class="stat-card stat-green" routerLink="/admin/motoristas/gerenciar">
+      <div class="stat-icon">
+        <i class="bi bi-person-vcard-fill"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ totalMotoristas }}</span>
+        <span class="stat-label">Motoristas</span>
+      </div>
+    </a>
+
+    <a class="stat-card stat-orange" routerLink="/admin/setores/gerenciar">
+      <div class="stat-icon">
+        <i class="bi bi-building-fill"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ totalSetores }}</span>
+        <span class="stat-label">Setores</span>
+      </div>
+    </a>
+
+    <a class="stat-card stat-purple" routerLink="/admin/solicitacoes/gerenciar">
+      <div class="stat-icon">
+        <i class="bi bi-journal-text"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ totalSolicitacoes }}</span>
+        <span class="stat-label">Solicitações</span>
+      </div>
+    </a>
+
+    <a class="stat-card stat-teal" routerLink="/admin/fichas/gerenciar">
+      <div class="stat-icon">
+        <i class="bi bi-journal-bookmark-fill"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ totalFichas }}</span>
+        <span class="stat-label">Fichas</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Atalhos -->
+  <div class="dashboard-section">
+    <div class="section-header">
+      <div>
+        <span class="section-kicker">ACESSO RÁPIDO</span>
+        <h2 class="section-title">Atalhos do sistema</h2>
+      </div>
+    </div>
+
+    <div class="atalhos-grid">
+      <a
+        *ngFor="let item of atalhos"
+        class="atalho-card"
+        [ngClass]="'atalho-' + item.cor"
+        [routerLink]="item.rota"
+      >
+        <div class="atalho-top">
+          <div class="atalho-icon">
+            <i [class]="item.icon"></i>
+          </div>
+          <div class="atalho-total">{{ getTotal(item) }}</div>
+        </div>
+
+        <div class="atalho-title">{{ item.titulo }}</div>
+        <div class="atalho-desc">{{ item.descricao }}</div>
+
+        <div class="atalho-link">
+          Abrir módulo
+          <i class="bi bi-arrow-right-short"></i>
+        </div>
+      </a>
     </div>
   </div>
 
-  <!-- Loader -->
-  <div *ngIf="loading" class="text-center mt-5 py-5">
-    <div class="spinner-border text-primary" style="width:3rem;height:3rem" role="status"></div>
-    <p class="mt-3 text-muted">Carregando estatísticas...</p>
-  </div>
+  <!-- Painéis inferiores -->
+  <div class="dashboard-bottom">
+    <div class="dashboard-panel">
+      <div class="panel-header">
+        <span class="panel-dot blue"></span>
+        <h3>Ações rápidas</h3>
+      </div>
 
-  <div *ngIf="!loading && dashboard">
+      <div class="panel-body actions-list">
+        <a *ngIf="isAdmin() || isGerente()" routerLink="/admin/solicitacoes/gerenciar" class="quick-link">
+          <i class="bi bi-plus-circle"></i>
+          <span>Nova solicitação</span>
+        </a>
 
-    <!-- Cards de totais -->
-    <div class="row g-3 mb-4">
-      <div class="col-6 col-md-3">
-        <div class="card dashboard-card text-white bg-primary shadow-sm">
-          <div class="card-body d-flex align-items-center gap-3">
-            <i class="bi bi-people-fill fs-2 opacity-75"></i>
-            <div>
-              <div class="small fw-semibold">Usuários</div>
-              <div class="fs-3 fw-bold">{{ dashboard.totalUsuarios }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="card dashboard-card text-white bg-success shadow-sm">
-          <div class="card-body d-flex align-items-center gap-3">
-            <i class="bi bi-car-front-fill fs-2 opacity-75"></i>
-            <div>
-              <div class="small fw-semibold">Carros</div>
-              <div class="fs-3 fw-bold">{{ dashboard.totalCarros }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="card dashboard-card text-white bg-warning shadow-sm">
-          <div class="card-body d-flex align-items-center gap-3">
-            <i class="bi bi-person-vcard-fill fs-2 opacity-75"></i>
-            <div>
-              <div class="small fw-semibold">Motoristas</div>
-              <div class="fs-3 fw-bold">{{ dashboard.totalMotoristas }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="card dashboard-card text-white bg-info shadow-sm">
-          <div class="card-body d-flex align-items-center gap-3">
-            <i class="bi bi-building fs-2 opacity-75"></i>
-            <div>
-              <div class="small fw-semibold">Setores</div>
-              <div class="fs-3 fw-bold">{{ dashboard.totalSetores }}</div>
-            </div>
-          </div>
-        </div>
+        <a *ngIf="isAdmin() || isGerente()" routerLink="/admin/carros/gerenciar" class="quick-link">
+          <i class="bi bi-car-front"></i>
+          <span>Gerenciar carros</span>
+        </a>
+
+        <a *ngIf="isAdmin() || isGerente()" routerLink="/admin/motoristas/gerenciar" class="quick-link">
+          <i class="bi bi-person-badge"></i>
+          <span>Gerenciar motoristas</span>
+        </a>
+
+        <a *ngIf="isAdmin() || isGerente()" routerLink="/admin/setores/gerenciar" class="quick-link">
+          <i class="bi bi-building"></i>
+          <span>Gerenciar setores</span>
+        </a>
+
+        <a routerLink="/admin/relatorios/geral" class="quick-link">
+          <i class="bi bi-file-earmark-bar-graph"></i>
+          <span>Abrir relatórios</span>
+        </a>
       </div>
     </div>
 
-    <!-- Cards de solicitações -->
-    <div class="row g-3 mb-4">
-      <div class="col-6 col-md-3">
-        <div class="card shadow-sm text-center h-100">
-          <div class="card-body py-3">
-            <div class="text-muted small mb-1">Total Solicitações</div>
-            <div class="fs-2 fw-bold text-dark">{{ dashboard.totalSolicitacoes }}</div>
-          </div>
-        </div>
+    <div class="dashboard-panel">
+      <div class="panel-header">
+        <span class="panel-dot green"></span>
+        <h3>Resumo operacional</h3>
       </div>
-      <div class="col-6 col-md-3">
-        <div class="card shadow-sm text-center h-100 border-warning">
-          <div class="card-body py-3">
-            <div class="text-muted small mb-1">Em Andamento</div>
-            <div class="fs-2 fw-bold text-warning">{{ dashboard.solicitacoesEmAndamento }}</div>
-          </div>
+
+      <div class="panel-body resumo-grid">
+        <div class="resumo-item">
+          <span class="resumo-label">Total de carros</span>
+          <strong>{{ totalCarros }}</strong>
         </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="card shadow-sm text-center h-100 border-success">
-          <div class="card-body py-3">
-            <div class="text-muted small mb-1">Finalizadas</div>
-            <div class="fs-2 fw-bold text-success">{{ dashboard.solicitacoesFinalizadas }}</div>
-            <div class="text-muted small">{{ percentualConcluidas }}% do total</div>
-          </div>
+
+        <div class="resumo-item">
+          <span class="resumo-label">Total de motoristas</span>
+          <strong>{{ totalMotoristas }}</strong>
         </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="card shadow-sm text-center h-100 border-danger">
-          <div class="card-body py-3">
-            <div class="text-muted small mb-1">Canceladas</div>
-            <div class="fs-2 fw-bold text-danger">{{ dashboard.solicitacoesCanceladas }}</div>
-          </div>
+
+        <div class="resumo-item">
+          <span class="resumo-label">Total de setores</span>
+          <strong>{{ totalSetores }}</strong>
+        </div>
+
+        <div class="resumo-item">
+          <span class="resumo-label">Solicitações</span>
+          <strong>{{ totalSolicitacoes }}</strong>
+        </div>
+
+        <div class="resumo-item">
+          <span class="resumo-label">Fichas</span>
+          <strong>{{ totalFichas }}</strong>
         </div>
       </div>
     </div>
-
-    <!-- Gráfico de linha — Solicitações por dia -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-body">
-        <apx-chart
-          [series]="solicitacoesDiaOptions.series"
-          [chart]="solicitacoesDiaOptions.chart"
-          [stroke]="solicitacoesDiaOptions?.stroke || {}"
-          [colors]="solicitacoesDiaOptions.colors"
-          [xaxis]="solicitacoesDiaOptions.xaxis"
-          [yaxis]="solicitacoesDiaOptions?.yaxis || {}"
-          [fill]="solicitacoesDiaOptions?.fill || {}"
-          [grid]="solicitacoesDiaOptions?.grid || {}"
-          [title]="solicitacoesDiaOptions.title"
-          [dataLabels]="solicitacoesDiaOptions.dataLabels">
-        </apx-chart>
-      </div>
-    </div>
-
-    <!-- Gráficos de barras -->
-    <div class="row g-4 mb-4">
-      <div class="col-md-6">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <apx-chart
-              [series]="setoresOptions.series"
-              [chart]="setoresOptions.chart"
-              [colors]="setoresOptions.colors"
-              [xaxis]="setoresOptions.xaxis"
-              [dataLabels]="setoresOptions.dataLabels"
-              [title]="setoresOptions.title">
-            </apx-chart>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <apx-chart
-              [series]="motoristasOptions.series"
-              [chart]="motoristasOptions.chart"
-              [colors]="motoristasOptions.colors"
-              [xaxis]="motoristasOptions.xaxis"
-              [dataLabels]="motoristasOptions.dataLabels"
-              [title]="motoristasOptions.title">
-            </apx-chart>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Usuários ativos -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-body">
-        <h6 class="fw-bold mb-3"><i class="bi bi-person-check me-2 text-primary"></i>Atividade de Usuários</h6>
-        <div class="row text-center">
-          <div class="col-6">
-            <div class="text-muted small">Ativos agora</div>
-            <div class="fs-3 fw-bold text-primary">{{ dashboard.usuariosAtivosAgora }}</div>
-          </div>
-          <div class="col-6">
-            <div class="text-muted small">Logaram hoje</div>
-            <div class="fs-3 fw-bold text-secondary">{{ dashboard.usuariosLogaramHoje }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>

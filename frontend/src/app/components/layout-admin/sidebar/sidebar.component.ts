@@ -15,33 +15,10 @@ export class SidebarComponent {
 
   isCollapsed = false;
 
-  // controla qual submenu está aberto
-  currentOpen: string | null = null;
-
   toggle() {
     this.isCollapsed = !this.isCollapsed;
   }
 
-  toggleSubmenu(submenu: string) {
-    if (this.currentOpen === submenu) {
-      // se clicar no mesmo já aberto → fecha
-      this.currentOpen = null;
-    } else {
-      // abre o novo e fecha os outros
-      this.currentOpen = submenu;
-    }
-  }
-
-  isSubmenuOpen(submenu: string): boolean {
-    return this.currentOpen === submenu;
-  }
-
-  //fecha todos menus e submenus
-  hideAllSubmenus() {
-    this.currentOpen = null;
-  }
-
-  // Roles
   isAdmin(): boolean {
     const roles = this.authService.getLoggedInRoles();
     return roles.includes('ADMIN');

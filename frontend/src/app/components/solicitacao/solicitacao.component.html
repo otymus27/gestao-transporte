@@ -1,11 +1,13 @@
 <div class="container-fluid px-4 py-3">
   <div class="card shadow-sm">
     <div class="card-body">
-
       <!-- Cabeçalho -->
-      <div class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded mb-3">
-        <h5 class="mb-0 fw-bold"><i class="bi bi-list-ul me-2"></i>Gerenciamento de Solicitações</h5>
-
+      <div
+        class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded mb-3"
+      >
+        <h5 class="mb-0 fw-bold">
+          <i class="bi bi-list-ul me-2"></i>Gerenciamento de Solicitações
+        </h5>
       </div>
 
       <!-- Filtros -->
@@ -15,10 +17,10 @@
           <input
             type="number"
             class="form-control form-control-sm"
-            style="width:120px"
+            style="width: 120px"
             placeholder="ID"
             [(ngModel)]="filtroId"
-            [ngModelOptions]="{standalone: true}"
+            [ngModelOptions]="{ standalone: true }"
             (input)="usarFiltro('id')"
             (keyup.enter)="aplicarFiltros()"
           />
@@ -27,9 +29,9 @@
           <label class="form-label small mb-1">Status</label>
           <select
             class="form-select form-select-sm"
-            style="width:160px"
+            style="width: 160px"
             [(ngModel)]="filtroStatus"
-            [ngModelOptions]="{standalone: true}"
+            [ngModelOptions]="{ standalone: true }"
             (change)="usarFiltro('status')"
           >
             <option value="">Todos os status</option>
@@ -37,28 +39,48 @@
           </select>
         </div>
         <div class="col-auto d-flex gap-2">
-          <button class="btn btn-warning btn-sm" (click)="alternarFiltroPendentes()"
-            [class.active]="mostrarSomentePendentes">
+          <button
+            class="btn btn-warning btn-sm"
+            (click)="alternarFiltroPendentes()"
+            [class.active]="mostrarSomentePendentes"
+          >
             <i class="bi bi-clock me-1"></i> Pendentes
           </button>
           <button class="btn btn-primary btn-sm" (click)="aplicarFiltros()">
             <i class="bi bi-search me-1"></i> Pesquisar
           </button>
-          <button class="btn btn-outline-secondary btn-sm" (click)="limparFiltros()">Limpar</button>
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            (click)="limparFiltros()"
+          >
+            Limpar
+          </button>
         </div>
       </div>
 
       <!-- Tabela -->
       <div class="table-responsive">
-        <table class="table table-striped table-hover table-sm align-middle mb-0">
-          <thead style="background-color:#212529 !important; color:#fff !important;">
+        <table
+          class="table table-striped table-hover table-sm align-middle mb-0"
+        >
+          <thead
+            style="background-color: #212529 !important; color: #fff !important"
+          >
             <tr>
-              <th (click)="ordenarPor('id')" style="cursor:pointer;width:60px">
+              <th
+                (click)="ordenarPor('id')"
+                style="cursor: pointer; width: 60px"
+              >
                 ID
-                <i *ngIf="colunaOrdenada==='id'" class="bi"
-                  [ngClass]="{'bi-caret-up-fill': ordem==='asc','bi-caret-down-fill': ordem==='desc'}"></i>
+                <i
+                  *ngIf="colunaOrdenada === 'id'"
+                  class="bi"
+                  [ngClass]="{
+                    'bi-caret-up-fill': ordem === 'asc',
+                    'bi-caret-down-fill': ordem === 'desc'
+                  }"
+                ></i>
               </th>
-              <th>Data</th>
               <th>Motorista</th>
               <th>Setor</th>
               <th>Destino</th>
@@ -68,36 +90,38 @@
               <th class="text-center">Hora Chegada</th>
               <th class="text-center">Total KM</th>
               <th class="text-center">Status</th>
-
             </tr>
           </thead>
           <tbody>
             @for (sol of lista; track sol.id) {
             <tr>
               <td class="fw-bold">{{ sol.id }}</td>
-              <td>{{ sol.dataSolicitacao | date: 'dd/MM/yyyy' }}</td>
-              <td>{{ sol.motoristaNome || '-' }}</td>
-              <td>{{ sol.setorNome    || '-' }}</td>
-              <td>{{ sol.destinoNome  || '-' }}</td>
-              <td class="text-center">{{ sol.kmInicial  ?? '-' }}</td>
-              <td class="text-center">{{ sol.horaSaida  || '-' }}</td>
-              <td class="text-center">{{ sol.kmFinal    ?? '-' }}</td>
-              <td class="text-center">{{ sol.horaChegada || '-' }}</td>
+              <td>{{ sol.motoristaNome || "-" }}</td>
+              <td>{{ sol.setorNome || "-" }}</td>
+              <td>{{ sol.destinoNome || "-" }}</td>
+              <td class="text-center">{{ sol.kmInicial ?? "-" }}</td>
+              <td class="text-center">{{ sol.horaSaida || "-" }}</td>
+              <td class="text-center">{{ sol.kmFinal ?? "-" }}</td>
+              <td class="text-center">{{ sol.horaChegada || "-" }}</td>
               <td class="text-center fw-bold">{{ calcularKmTotal(sol) }}</td>
               <td class="text-center">
-                <span class="badge"
+                <span
+                  class="badge"
                   [ngClass]="{
                     'bg-warning text-dark': sol.status === 'PENDENTE',
-                    'bg-primary':           sol.status === 'EM_ANDAMENTO',
-                    'bg-success':           sol.status === 'CONCLUIDO',
-                    'bg-danger':            sol.status === 'CANCELADO'
-                  }">{{ sol.status }}</span>
+                    'bg-primary': sol.status === 'EM_ANDAMENTO',
+                    'bg-success': sol.status === 'CONCLUIDO',
+                    'bg-danger': sol.status === 'CANCELADO'
+                  }"
+                  >{{ sol.status }}</span
+                >
               </td>
-
             </tr>
             } @empty {
             <tr>
-              <td colspan="11" class="text-center text-muted py-4">Nenhuma solicitação encontrada.</td>
+              <td colspan="11" class="text-center text-muted py-4">
+                Nenhuma solicitação encontrada.
+              </td>
             </tr>
             }
           </tbody>
@@ -105,43 +129,67 @@
       </div>
 
       <!-- Paginação inteligente -->
-      <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+      <div
+        class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2"
+      >
         <small class="text-muted">
-          Página <strong>{{ page + 1 }}</strong> de <strong>{{ totalPages }}</strong>
-          — Total: <strong>{{ totalElements }}</strong> registros
+          Página <strong>{{ page + 1 }}</strong> de
+          <strong>{{ totalPages }}</strong> — Total:
+          <strong>{{ totalElements }}</strong> registros
         </small>
         <nav *ngIf="totalPages > 1">
           <ul class="pagination pagination-sm mb-0">
             <li class="page-item" [class.disabled]="page === 0">
-              <button class="page-link" (click)="paginaAnterior()" [disabled]="page === 0">‹ Anterior</button>
+              <button
+                class="page-link"
+                (click)="paginaAnterior()"
+                [disabled]="page === 0"
+              >
+                ‹ Anterior
+              </button>
             </li>
             <ng-container *ngFor="let p of paginasVisiveis">
               <li *ngIf="p === null" class="page-item disabled">
                 <span class="page-link">…</span>
               </li>
-              <li *ngIf="p !== null" class="page-item" [class.active]="p === page">
-                <button class="page-link" (click)="irParaPagina(p!)">{{ p! + 1 }}</button>
+              <li
+                *ngIf="p !== null"
+                class="page-item"
+                [class.active]="p === page"
+              >
+                <button class="page-link" (click)="irParaPagina(p!)">
+                  {{ p! + 1 }}
+                </button>
               </li>
             </ng-container>
             <li class="page-item" [class.disabled]="page + 1 >= totalPages">
-              <button class="page-link" (click)="proximaPagina()" [disabled]="page + 1 >= totalPages">Próxima ›</button>
+              <button
+                class="page-link"
+                (click)="proximaPagina()"
+                [disabled]="page + 1 >= totalPages"
+              >
+                Próxima ›
+              </button>
             </li>
           </ul>
         </nav>
       </div>
-
     </div>
   </div>
 </div>
 
-
-
 <!-- Toasts -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   @for (toast of toastService.messages$ | async; track toast) {
-  <div class="toast show"
-    [ngClass]="{'bg-success': toast.type==='success','bg-danger': toast.type==='danger','bg-info': toast.type==='info'}"
-    role="alert">
+  <div
+    class="toast show"
+    [ngClass]="{
+      'bg-success': toast.type === 'success',
+      'bg-danger': toast.type === 'danger',
+      'bg-info': toast.type === 'info'
+    }"
+    role="alert"
+  >
     <div class="toast-header border-0 bg-transparent text-white">
       <strong class="me-auto text-capitalize">{{ toast.type }}</strong>
     </div>

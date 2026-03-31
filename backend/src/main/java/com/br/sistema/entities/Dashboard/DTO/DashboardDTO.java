@@ -11,6 +11,7 @@ public record DashboardDTO(
         long totalMotoristas,
         long totalSetores,
         long totalSolicitacoes,
+        long totalFichas,
 
         // Estatísticas de solicitações
         long solicitacoesEmAndamento,

@@ -1,152 +1,244 @@
-<div class="sobre-container container py-5">
-  <!-- Cabeçalho -->
-  <header class="text-center mb-5">
-    <img
-      src="../../../../assets/icons/ses_logo.png"
-      alt="Logo do Sistema"
-      class="logo mb-3"
-    />
-    <h1 class="fw-bold">Sistema de Gestão de Transporte</h1>
-    <p class="text-muted fs-5">
-      Plataforma integrada para gerenciamento de solicitações de transporte,
-      motoristas, veículos e setores do HRG.
-    </p>
-  </header>
+<div class="sobre-page">
+  <section class="hero">
+    <div class="hero-noise"></div>
 
-  <div class="row g-4">
-    <!-- Sobre o sistema -->
-    <div class="col-md-6">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h4 class="card-title mb-3">
-            <i class="bi bi-info-circle text-primary"></i> Sobre o Sistema
-          </h4>
-          <p>
-            O <strong>Sistema de Gestão de Transporte</strong> foi desenvolvido
-            para otimizar o controle de solicitações de transporte interno e
-            externo, garantindo agilidade, transparência e eficiência nas
-            operações da SES-DF.
-          </p>
-          <ul class="list-unstyled mt-3">
-            <li>
-              <i class="bi bi-check-circle text-success"></i> Cadastro de
-              motoristas e veículos
-            </li>
-            <li>
-              <i class="bi bi-check-circle text-success"></i> Solicitações e
-              acompanhamento em tempo real
-            </li>
-            <li>
-              <i class="bi bi-check-circle text-success"></i> Relatórios e
-              dashboards gerenciais
-            </li>
-            <li>
-              <i class="bi bi-check-circle text-success"></i> Controle de acesso
-              com autenticação JWT
-            </li>
-          </ul>
-        </div>
-      </div>
+    <div class="hero-lines">
+      @for (i of arr(18); track i) {
+      <div class="hline"></div>
+      }
     </div>
 
-    <!-- Desenvolvedor / Equipe -->
-    <div class="col-md-6">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h4 class="card-title mb-3">
-            <i class="bi bi-person-badge text-primary"></i> Desenvolvedor
-          </h4>
-          <p>O sistema foi idealizado e desenvolvido por:</p>
-          <ul class="list-unstyled">
-            <li>
-              <i class="bi bi-star-fill text-warning"></i>
-              <strong>Fabio de Alencar Rocha</strong>
-            </li>
-          </ul>
-          <p class="text-muted">
-            Com colaboração e apoio da equipe de TI do NTINF-HRG.
-          </p>
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span>
+          Sistema ativo
+        </div>
+
+        <h1 class="hero-title">
+          <span class="title-accent">TRANSPORTE</span>
+          <span class="title-sub">
+            Sistema de Gestão<br />
+            Administrativa
+          </span>
+        </h1>
+
+        <p class="hero-p">
+          Plataforma institucional para gerenciamento administrativo, cadastros,
+          relatórios e controle de acessos, com interface moderna, clara e
+          organizada para os usuários.
+        </p>
+
+        <div class="hero-chips">
+          <span class="chip chip-v">v 2.0.0</span>
+          <span class="chip">Angular</span>
+          <span class="chip">Spring Boot</span>
+          <span class="chip">MySQL</span>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Tecnologias -->
-  <div class="row g-4 mt-4">
-    <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h4 class="card-title mb-3">
-            <i class="bi bi-cpu text-primary"></i> Tecnologias Utilizadas
-          </h4>
-          <div class="row">
-            <div class="col-md-3">
-              <h6 class="fw-bold">Frontend</h6>
-              <ul class="list-unstyled">
-                <li><i class="bi bi-code-slash"></i> Angular 20</li>
-                <li><i class="bi bi-bootstrap"></i> Bootstrap / SCSS</li>
-                <li><i class="bi bi-ui-checks"></i> Material UI</li>
-              </ul>
-            </div>
-            <div class="col-md-3">
-              <h6 class="fw-bold">Backend</h6>
-              <ul class="list-unstyled">
-                <li><i class="bi bi-braces"></i> Spring Boot 3.x</li>
-                <li><i class="bi bi-shield-lock"></i> Spring Security + JWT</li>
-                <li><i class="bi bi-diagram-3"></i> JPA / Hibernate</li>
-              </ul>
-            </div>
-            <div class="col-md-3">
-              <h6 class="fw-bold">Banco de Dados</h6>
-              <ul class="list-unstyled">
-                <li><i class="bi bi-database"></i> MySQL 5.7</li>
-                <li><i class="bi bi-arrow-repeat"></i> Flyway Migrations</li>
-              </ul>
-            </div>
-            <div class="col-md-3">
-              <h6 class="fw-bold">Infraestrutura</h6>
-              <ul class="list-unstyled">
-                <li><i class="bi bi-box"></i> Docker / Docker Compose</li>
-              </ul>
-            </div>
+      <div class="hero-right">
+        <div class="stat-ring">
+          <div class="ring-outer"></div>
+          <div class="ring-mid"></div>
+          <div class="ring-inner">
+            <span class="ring-num">APP</span>
+            <span class="ring-lbl">Sistema</span>
+          </div>
+        </div>
+
+        <div class="stat-cards">
+          <div class="scard">
+            <span class="scard-val">2.0</span>
+            <span class="scard-lbl">Versão</span>
+          </div>
+          <div class="scard">
+            <span class="scard-val">JWT</span>
+            <span class="scard-lbl">Acesso</span>
+          </div>
+          <div class="scard">
+            <span class="scard-val">API</span>
+            <span class="scard-lbl">Backend</span>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Versão e Contato -->
-  <div class="row g-4 mt-4">
-    <div class="col-md-6">
-      <div class="card shadow-sm h-100 text-center">
-        <div class="card-body">
-          <h4 class="card-title mb-3">
-            <i class="bi bi-terminal text-primary"></i> Versão
-          </h4>
-          <p class="fs-4 fw-bold text-dark">2.0.0</p>
-          <p class="text-muted">Última atualização: Março/2026</p>
+  <div class="body">
+    <section class="section">
+      <div class="section-eyebrow">Desenvolvimento</div>
+      <h2 class="section-title">Quem construiu</h2>
+
+      <div class="dev-card">
+        <div class="dev-avatar">
+          <span>F</span>
+          <div class="avatar-ring"></div>
+        </div>
+
+        <div class="dev-info">
+          <div class="dev-nome">Fábio de Alencar Rocha</div>
+          <div class="dev-cargo">Desenvolvedor Full Stack</div>
+
+          <p class="dev-bio">
+            Sistema desenvolvido com foco em usabilidade, organização visual,
+            produtividade administrativa e padronização das operações do
+            sistema.
+          </p>
+
+          <div class="dev-tags">
+            <span class="dtag">Full Stack</span>
+            <span class="dtag">Angular</span>
+            <span class="dtag">Spring Boot</span>
+            <span class="dtag">UI/UX</span>
+            <span class="dtag">REST API</span>
+          </div>
+        </div>
+
+        <div class="dev-aside">
+          <div class="dev-stat">
+            <span class="ds-val">WEB</span>
+            <span class="ds-lbl">Plataforma</span>
+          </div>
+          <div class="dev-stat">
+            <span class="ds-val">PROD</span>
+            <span class="ds-lbl">Ambiente</span>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="col-md-6">
-      <div class="card shadow-sm h-100 text-center">
-        <div class="card-body">
-          <h4 class="card-title mb-3">
-            <i class="bi bi-envelope text-primary"></i> Contato
-          </h4>
-          <p>
-            <i class="bi bi-envelope-fill"></i>
-            <a href="mailto:suporte@gestaotransporte.com">otymus27@gmail.com</a>
-          </p>
-          <p>
-            <i class="bi bi-globe"></i>
-            <a href="https://gestaotransporte.com" target="_blank"
-              >gestaotransporte.com</a
-            >
-          </p>
+    <section class="section">
+      <div class="section-eyebrow">Tecnologias</div>
+      <h2 class="section-title">Stack utilizada</h2>
+
+      <div class="stack-grid">
+        @for (s of stack; track s.nome) {
+        <div class="stack-card">
+          <div class="sk-head">
+            <div class="sk-ico" [ngClass]="'ski-' + s.cor">
+              {{ s.icon }}
+            </div>
+            <span class="sk-ver">{{ s.version }}</span>
+          </div>
+
+          <div class="sk-nome">{{ s.nome }}</div>
+          <div class="sk-role">{{ s.role }}</div>
+
+          <div class="sk-bar">
+            <div
+              class="sk-fill"
+              [style.width]="s.pct + '%'"
+              [ngClass]="'skf-' + s.cor"
+            ></div>
+          </div>
         </div>
+        }
       </div>
-    </div>
+    </section>
+
+    <section class="section">
+      <div class="section-eyebrow">Produto</div>
+      <h2 class="section-title">Funcionalidades principais</h2>
+
+      <div class="feat-grid">
+        @for (f of features; track f.titulo) {
+        <div class="feat-card">
+          <div class="feat-ico" [ngClass]="'fi-' + f.cor">
+            {{ f.icon }}
+          </div>
+          <h3 class="feat-titulo">{{ f.titulo }}</h3>
+          <p class="feat-desc">{{ f.desc }}</p>
+        </div>
+        }
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-eyebrow">Segurança</div>
+      <h2 class="section-title">Controle de acesso</h2>
+
+      <div class="perfis-grid">
+        @for (p of perfis; track p.nome) {
+        <div class="perfil-card" [ngClass]="'pfc-' + p.cor">
+          <div class="pf-header">
+            <div class="pf-ico" [ngClass]="'pfi-' + p.cor">
+              {{ p.icon }}
+            </div>
+
+            <div>
+              <div class="pf-nome">{{ p.nome }}</div>
+              <div class="pf-role" [ngClass]="'pfr-' + p.cor">
+                {{ p.role }}
+              </div>
+            </div>
+          </div>
+
+          <ul class="pf-list">
+            @for (item of p.perms; track item.label) {
+            <li [class.ok]="item.ok" [class.no]="!item.ok">
+              <span class="pf-mark">{{ item.ok ? "✓" : "✕" }}</span>
+              {{ item.label }}
+            </li>
+            }
+          </ul>
+        </div>
+        }
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-eyebrow">Histórico</div>
+      <h2 class="section-title">Registro de versões</h2>
+
+      <div class="changelog">
+        @for (log of changelog; track log.versao) {
+        <div class="log-item">
+          <div class="log-left">
+            <div class="log-ver" [class.lv-atual]="log.atual">
+              {{ log.versao }}
+            </div>
+            <div class="log-data">{{ log.data }}</div>
+          </div>
+
+          <div class="log-line">
+            <div class="log-dot" [class.ld-atual]="log.atual"></div>
+          </div>
+
+          <div class="log-right">
+            <div class="log-titulo">{{ log.titulo }}</div>
+            <ul class="log-lista">
+              @for (item of log.items; track item) {
+              <li>{{ item }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+        }
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-brand">
+        <span class="fb-sigla">TRANSPORTE</span>
+        <span class="fb-full">Sistema de Gestão Administrativa</span>
+      </div>
+
+      <div class="footer-dev">
+        Desenvolvido por <strong>Fábio de Alencar Rocha</strong>
+      </div>
+
+      <div class="footer-copy">© 2026 · Todos os direitos reservados</div>
+
+      <div class="footer-tech">
+        <span>Spring Boot</span>
+        <span class="ft-sep">·</span>
+        <span>Angular</span>
+        <span class="ft-sep">·</span>
+        <span>MySQL</span>
+        <span class="ft-sep">·</span>
+        <span>JWT</span>
+      </div>
+    </footer>
   </div>
 </div>

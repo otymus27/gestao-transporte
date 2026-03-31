@@ -162,4 +162,9 @@ public class FichaSolicitacaoService {
     private FichaSolicitacao throwNotFound(Long id) {
         throw new EntityNotFoundException("Ficha não encontrada: id=" + id);
     }
+
+    @Transactional(readOnly = true)
+    public long contarFichas() {
+        return fichaRepository.count();
+    }
 }

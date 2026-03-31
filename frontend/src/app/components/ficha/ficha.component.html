@@ -79,7 +79,7 @@
             @for (f of lista; track f.id) {
             <tr>
               <td class="text-center fw-bold">{{ f.id }}</td>
-              <td>{{ f.dataViagem }}</td>
+              <td>{{ f.dataViagem | date: 'dd/MM/yyyy'}}</td>
               <td>
                 <span class="badge bg-secondary">{{ f.placaVeiculo }}</span>
               </td>

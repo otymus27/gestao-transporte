@@ -45,4 +45,6 @@ public interface FichaSolicitacaoRepository extends JpaRepository<FichaSolicitac
             @Param("usuarioId") Long usuarioId,
             Pageable pageable
     );
+
+
 }

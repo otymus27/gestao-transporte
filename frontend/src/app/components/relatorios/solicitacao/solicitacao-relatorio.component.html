@@ -1,197 +1,267 @@
-<div class="container mt-2 mw-100">
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <div
-        class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded mb-3"
-      >
-        <h3 class="m-0">Relatório de Solicitações</h3>
-      </div>
+<div class="relatorio-page">
+  <!-- Cabeçalho -->
+  <div class="relatorio-header">
+    <div>
+      <span class="relatorio-label">SISTEMA</span>
+      <h4 class="relatorio-title">
+        <i class="bi bi-file-earmark-bar-graph me-2"></i>Relatórios
+      </h4>
+    </div>
+  </div>
 
-      <!-- Filtros -->
-      <div class="row g-2 mb-3">
-        <div class="col-md-4">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Filtro livre (carro, motorista, usuário, setor, destino, status)"
-            [(ngModel)]="filtros.filtro"
-          />
-        </div>
-
-        <div class="col-md-2">
-          <input
-            type="date"
-            class="form-control"
-            [(ngModel)]="filtros.dataInicio"
-            title="Data Início"
-          />
-        </div>
-
-        <div class="col-md-2">
-          <input
-            type="date"
-            class="form-control"
-            [(ngModel)]="filtros.dataFim"
-            title="Data Fim"
-          />
-        </div>
-
-        <!-- ✅ AGRUPAMENTO -->
-        <div class="col-md-2">
-          <select
-            class="form-select"
-            [(ngModel)]="filtros.tipo"
-            title="Agrupar por"
-          >
-            <option *ngFor="let t of tiposRelatorio" [ngValue]="t.value">
-              {{ t.label }}
-            </option>
-          </select>
-        </div>
-
-        <div class="col-sm-2 d-flex gap-2">
-          <button class="btn btn-primary flex-grow-1" (click)="consultar(0)">
-            <i class="bi bi-search"></i> Consultar
-          </button>
-          <button class="btn btn-outline-secondary" (click)="limpar()">
-            <i class="bi bi-x-circle"></i>
-          </button>
+  <!-- Cards de resumo -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="resumo-card resumo-blue">
+        <div class="resumo-icon"><i class="bi bi-journal-text"></i></div>
+        <div class="resumo-info">
+          <div class="resumo-valor">{{ totalSolicitacoes }}</div>
+          <div class="resumo-label">Total</div>
         </div>
       </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="resumo-card resumo-yellow">
+        <div class="resumo-icon"><i class="bi bi-clock"></i></div>
+        <div class="resumo-info">
+          <div class="resumo-valor">{{ totalPendentes }}</div>
+          <div class="resumo-label">Em Andamento</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="resumo-card resumo-green">
+        <div class="resumo-icon"><i class="bi bi-check-circle"></i></div>
+        <div class="resumo-info">
+          <div class="resumo-valor">{{ totalConcluidas }}</div>
+          <div class="resumo-label">
+            Concluídas ({{ percentualConcluidas }}%)
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="resumo-card resumo-red">
+        <div class="resumo-icon"><i class="bi bi-x-circle"></i></div>
+        <div class="resumo-info">
+          <div class="resumo-valor">{{ totalCanceladas }}</div>
+          <div class="resumo-label">Canceladas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout dois painéis -->
+  <div class="relatorio-layout">
+    <!-- Painel de filtros (esquerda) -->
+    <div class="filtros-panel">
+      <div class="filtros-header">
+        <i class="bi bi-funnel me-2"></i> FILTROS
+      </div>
+
+      <div class="filtro-grupo">
+        <label>Agrupamento</label>
+        <select class="form-select form-select-sm" [(ngModel)]="filtros.tipo">
+          <option *ngFor="let t of tiposRelatorio" [ngValue]="t.value">
+            {{ t.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filtro-grupo">
+        <label>Busca livre</label>
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          placeholder="Motorista, setor, destino..."
+          [(ngModel)]="filtros.filtro"
+          (keyup.enter)="consultar(0)"
+        />
+      </div>
+
+      <div class="filtro-grupo">
+        <label>Data Início</label>
+        <input
+          type="date"
+          class="form-control form-control-sm"
+          [(ngModel)]="filtros.dataInicio"
+        />
+      </div>
+
+      <div class="filtro-grupo">
+        <label>Data Fim</label>
+        <input
+          type="date"
+          class="form-control form-control-sm"
+          [(ngModel)]="filtros.dataFim"
+        />
+      </div>
+
+      <button class="btn-buscar" (click)="consultar(0)" [disabled]="carregando">
+        <i class="bi bi-search me-1"></i>
+        {{ carregando ? "Buscando..." : "Buscar dados" }}
+      </button>
+
+      <button class="btn-limpar" (click)="limpar()">
+        <i class="bi bi-x me-1"></i> Limpar
+      </button>
 
       <!-- Exportação -->
-      <div class="d-flex justify-content-start gap-2 mb-2">
-        <!-- ✅ PDF/Excel podem exportar sem depender da tabela -->
-        <button class="btn btn-danger btn-sm" (click)="exportar('pdf')">
-          <i class="bi bi-file-earmark-pdf"></i> PDF
-        </button>
-        <button class="btn btn-success btn-sm" (click)="exportar('excel')">
-          <i class="bi bi-file-earmark-excel"></i> Excel
-        </button>
+      <div class="exportacao" *ngIf="resultados.length > 0">
+        <div class="exportacao-label">EXPORTAR</div>
+        <div class="d-flex flex-column gap-2">
+          <button class="btn-export btn-export-pdf" (click)="exportar('pdf')">
+            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+          </button>
+          <button
+            class="btn-export btn-export-excel"
+            (click)="exportar('excel')"
+          >
+            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+          </button>
+          <button class="btn-export btn-export-csv" (click)="exportar('csv')">
+            <i class="bi bi-file-earmark-text me-1"></i> CSV
+          </button>
+        </div>
+      </div>
+    </div>
 
-        <!-- ✅ CSV depende dos resultados em tela -->
-        <button
-          class="btn btn-secondary btn-sm"
-          (click)="exportar('csv')"
-          [disabled]="!resultados || resultados.length === 0"
-          title="CSV é gerado a partir da tabela exibida"
-        >
-          <i class="bi bi-file-earmark-text"></i> CSV
-        </button>
+    <!-- Painel de resultados (direita) -->
+    <div class="resultados-panel">
+      <!-- Estado inicial -->
+      <div *ngIf="!consultado && !carregando" class="estado-vazio">
+        <i class="bi bi-search estado-icone"></i>
+        <p>Configure os filtros e clique em <strong>Buscar dados</strong></p>
       </div>
 
-      <!-- Tabela de resultados -->
-      <div *ngIf="resultados.length > 0; else semResultados">
-        <table class="table table-hover table-bordered align-middle">
-          <thead class="table-dark">
-            <tr>
-              <th style="width: 70px">ID</th>
-              <th style="width: 120px">Data</th>
-              <th style="width: 120px">Status</th>
-              <th>Carro</th>
-              <th>Motorista</th>
-              <th>Usuário</th>
-              <th>Setor</th>
-              <th>Destino</th>
-              <th style="width: 90px">Km Inicial</th>
-              <th style="width: 90px">Km Final</th>
-              <th style="width: 90px">Km Total</th>
-              <th style="width: 110px">Saída</th>
-              <th style="width: 110px">Chegada</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr *ngFor="let s of resultados">
-              <td>{{ s.id }}</td>
-
-              <!-- ✅ se quiser formatar, troque para: {{ s.dataSolicitacao | date:'dd/MM/yyyy' }} -->
-              <td>{{ s.dataSolicitacao }}</td>
-
-              <td>{{ s.status }}</td>
-              <td>{{ s.carro }}</td>
-              <td>{{ s.motorista }}</td>
-              <td>{{ s.usuario }}</td>
-              <td>{{ s.setor }}</td>
-              <td>{{ s.destino }}</td>
-              <td>{{ s.kmInicial ?? "-" }}</td>
-              <td>{{ s.kmFinal ?? "-" }}</td>
-              <td>{{ s.kmTotal ?? "-" }}</td>
-              <td>{{ s.horaSaida ?? "-" }}</td>
-              <td>{{ s.horaChegada ?? "-" }}</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Carregando -->
+      <div *ngIf="carregando" class="estado-vazio">
+        <div
+          class="spinner-border text-primary mb-3"
+          style="width: 2.5rem; height: 2.5rem"
+          role="status"
+        ></div>
+        <p class="text-muted">Carregando resultados...</p>
       </div>
 
-      <!-- Paginação -->
+      <!-- Sem resultados -->
       <div
-        *ngIf="resultados.length > 0"
-        class="d-flex justify-content-between align-items-center mt-2"
+        *ngIf="consultado && !carregando && resultados.length === 0"
+        class="estado-vazio"
       >
-        <div class="text-muted">
-          Total: <b>{{ totalElements }}</b> registros
-        </div>
-
-        <div class="d-flex align-items-center gap-2">
-          <label class="text-muted mb-0">Por página:</label>
-          <select
-            class="form-select form-select-sm"
-            style="width: 90px"
-            (change)="mudarTamanho($event)"
-          >
-            <option [selected]="size === 5" value="5">5</option>
-            <option [selected]="size === 10" value="10">10</option>
-            <option [selected]="size === 20" value="20">20</option>
-            <option [selected]="size === 50" value="50">50</option>
-          </select>
-
-          <button
-            class="btn btn-outline-secondary btn-sm"
-            (click)="irPara(0)"
-            [disabled]="page === 0"
-          >
-            «
-          </button>
-          <button
-            class="btn btn-outline-secondary btn-sm"
-            (click)="irPara(page - 1)"
-            [disabled]="page === 0"
-          >
-            ‹
-          </button>
-
-          <span class="text-muted">
-            Página <b>{{ page + 1 }}</b> de <b>{{ totalPages }}</b>
-          </span>
-
-          <button
-            class="btn btn-outline-secondary btn-sm"
-            (click)="irPara(page + 1)"
-            [disabled]="page >= totalPages - 1"
-          >
-            ›
-          </button>
-          <button
-            class="btn btn-outline-secondary btn-sm"
-            (click)="irPara(totalPages - 1)"
-            [disabled]="page >= totalPages - 1"
-          >
-            »
-          </button>
-        </div>
+        <i class="bi bi-inbox estado-icone text-muted"></i>
+        <p class="text-muted">
+          Nenhum registro encontrado para os filtros informados.
+        </p>
       </div>
 
-      <!-- Mensagens -->
-      <ng-template #semResultados>
-        <div class="text-center text-muted mt-4" *ngIf="!carregando">
-          Nenhum resultado encontrado.
+      <!-- Tabela -->
+      <div *ngIf="resultados.length > 0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted small">
+            <strong>{{ totalElements }}</strong> registros encontrados
+          </span>
+          <div class="d-flex align-items-center gap-2">
+            <label class="text-muted small mb-0">Por página:</label>
+            <select
+              class="form-select form-select-sm"
+              style="width: 80px"
+              (change)="mudarTamanho($event)"
+            >
+              <option [selected]="size === 10" value="10">10</option>
+              <option [selected]="size === 20" value="20">20</option>
+              <option [selected]="size === 50" value="50">50</option>
+              <option [selected]="size === 100" value="100">100</option>
+            </select>
+          </div>
         </div>
-      </ng-template>
 
-      <div class="text-center mt-3" *ngIf="carregando">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Carregando...</span>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Status</th>
+                <th>Veículo</th>
+                <th>Motorista</th>
+                <th>Setor</th>
+                <th>Destino</th>
+                <th class="text-center">KM Ini</th>
+                <th class="text-center">KM Fin</th>
+                <th class="text-center">Total KM</th>
+                <th class="text-center">Saída</th>
+                <th class="text-center">Chegada</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of resultados">
+                <td class="fw-bold">{{ s.id }}</td>
+                <td>{{ s.dataSolicitacao | date : "dd/MM/yyyy" }}</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="{
+                      'bg-warning text-dark': s.status === 'PENDENTE',
+                      'bg-primary': s.status === 'EM_ANDAMENTO',
+                      'bg-success': s.status === 'CONCLUIDO',
+                      'bg-danger': s.status === 'CANCELADO'
+                    }"
+                    >{{ s.status }}</span
+                  >
+                </td>
+                <td>
+                  <span class="badge bg-secondary">{{ s.carro || "-" }}</span>
+                </td>
+                <td>{{ s.motorista || "-" }}</td>
+                <td>{{ s.setor || "-" }}</td>
+                <td>{{ s.destino || "-" }}</td>
+                <td class="text-center">{{ s.kmInicial ?? "-" }}</td>
+                <td class="text-center">{{ s.kmFinal ?? "-" }}</td>
+                <td class="text-center fw-bold">{{ s.kmTotal ?? "-" }}</td>
+                <td class="text-center">{{ s.horaSaida ?? "-" }}</td>
+                <td class="text-center">{{ s.horaChegada ?? "-" }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginação -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <span class="text-muted small"
+            >Página <strong>{{ page + 1 }}</strong> de
+            <strong>{{ totalPages }}</strong></span
+          >
+          <div class="d-flex gap-1">
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              (click)="irPara(0)"
+              [disabled]="page === 0"
+            >
+              «
+            </button>
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              (click)="irPara(page - 1)"
+              [disabled]="page === 0"
+            >
+              ‹
+            </button>
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              (click)="irPara(page + 1)"
+              [disabled]="page >= totalPages - 1"
+            >
+              ›
+            </button>
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              (click)="irPara(totalPages - 1)"
+              [disabled]="page >= totalPages - 1"
+            >
+              »
+            </button>
+          </div>
         </div>
       </div>
     </div>

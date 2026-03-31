@@ -1,0 +1,32 @@
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="menu-btn" (click)="toggleSidebar()" aria-label="Alternar menu lateral">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <div class="brand-wrap">
+      <div class="brand-icon">
+        <i class="bi bi-truck"></i>
+      </div>
+      <div>
+        <div class="brand-eyebrow">Sistema Institucional</div>
+        <h1 class="brand-title">Gestão de Transporte</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="user-chip">
+      <div class="user-avatar">{{ (loggedInFirstName || 'U').charAt(0) }}</div>
+      <div class="user-meta">
+        <span class="user-name">{{ loggedInFirstName || 'Usuário' }}</span>
+        <span class="user-role">{{ loggedInMainRole || 'Acesso' }}</span>
+      </div>
+    </div>
+
+    <button class="btn btn-danger btn-sm logout-btn" (click)="logout()">
+      <i class="bi bi-box-arrow-right me-1"></i>
+      Sair
+    </button>
+  </div>
+</header>
