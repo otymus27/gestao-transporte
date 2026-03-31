@@ -206,6 +206,30 @@
       </ul>
     </li>
 
+    <!-- 🔹 Fichas de Solicitação -->
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isBasic()">
+      <a class="nav-link" (click)="toggleSubmenu('fichas')">
+        <i class="bi bi-journal-bookmark-fill me-2"></i> Fichas
+        <i
+          class="bi chevron"
+          [ngClass]="{
+            'bi-chevron-down': !isSubmenuOpen('fichas'),
+            'bi-chevron-up': isSubmenuOpen('fichas')
+          }"
+        ></i>
+      </a>
+      <ul *ngIf="isSubmenuOpen('fichas')" class="nav flex-column ms-3">
+        <li>
+          <a
+            class="nav-link"
+            routerLink="/admin/fichas/gerenciar"
+            routerLinkActive="active"
+            >Gerenciar</a
+          >
+        </li>
+      </ul>
+    </li>
+
     <!-- 🔹 Perfil - todos logados -->
     <li class="nav-item" *ngIf="isLogado()">
       <a

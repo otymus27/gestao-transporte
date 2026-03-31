@@ -1,0 +1,464 @@
+<!-- src/app/components/ficha/ficha.component.html -->
+<div class="container">
+  <div class="card">
+    <div class="card-body">
+
+      <!-- Cabeçalho -->
+      <div class="d-flex justify-content-between align-items-center bg-dark text-white p-3 rounded">
+        <h1><i class="bi bi-journal-text me-2"></i>Fichas de Solicitação</h1>
+        <button class="btn btn-primary btn-rounded btn-shadow" (click)="abrirModalNova()">
+          <i class="bi bi-plus-circle me-1"></i> Nova Ficha
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="d-flex align-items-center gap-2 mt-3 mb-2 flex-wrap">
+        <input
+          type="text"
+          class="form-control"
+          style="max-width: 180px"
+          placeholder="Placa do veículo"
+          [(ngModel)]="filtroPlaca"
+          (keyup.enter)="aplicarFiltros()"
+        />
+        <input
+          type="date"
+          class="form-control"
+          style="max-width: 170px"
+          [(ngModel)]="filtroInicio"
+          title="Data início"
+        />
+        <span class="text-muted">até</span>
+        <input
+          type="date"
+          class="form-control"
+          style="max-width: 170px"
+          [(ngModel)]="filtroFim"
+          title="Data fim"
+        />
+        <button class="btn btn-primary" (click)="aplicarFiltros()">
+          <i class="bi bi-search"></i> Pesquisar
+        </button>
+        <button class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
+      </div>
+
+      <!-- Tabela -->
+      <table class="table table-striped mt-2">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data Viagem</th>
+            <th>Placa</th>
+            <th>Responsável</th>
+            <th>Solicitações</th>
+            <th>Criado em</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of lista; track f.id) {
+          <tr>
+            <td>{{ f.id }}</td>
+            <td>{{ f.dataViagem }}</td>
+            <td><span class="badge bg-secondary">{{ f.placaVeiculo }}</span></td>
+            <td>{{ f.usuarioNome }}</td>
+            <td>
+              <span class="badge bg-primary rounded-pill">
+                {{ f.solicitacoes.length }}
+              </span>
+            </td>
+            <td>{{ f.dataCriacao | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <button
+                class="btn btn-info btn-sm btn-shadow me-1"
+                (click)="verDetalhe(f)"
+                title="Ver detalhes"
+              >
+                <i class="bi bi-eye"></i>
+              </button>
+              <button
+                class="btn btn-warning btn-sm btn-shadow me-1"
+                (click)="abrirModalEditar(f)"
+                title="Editar ficha"
+              >
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button
+                class="btn btn-danger btn-sm btn-shadow"
+                (click)="confirmarExclusao(f)"
+                title="Excluir ficha"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="7" class="text-center text-muted py-3">Nenhuma ficha encontrada.</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Paginação -->
+      <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap bg-light p-3 rounded">
+        <small>
+          Página <strong>{{ page + 1 }}</strong> de <strong>{{ totalPages }}</strong>
+          — Total: <strong>{{ totalElements }}</strong>
+        </small>
+        <nav>
+          <ul class="pagination mb-0">
+            <li class="page-item" [class.disabled]="page === 0">
+              <button class="page-link" (click)="paginaAnterior()" [disabled]="page === 0">‹ Anterior</button>
+            </li>
+            <li *ngFor="let p of paginasArray" class="page-item" [class.active]="p === page">
+              <button class="page-link" (click)="irParaPagina(p)">{{ p + 1 }}</button>
+            </li>
+            <li class="page-item" [class.disabled]="page + 1 >= totalPages">
+              <button class="page-link" (click)="proximaPagina()" [disabled]="page + 1 >= totalPages">Próxima ›</button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL CRIAR / EDITAR FICHA                                   -->
+<!-- ============================================================ -->
+<ng-template #modalFicha>
+  <div class="modal-header bg-primary text-white">
+    <h5 class="modal-title fw-bold">
+      <i class="bi bi-journal-plus me-2"></i>
+      {{ fichaIdEditando ? 'Editar Ficha' : 'Nova Ficha de Solicitação' }}
+    </h5>
+    <button type="button" class="btn-close btn-close-white" (click)="cancelarModal()"></button>
+  </div>
+
+  <div class="modal-body">
+
+    <!-- Dados da Ficha (master) -->
+    <div class="card mb-3 border-primary">
+      <div class="card-header bg-primary text-white fw-bold">
+        <i class="bi bi-card-heading me-1"></i> Dados da Ficha
+      </div>
+      <div class="card-body row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Data da Viagem <span class="text-danger">*</span></label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="ficha.dataViagem"
+            name="dataViagem"
+            required
+          />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Placa do Veículo <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control text-uppercase"
+            [(ngModel)]="ficha.placaVeiculo"
+            name="placaVeiculo"
+            placeholder="Ex: ABC1234"
+            maxlength="10"
+            required
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulário para adicionar solicitação -->
+    <div class="card mb-3 border-success">
+      <div class="card-header bg-success text-white fw-bold">
+        <i class="bi bi-plus-circle me-1"></i> Adicionar Solicitação
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+
+          <!-- Motorista autocomplete -->
+          <div class="col-md-4 position-relative">
+            <label class="form-label fw-bold">Motorista <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Digite para buscar..."
+              [(ngModel)]="itemMotorista"
+              (input)="buscarMotoristas(itemMotorista)"
+              name="itemMotorista"
+            />
+            <ul *ngIf="motoristas.length" class="list-group position-absolute w-100 z-3 shadow-sm" style="top: 100%">
+              <li
+                *ngFor="let m of motoristas"
+                class="list-group-item list-group-item-action"
+                style="cursor: pointer"
+                (click)="selecionarMotorista(m)"
+              >{{ m.nome }}</li>
+            </ul>
+          </div>
+
+          <!-- Setor autocomplete -->
+          <div class="col-md-4 position-relative">
+            <label class="form-label fw-bold">Setor <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Digite para buscar..."
+              [(ngModel)]="itemSetor"
+              (input)="buscarSetores(itemSetor)"
+              name="itemSetor"
+            />
+            <ul *ngIf="setores.length" class="list-group position-absolute w-100 z-3 shadow-sm" style="top: 100%">
+              <li
+                *ngFor="let s of setores"
+                class="list-group-item list-group-item-action"
+                style="cursor: pointer"
+                (click)="selecionarSetor(s)"
+              >{{ s.nome }}</li>
+            </ul>
+          </div>
+
+          <!-- Destino autocomplete -->
+          <div class="col-md-4 position-relative">
+            <label class="form-label fw-bold">Destino <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Digite para buscar..."
+              [(ngModel)]="itemDestino"
+              (input)="buscarDestinos(itemDestino)"
+              name="itemDestino"
+            />
+            <ul *ngIf="destinos.length" class="list-group position-absolute w-100 z-3 shadow-sm" style="top: 100%">
+              <li
+                *ngFor="let d of destinos"
+                class="list-group-item list-group-item-action"
+                style="cursor: pointer"
+                (click)="selecionarDestino(d)"
+              >{{ d.nome }}</li>
+            </ul>
+          </div>
+
+          <!-- KM Inicial -->
+          <div class="col-md-3">
+            <label class="form-label fw-bold">KM Inicial</label>
+            <input type="number" class="form-control" [(ngModel)]="itemAtual.kmInicial" name="kmInicial" min="0" />
+          </div>
+
+          <!-- KM Final -->
+          <div class="col-md-3">
+            <label class="form-label fw-bold">KM Final</label>
+            <input type="number" class="form-control" [(ngModel)]="itemAtual.kmFinal" name="kmFinal" min="0" />
+          </div>
+
+          <!-- Hora Saída -->
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Hora Saída</label>
+            <input type="time" class="form-control" [(ngModel)]="itemAtual.horaSaida" name="horaSaida" />
+          </div>
+
+          <!-- Hora Chegada -->
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Hora Chegada</label>
+            <input type="time" class="form-control" [(ngModel)]="itemAtual.horaChegada" name="horaChegada" />
+          </div>
+
+        </div>
+
+        <div class="mt-3 text-end">
+          <button class="btn btn-success" (click)="adicionarItem()">
+            <i class="bi bi-plus-lg me-1"></i> Adicionar à Ficha
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de solicitações adicionadas -->
+    <div class="card border-secondary">
+      <div class="card-header fw-bold bg-secondary text-white">
+        <i class="bi bi-list-check me-1"></i>
+        Solicitações na Ficha
+        <span class="badge bg-light text-dark ms-2">{{ ficha.solicitacoes.length }}</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Motorista</th>
+              <th>Setor</th>
+              <th>Destino</th>
+              <th>Saída</th>
+              <th>Chegada</th>
+              <th>KM</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of ficha.solicitacoes; track $index) {
+            <tr>
+              <td>{{ $index + 1 }}</td>
+              <td>{{ item.motoristaNome || item.motoristaId }}</td>
+              <td>{{ item.setorNome    || item.setorId }}</td>
+              <td>{{ item.destinoNome  || item.destinoId }}</td>
+              <td>{{ item.horaSaida    || '-' }}</td>
+              <td>{{ item.horaChegada  || '-' }}</td>
+              <td>{{ calcularKm(item) }}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" (click)="removerItem($index)" title="Remover">
+                  <i class="bi bi-x-circle"></i>
+                </button>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="8" class="text-center text-muted py-2">
+                Nenhuma solicitação adicionada ainda.
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-footer bg-light">
+    <button class="btn btn-primary" (click)="salvarFicha()">
+      <i class="bi bi-save me-1"></i>
+      {{ fichaIdEditando ? 'Atualizar Ficha' : 'Salvar Ficha' }}
+    </button>
+    <button class="btn btn-secondary" (click)="cancelarModal()">Cancelar</button>
+  </div>
+</ng-template>
+
+<!-- ============================================================ -->
+<!-- MODAL DETALHE                                                 -->
+<!-- ============================================================ -->
+<ng-template #modalDetalhe>
+  <div class="modal-header bg-info text-white">
+    <h5 class="modal-title fw-bold">
+      <i class="bi bi-eye me-2"></i>
+      Ficha #{{ fichaDetalhe?.id }} — {{ fichaDetalhe?.placaVeiculo }}
+    </h5>
+    <button type="button" class="btn-close btn-close-white" (click)="cancelarModal()"></button>
+  </div>
+
+  <div class="modal-body" *ngIf="fichaDetalhe">
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <small class="text-muted">Data da Viagem</small>
+        <p class="fw-bold mb-0">{{ fichaDetalhe.dataViagem }}</p>
+      </div>
+      <div class="col-md-4">
+        <small class="text-muted">Placa do Veículo</small>
+        <p class="fw-bold mb-0"><span class="badge bg-secondary">{{ fichaDetalhe.placaVeiculo }}</span></p>
+      </div>
+      <div class="col-md-4">
+        <small class="text-muted">Responsável</small>
+        <p class="fw-bold mb-0">{{ fichaDetalhe.usuarioNome }}</p>
+      </div>
+    </div>
+
+    <h6 class="fw-bold border-bottom pb-2">
+      Solicitações
+      <span class="badge bg-primary ms-1">{{ fichaDetalhe.solicitacoes.length }}</span>
+    </h6>
+
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Motorista</th>
+          <th>Setor</th>
+          <th>Destino</th>
+          <th>Saída</th>
+          <th>Chegada</th>
+          <th>KM Inicial</th>
+          <th>KM Final</th>
+          <th>KM Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of fichaDetalhe.solicitacoes; track $index) {
+        <tr>
+          <td>{{ $index + 1 }}</td>
+          <td>{{ item.motoristaNome }}</td>
+          <td>{{ item.setorNome }}</td>
+          <td>{{ item.destinoNome }}</td>
+          <td>{{ item.horaSaida    || '-' }}</td>
+          <td>{{ item.horaChegada  || '-' }}</td>
+          <td>{{ item.kmInicial    ?? '-' }}</td>
+          <td>{{ item.kmFinal      ?? '-' }}</td>
+          <td>{{ calcularKm(item) }}</td>
+          <td>
+            <span class="badge"
+              [ngClass]="{
+                'bg-warning text-dark': item.status === 'PENDENTE',
+                'bg-primary':           item.status === 'EM_ANDAMENTO',
+                'bg-success':           item.status === 'CONCLUIDO',
+                'bg-danger':            item.status === 'CANCELADO'
+              }">{{ item.status }}</span>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="cancelarModal()">Fechar</button>
+  </div>
+</ng-template>
+
+<!-- ============================================================ -->
+<!-- MODAL CONFIRMAÇÃO EXCLUSÃO                                    -->
+<!-- ============================================================ -->
+<ng-template #modalConfirmar>
+  <div class="modal-header bg-danger text-white">
+    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Confirmar Exclusão</h5>
+    <button type="button" class="btn-close btn-close-white" (click)="cancelarModal()"></button>
+  </div>
+  <div class="modal-body">
+    <p>
+      Tem certeza que deseja excluir a ficha
+      <strong>#{{ fichaParaExcluir?.id }}</strong> —
+      placa <strong>{{ fichaParaExcluir?.placaVeiculo }}</strong>?
+    </p>
+    <p class="text-danger small">
+      <i class="bi bi-exclamation-circle me-1"></i>
+      Todas as <strong>{{ fichaParaExcluir?.solicitacoes?.length }}</strong>
+      solicitações vinculadas também serão excluídas.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="cancelarModal()">Cancelar</button>
+    <button class="btn btn-danger" (click)="excluirConfirmado()">
+      <i class="bi bi-trash me-1"></i> Excluir
+    </button>
+  </div>
+</ng-template>
+
+<!-- Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  @for (toast of toastService.messages$ | async; track toast) {
+  <div
+    class="toast show"
+    [ngClass]="{
+      'bg-success': toast.type === 'success',
+      'bg-danger':  toast.type === 'danger',
+      'bg-info':    toast.type === 'info'
+    }"
+    role="alert"
+  >
+    <div class="toast-header border-0 bg-transparent text-white">
+      <strong class="me-auto text-capitalize">{{ toast.type }}</strong>
+    </div>
+    <div class="toast-body text-white">{{ toast.message }}</div>
+  </div>
+  }
+</div>

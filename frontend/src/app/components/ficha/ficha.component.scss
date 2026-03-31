@@ -1,0 +1,21 @@
+// src/app/components/ficha/ficha.component.scss
+
+.z-3 { z-index: 1050; }
+
+// Lista autocomplete flutuante
+.list-group.position-absolute {
+  max-height: 200px;
+  overflow-y: auto;
+  border-top: none;
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+// Badge de placa
+.badge.bg-secondary {
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+// Card seções do modal
+.card.border-primary .card-header { border-radius: 0.375rem 0.375rem 0 0; }
+.card.border-success .card-header { border-radius: 0.375rem 0.375rem 0 0; }
