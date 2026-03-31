@@ -1,8 +1,5 @@
 // src/app/components/ficha/ficha.component.scss
 
-.z-3 { z-index: 1050; }
-
-// Lista autocomplete flutuante
 .list-group.position-absolute {
   max-height: 200px;
   overflow-y: auto;
@@ -10,12 +7,22 @@
   border-radius: 0 0 0.375rem 0.375rem;
 }
 
-// Badge de placa
-.badge.bg-secondary {
-  font-size: 0.9rem;
-  letter-spacing: 1px;
+table thead tr {
+  background-color: #212529 !important;
+  color: #fff !important;
 }
 
-// Card seções do modal
-.card.border-primary .card-header { border-radius: 0.375rem 0.375rem 0 0; }
-.card.border-success .card-header { border-radius: 0.375rem 0.375rem 0 0; }
+table thead tr th {
+  background-color: #212529 !important;
+  color: #fff !important;
+}
+
+.dropdown-carro-item {
+  cursor: pointer;
+  background-color: #fff;
+  transition: background-color 0.15s;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}

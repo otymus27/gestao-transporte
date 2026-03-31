@@ -1,12 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface RankingItem {
   nome: string;
   quantidade: number;
+}
+
+export interface SolicitacaoPorDia {
+  data: string;
+  total: number;
 }
 
 export interface Dashboard {
@@ -20,10 +24,10 @@ export interface Dashboard {
   solicitacoesCanceladas: number;
   usuariosAtivosAgora: number;
   usuariosLogaramHoje: number;
-  solicitacoesPorDia: any[]; // por enquanto vazio
+  solicitacoesPorDia: SolicitacaoPorDia[];
   topSetores: RankingItem[];
   topMotoristas: RankingItem[];
-  topCarros: RankingItem[];
+  // topCarros REMOVIDO — placa está na FichaSolicitacao
 }
 
 @Injectable({ providedIn: 'root' })

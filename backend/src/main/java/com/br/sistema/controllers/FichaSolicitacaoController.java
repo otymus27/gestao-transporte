@@ -59,6 +59,32 @@ public class FichaSolicitacaoController {
     }
 
     // =========================================================
+// PATCH /api/fichas/{id}
+// Atualiza dados da ficha e substitui todas as solicitações
+// =========================================================
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    public ResponseEntity<?> atualizar(@PathVariable Long id,
+                                       @Valid @RequestBody FichaSolicitacaoRequestDTO dto,
+                                       Authentication authentication,
+                                       HttpServletRequest request) {
+        try {
+            Usuario usuarioLogado = authService.getUsuarioLogado(authentication);
+            FichaSolicitacaoResponseDTO resposta = fichaService.atualizar(id, dto, usuarioLogado);
+            return ResponseEntity.ok(resposta);
+
+        } catch (EntityNotFoundException e) {
+            return erro(HttpStatus.NOT_FOUND, "Ficha não encontrada", e.getMessage(), request);
+        } catch (IllegalArgumentException e) {
+            return erro(HttpStatus.BAD_REQUEST, "Dados inválidos", e.getMessage(), request);
+        } catch (Exception e) {
+            logger.error("Erro ao atualizar ficha id={}", id, e);
+            return erroInterno(request);
+        }
+    }
+
+    // =========================================================
     // GET /api/fichas
     // Lista todas as fichas com paginação
     // =========================================================

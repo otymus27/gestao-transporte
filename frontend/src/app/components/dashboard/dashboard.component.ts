@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgApexchartsModule, ChartComponent } from 'ng-apexcharts';
-
 import {
   ApexAxisChartSeries,
   ApexChart,
@@ -43,27 +42,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   @ViewChild('setorChart') setorChart!: ChartComponent;
   @ViewChild('motoristaChart') motoristaChart!: ChartComponent;
-  @ViewChild('carroChart') carroChart!: ChartComponent;
   @ViewChild('linhaChart') linhaChart!: ChartComponent;
 
   setoresOptions!: ChartOptions;
   motoristasOptions!: ChartOptions;
-  carrosOptions!: ChartOptions;
   solicitacoesDiaOptions!: ChartOptions;
 
   constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.carregarDashboard();
-
-    // Atualização automática a cada 60 segundos
     this.refreshInterval = setInterval(() => this.carregarDashboard(), 60000);
   }
 
   ngOnDestroy(): void {
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval);
-    }
+    if (this.refreshInterval) clearInterval(this.refreshInterval);
   }
 
   carregarDashboard(): void {
@@ -83,7 +76,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   configurarGraficos(data: Dashboard): void {
-    // === Top Setores ===
     this.setoresOptions = {
       series: [
         {
@@ -91,14 +83,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
           data: data.topSetores.map((s) => s.quantidade),
         },
       ],
-      chart: { type: 'bar', height: 300 },
+      chart: { type: 'bar', height: 300, toolbar: { show: false } },
       colors: ['#0d6efd'],
-      xaxis: { categories: data.topSetores.map((s) => s.nome) },
+      xaxis: {
+        categories: data.topSetores.map((s) => s.nome),
+        labels: { rotate: -30 },
+      },
       dataLabels: { enabled: true },
       title: { text: '🏢 Top Setores', align: 'center' },
     };
 
-    // === Top Motoristas ===
     this.motoristasOptions = {
       series: [
         {
@@ -106,26 +100,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
           data: data.topMotoristas.map((m) => m.quantidade),
         },
       ],
-      chart: { type: 'bar', height: 300 },
+      chart: { type: 'bar', height: 300, toolbar: { show: false } },
       colors: ['#198754'],
-      xaxis: { categories: data.topMotoristas.map((m) => m.nome) },
+      xaxis: {
+        categories: data.topMotoristas.map((m) => m.nome),
+        labels: { rotate: -30 },
+      },
       dataLabels: { enabled: true },
       title: { text: '🚗 Top Motoristas', align: 'center' },
     };
 
-    // === Top Carros ===
-    this.carrosOptions = {
-      series: [
-        { name: 'Solicitações', data: data.topCarros.map((c) => c.quantidade) },
-      ],
-      chart: { type: 'bar', height: 300 },
-      colors: ['#0dcaf0'],
-      xaxis: { categories: data.topCarros.map((c) => c.nome) },
-      dataLabels: { enabled: true },
-      title: { text: '🚙 Top Carros', align: 'center' },
-    };
-
-    // === Solicitações por Dia (gráfico de linha) ===
     this.solicitacoesDiaOptions = {
       series: [
         {
@@ -133,7 +117,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           data: data.solicitacoesPorDia.map((s) => s.total),
         },
       ],
-      chart: { type: 'line', height: 320, toolbar: { show: false } },
+      chart: { type: 'area', height: 320, toolbar: { show: false } },
       stroke: { curve: 'smooth', width: 3 },
       colors: ['#6610f2'],
       fill: {
@@ -151,15 +135,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
       },
       xaxis: {
         categories: data.solicitacoesPorDia.map((s) => s.data),
-        title: { text: 'Data' },
         labels: { rotate: -45 },
+        title: { text: 'Data' },
       },
-      yaxis: { title: { text: 'Qtd de Solicitações' } },
+      yaxis: { title: { text: 'Qtd' } },
       title: {
         text: '📈 Solicitações por Dia (Últimos 7 dias)',
         align: 'center',
       },
       dataLabels: { enabled: false },
     };
+  }
+
+  get percentualConcluidas(): string {
+    if (!this.dashboard || !this.dashboard.totalSolicitacoes) return '0';
+    return (
+      (this.dashboard.solicitacoesFinalizadas /
+        this.dashboard.totalSolicitacoes) *
+      100
+    ).toFixed(1);
   }
 }

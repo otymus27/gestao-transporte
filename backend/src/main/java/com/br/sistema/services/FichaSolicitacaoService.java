@@ -61,23 +61,24 @@ public class FichaSolicitacaoService {
     public FichaSolicitacaoResponseDTO atualizar(Long id,
                                                  FichaSolicitacaoRequestDTO dto,
                                                  Usuario usuarioLogado) {
-        FichaSolicitacao ficha = buscarEntidade(id);
+        FichaSolicitacao ficha = fichaRepository.findByIdComSolicitacoes(id);
+        if (ficha == null) throwNotFound(id);
 
         ficha.setDataViagem(dto.dataViagem());
         ficha.setPlacaVeiculo(dto.placaVeiculo().toUpperCase());
         ficha.setDataAtualizacao(LocalDateTime.now());
-        ficha.setUsuario(usuarioLogado); // atualiza o responsável
+        ficha.setUsuario(usuarioLogado);
 
-        // orphanRemoval=true remove as antigas automaticamente
+        // Limpa a lista existente — orphanRemoval=true cuida dos DELETEs
         ficha.getSolicitacoes().clear();
 
-        List<Solicitacao> novas = dto.solicitacoes().stream()
+        // Adiciona na MESMA lista, sem trocar a referência
+        dto.solicitacoes().stream()
                 .map(item -> montarSolicitacao(item, ficha, dto.dataViagem()))
-                .toList();
+                .forEach(ficha.getSolicitacoes()::add);
 
-        ficha.getSolicitacoes().addAll(novas);
-
-        return FichaSolicitacaoResponseDTO.fromEntity(fichaRepository.save(ficha));
+        // saveAndFlush garante que o clear é processado antes dos INSERTs
+        return FichaSolicitacaoResponseDTO.fromEntity(fichaRepository.saveAndFlush(ficha));
     }
 
     // =========================================================
@@ -92,11 +93,9 @@ public class FichaSolicitacaoService {
 
     @Transactional(readOnly = true)
     public FichaSolicitacaoResponseDTO buscarPorId(Long id) {
-        return FichaSolicitacaoResponseDTO.fromEntity(
-                fichaRepository.findByIdComSolicitacoes(id) != null
-                        ? fichaRepository.findByIdComSolicitacoes(id)
-                        : throwNotFound(id)
-        );
+        FichaSolicitacao ficha = fichaRepository.findByIdComSolicitacoes(id);
+        if (ficha == null) throwNotFound(id);
+        return FichaSolicitacaoResponseDTO.fromEntity(ficha);
     }
 
     @Transactional(readOnly = true)

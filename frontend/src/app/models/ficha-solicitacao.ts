@@ -10,14 +10,14 @@ export interface SolicitacaoItem {
   destinoNome?: string;
   kmInicial: number | null;
   kmFinal: number | null;
-  horaSaida: string | null;   // HH:mm
+  horaSaida: string | null; // HH:mm
   horaChegada: string | null; // HH:mm
   status: string;
   dataSolicitacao?: string;
 }
 
 export interface FichaSolicitacaoRequest {
-  dataViagem: string;         // yyyy-MM-dd
+  dataViagem: string; // yyyy-MM-dd
   placaVeiculo: string;
   solicitacoes: SolicitacaoItem[];
 }
@@ -51,6 +51,6 @@ export function novaSolicitacaoItem(): SolicitacaoItem {
     kmFinal: null,
     horaSaida: null,
     horaChegada: null,
-    status: 'PENDENTE',
+    status: 'CONCLUIDO',
   };
 }
