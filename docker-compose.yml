@@ -1,25 +1,5 @@
 services:
     # ===========================
-    # Banco de Dados - MySql
-    # ===========================
-#    mysql:
-#      image: mysql:8.0
-#      container_name: mysql_nutran
-#      environment:
-#        MYSQL_DATABASE: db_nutran
-#        MYSQL_ROOT_PASSWORD: root
-#      ports:
-#        - "3306:3306"
-#      volumes:
-#        - mysql_volume:/var/lib/mysql
-#      networks: [ otymus_net ]
-#      healthcheck:
-#        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-proot" ]
-#        interval: 5s
-#        timeout: 3s
-#        retries: 30
-
-    # ===========================
     # Backend - Spring Boot
     # ===========================
     api:
@@ -28,6 +8,8 @@ services:
         restart: unless-stopped  # Reinicia sempre, exceto se você parar o container
         env_file:
             - .env
+        environment:
+            - TZ=America/Sao_Paulo  # ✅ Define o fuso no sistema do container
         ports:
           - "8084:8080"
         networks:
@@ -40,6 +22,8 @@ services:
         build: ./frontend
         container_name: frontend-transporte
         restart: unless-stopped  # Reinicia sempre, exceto se você parar o container
+        environment:
+            - TZ=America/Sao_Paulo # ✅ Evita que o Nginx registre logs em UTC
         ports:
             - "85:80"
         depends_on:
