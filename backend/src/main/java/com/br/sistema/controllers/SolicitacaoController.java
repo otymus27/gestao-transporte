@@ -43,7 +43,7 @@ public class SolicitacaoController {
     // =========================================================
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<?> cadastrar(@Valid @RequestBody SolicitacaoRequestDTO dto,
                                        Authentication authentication,
                                        HttpServletRequest request) {
@@ -63,7 +63,7 @@ public class SolicitacaoController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<?> atualizar(@PathVariable Long id,
                                        @Valid @RequestBody SolicitacaoRequestDTO dto,
                                        Authentication authentication,
@@ -107,7 +107,7 @@ public class SolicitacaoController {
     // =========================================================
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR')")
     public ResponseEntity<?> atualizarStatus(@PathVariable Long id,
                                              @RequestParam String valor,
                                              Authentication authentication,

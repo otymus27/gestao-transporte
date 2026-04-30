@@ -35,7 +35,7 @@ import java.util.Set;
 @Service
 public class SolicitacaoService {
 
-    private static final Set<String> ROLES_ESCRITA  = Set.of("ADMIN", "GERENTE", "BASIC");
+    private static final Set<String> ROLES_ESCRITA  = Set.of("ADMIN", "GERENTE", "SUPERVISOR", "BASIC");
     private static final Set<String> ROLES_EXCLUSAO = Set.of("ADMIN");
 
     private final SolicitacaoRepository solicitacaoRepository;
@@ -135,7 +135,7 @@ public class SolicitacaoService {
                                                   String novoStatus,
                                                   Usuario usuarioLogado) throws AccessDeniedException {
         validarAutenticacao(usuarioLogado);
-        validarPermissao(usuarioLogado, Set.of("ADMIN", "GERENTE"));
+        validarPermissao(usuarioLogado, Set.of("ADMIN", "GERENTE", "SUPERVISOR"));
 
         Solicitacao sol = buscarEntidade(id);
         sol.setStatus(novoStatus);

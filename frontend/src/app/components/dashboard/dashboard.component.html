@@ -110,22 +110,22 @@
       </div>
 
       <div class="panel-body actions-list">
-        <a *ngIf="isAdmin() || isGerente()" routerLink="/admin/solicitacoes/gerenciar" class="quick-link">
+        <a *ngIf="isAdmin() || isGerente() || isSupervisor()" routerLink="/admin/solicitacoes/gerenciar" class="quick-link">
           <i class="bi bi-plus-circle"></i>
           <span>Nova solicitação</span>
         </a>
 
-        <a *ngIf="isAdmin() || isGerente()" routerLink="/admin/carros/gerenciar" class="quick-link">
+        <a *ngIf="isAdmin() || isGerente() || isSupervisor()" routerLink="/admin/carros/gerenciar" class="quick-link">
           <i class="bi bi-car-front"></i>
           <span>Gerenciar carros</span>
         </a>
 
-        <a *ngIf="isAdmin() || isGerente()" routerLink="/admin/motoristas/gerenciar" class="quick-link">
+        <a *ngIf="isAdmin() || isGerente() || isSupervisor()" routerLink="/admin/motoristas/gerenciar" class="quick-link">
           <i class="bi bi-person-badge"></i>
           <span>Gerenciar motoristas</span>
         </a>
 
-        <a *ngIf="isAdmin() || isGerente()" routerLink="/admin/setores/gerenciar" class="quick-link">
+        <a *ngIf="isAdmin() || isGerente() || isSupervisor()" routerLink="/admin/setores/gerenciar" class="quick-link">
           <i class="bi bi-building"></i>
           <span>Gerenciar setores</span>
         </a>

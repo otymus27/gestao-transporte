@@ -83,7 +83,7 @@ public class MotoristaService {
 
         // 3️⃣ Verificar permissões (somente ADMIN pode cadastrar motoristas)
         boolean temPermissao = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> r.getNome().equals("ADMIN") || r.getNome().equals("GERENTE"));
+                .anyMatch(r -> r.getNome().equals("ADMIN") || r.getNome().equals("GERENTE") || r.getNome().equals("SUPERVISOR"));
 
         if (!temPermissao) {
             throw new AccessDeniedException("Usuário não tem permissão para cadastrar motoristas.");
@@ -122,7 +122,7 @@ public class MotoristaService {
 
         // Apenas ADMIN pode atualizar
         boolean isAdmin = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> r.getNome().equals("ADMIN") || r.getNome().equals("GERENTE"));
+                .anyMatch(r -> r.getNome().equals("ADMIN") || r.getNome().equals("GERENTE") || r.getNome().equals("SUPERVISOR"));
         if (!isAdmin) {
             throw new AccessDeniedException("Usuário não tem permissão para atualizar motoristas.");
         }

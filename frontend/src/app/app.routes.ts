@@ -53,22 +53,22 @@ export const routes: Routes = [
           {
             path: '',
             component: CarroComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'gerenciar',
             component: CarroComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'novo',
             component: CarroComponent,
-            data: { roles: ['ADMIN'] },
+            data: { roles: ['ADMIN', 'SUPERVISOR'] },
           },
           {
             path: 'relatorio',
             component: CarrosRelatorioComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
         ],
       },
@@ -80,17 +80,17 @@ export const routes: Routes = [
           {
             path: '',
             component: DestinoComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'gerenciar',
             component: DestinoComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'relatorio',
             component: DestinosRelatorioComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
         ],
       },
@@ -102,17 +102,17 @@ export const routes: Routes = [
           {
             path: '',
             component: MotoristaComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'gerenciar',
             component: MotoristaComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'relatorio',
             component: MotoristasRelatorioComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
         ],
       },
@@ -124,17 +124,17 @@ export const routes: Routes = [
           {
             path: '',
             component: SetorComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'gerenciar',
             component: SetorComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'relatorio',
             component: SetorRelatorioComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
         ],
       },
@@ -146,17 +146,17 @@ export const routes: Routes = [
           {
             path: '',
             component: SolicitacaoComponent,
-            data: { roles: ['ADMIN', 'GERENTE', 'BASIC'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR', 'BASIC'] },
           },
           {
             path: 'gerenciar',
             component: SolicitacaoComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'relatorio',
             component: SolicitacaoRelatorioComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
         ],
       },
@@ -168,12 +168,12 @@ export const routes: Routes = [
           {
             path: '',
             component: FichaComponent,
-            data: { roles: ['ADMIN', 'GERENTE', 'BASIC'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR', 'BASIC'] },
           },
           {
             path: 'gerenciar',
             component: FichaComponent,
-            data: { roles: ['ADMIN', 'GERENTE', 'BASIC'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR', 'BASIC'] },
           },
         ],
       },
@@ -185,12 +185,12 @@ export const routes: Routes = [
           {
             path: '',
             component: RelatorioCentralComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
           {
             path: 'geral',
             component: RelatorioCentralComponent,
-            data: { roles: ['ADMIN', 'GERENTE'] },
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR'] },
           },
         ],
       },
@@ -219,7 +219,7 @@ export const routes: Routes = [
           {
             path: 'alterar-senha',
             component: AlterarSenhaComponent,
-            data: { roles: ['ADMIN', 'GERENTE', 'BASIC'] }, // todos os logados podem alterar
+            data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR', 'BASIC'] }, // todos os logados podem alterar
           },
         ],
       },
@@ -228,7 +228,7 @@ export const routes: Routes = [
       {
         path: 'sobre',
         component: SobreComponent,
-        data: { roles: ['ADMIN', 'GERENTE', 'BASIC'] }, // todos os logados
+        data: { roles: ['ADMIN', 'GERENTE', 'SUPERVISOR', 'BASIC'] }, // todos os logados
       },
     ],
   },

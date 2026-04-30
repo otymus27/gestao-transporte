@@ -109,6 +109,7 @@
                     <i class="bi bi-pencil-square"></i>
                   </button>
                   <button
+                    *ngIf="canDelete()"
                     class="btn btn-danger btn-sm"
                     (click)="confirmarExclusao(f)"
                     title="Excluir"
@@ -656,7 +657,7 @@
     <button class="btn btn-secondary btn-sm" (click)="cancelarModal()">
       Cancelar
     </button>
-    <button class="btn btn-danger btn-sm" (click)="excluirConfirmado()">
+    <button *ngIf="canDelete()" class="btn btn-danger btn-sm" (click)="excluirConfirmado()">
       <i class="bi bi-trash me-1"></i> Excluir
     </button>
   </div>

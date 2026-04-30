@@ -37,6 +37,7 @@ import {
   novaFicha,
   novaSolicitacaoItem,
 } from '../../models/ficha-solicitacao';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-ficha',
@@ -92,7 +93,12 @@ export class FichaComponent implements OnInit {
   private setorService = inject(SetorService);
   private destinoService = inject(DestinoService);
   private modalService = inject(MdbModalService);
+  private authService = inject(AuthService);
   toastService = inject(ToastService);
+
+  canDelete(): boolean {
+    return this.authService.getLoggedInRoles().includes('ADMIN');
+  }
 
   @HostListener('document:click', ['$event'])
   fecharDropdowns(event: MouseEvent) {

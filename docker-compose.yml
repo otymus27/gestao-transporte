@@ -1,48 +1,36 @@
 services:
-    # ===========================
-    # Backend - Spring Boot
-    # ===========================
     api:
         build: ./backend
         container_name: api-transporte
-        restart: unless-stopped  # Reinicia sempre, exceto se você parar o container
+        restart: unless-stopped
         env_file:
             - .env
         environment:
-            - TZ=America/Sao_Paulo  # ✅ Define o fuso no sistema do container
-        ports:
-          - "8084:8080"
+            - TZ=America/Sao_Paulo
+        expose:
+            - "8080"
         networks:
             - otymus_net
 
-  # ===========================
-    # Frontend - Angular + Nginx
-    # ===========================
     frontend:
         build: ./frontend
         container_name: frontend-transporte
-        restart: unless-stopped  # Reinicia sempre, exceto se você parar o container
+        restart: unless-stopped
         environment:
-            - TZ=America/Sao_Paulo # ✅ Evita que o Nginx registre logs em UTC
+            - TZ=America/Sao_Paulo
         ports:
             - "85:80"
         depends_on:
             - api
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost/health >/dev/null 2>&1 || exit 1"]
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
         networks:
             - otymus_net
 
-
-# ===========================
-# Volumes (persistência)
-# ===========================
-volumes:
-  mysql_volume:
-
-# ===========================
-# Redes
-# ===========================
 networks:
     otymus_net:
         external: true
-
-

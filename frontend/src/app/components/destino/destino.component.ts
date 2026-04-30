@@ -12,6 +12,7 @@ import { ToastService } from '../../services/toast.service';
 import { Paginacao } from '../../models/paginacao';
 import { Destino } from '../../models/destino';
 import { ErrorMessage, DestinoService } from '../../services/destino.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-destino',
@@ -41,10 +42,15 @@ export class DestinoComponent {
   destinoService = inject(DestinoService);
   modalService = inject(MdbModalService);
   toastService = inject(ToastService);
+  private authService = inject(AuthService);
 
   // Modais
   @ViewChild('modalDestinoDetalhe') modalDestinoDetalhe!: TemplateRef<any>;
   modalRef!: MdbModalRef<any>;
+
+  canDelete(): boolean {
+    return this.authService.getLoggedInRoles().includes('ADMIN');
+  }
 
   @ViewChild('modalConfirmacaoExclusao')
   modalConfirmacaoExclusao!: TemplateRef<any>;

@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS tb_usuarios_roles (
 INSERT INTO tb_roles (nome) VALUES
                                 ('ADMIN'),
                                 ('BASIC'),
-                                ('GERENTE')
+                                ('GERENTE'),
+                                ('SUPERVISOR')
     ON DUPLICATE KEY UPDATE nome = nome;
 
 -- Inserção de usuários

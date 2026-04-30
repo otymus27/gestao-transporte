@@ -64,7 +64,7 @@ public class RecuperarSenhaController {
      */
     @PostMapping("/redefinir-senha")
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'SUPERVISOR', 'BASIC')")
     public ResponseEntity<Object> confirmarRedefinicao(@RequestBody ResetSenhaRequestDto dto,
                                                        HttpServletRequest request) {
         logger.info("Tentando redefinir senha para username: {}", dto.username());
@@ -87,7 +87,7 @@ public class RecuperarSenhaController {
 //    Endpoint 3 - usuario refine sua propria senha.
     @PutMapping("/alterar-senha")
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<Object> alterarSenha(@RequestBody AlterarSenhaRequestDTO dto,
                                                @AuthenticationPrincipal Jwt jwt,
                                                HttpServletRequest request) {

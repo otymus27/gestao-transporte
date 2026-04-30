@@ -46,7 +46,7 @@ public class SetorController {
     // ✅ Cadastrar setor
     @PostMapping
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<?> cadastrar(@Valid @RequestBody SetorRequestDTO dto,
                                        Authentication authentication,
                                        HttpServletRequest request) {
@@ -81,7 +81,7 @@ public class SetorController {
     // ✅ Atualizar setor
     @PutMapping("/{id}")
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<?> atualizar(@PathVariable Long id,
                                        @Valid @RequestBody SetorRequestDTO dto,
                                        Authentication authentication,

@@ -27,7 +27,7 @@
     </li>
 
     <!-- Setores -->
-    <li class="nav-item" *ngIf="isAdmin() || isGerente()">
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isSupervisor()">
       <a
         class="nav-link"
         routerLink="/admin/setores/gerenciar"
@@ -39,7 +39,7 @@
     </li>
 
     <!-- Destinos -->
-    <li class="nav-item" *ngIf="isAdmin() || isGerente()">
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isSupervisor()">
       <a
         class="nav-link"
         routerLink="/admin/destinos/gerenciar"
@@ -51,7 +51,7 @@
     </li>
 
     <!-- Motoristas -->
-    <li class="nav-item" *ngIf="isAdmin() || isGerente()">
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isSupervisor()">
       <a
         class="nav-link"
         routerLink="/admin/motoristas/gerenciar"
@@ -63,7 +63,7 @@
     </li>
 
     <!-- Carros -->
-    <li class="nav-item" *ngIf="isAdmin() || isGerente()">
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isSupervisor()">
       <a
         class="nav-link"
         routerLink="/admin/carros/gerenciar"
@@ -77,7 +77,7 @@
     <div class="nav-group-label">Operações</div>
 
     <!-- Solicitações -->
-    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isBasic()">
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isSupervisor() || isBasic()">
       <a
         class="nav-link"
         routerLink="/admin/solicitacoes/gerenciar"
@@ -89,7 +89,7 @@
     </li>
 
     <!-- Fichas -->
-    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isBasic()">
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isSupervisor() || isBasic()">
       <a
         class="nav-link"
         routerLink="/admin/fichas/gerenciar"
@@ -101,7 +101,7 @@
     </li>
 
     <!-- Relatórios -->
-    <li class="nav-item" *ngIf="isAdmin() || isGerente()">
+    <li class="nav-item" *ngIf="isAdmin() || isGerente() || isSupervisor()">
       <a
         class="nav-link"
         routerLink="/admin/relatorios/geral"

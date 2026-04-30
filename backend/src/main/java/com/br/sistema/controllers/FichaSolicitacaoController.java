@@ -39,7 +39,7 @@ public class FichaSolicitacaoController {
     // =========================================================
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<?> salvar(@Valid @RequestBody FichaSolicitacaoRequestDTO dto,
                                     Authentication authentication,
                                     HttpServletRequest request) {
@@ -64,7 +64,7 @@ public class FichaSolicitacaoController {
 // =========================================================
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<?> atualizar(@PathVariable Long id,
                                        @Valid @RequestBody FichaSolicitacaoRequestDTO dto,
                                        Authentication authentication,
@@ -90,7 +90,7 @@ public class FichaSolicitacaoController {
     // =========================================================
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<?> listar(Pageable pageable, HttpServletRequest request) {
         try {
             Page<FichaSolicitacaoResponseDTO> fichas = fichaService.listar(pageable);
@@ -107,7 +107,7 @@ public class FichaSolicitacaoController {
     // =========================================================
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id, HttpServletRequest request) {
         try {
             FichaSolicitacaoResponseDTO ficha = fichaService.buscarPorId(id);
@@ -126,7 +126,7 @@ public class FichaSolicitacaoController {
     // =========================================================
 
     @GetMapping("/buscar")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<?> buscar(
             @RequestParam(required = false) String placa,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,

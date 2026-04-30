@@ -12,6 +12,7 @@ import { ToastService } from '../../services/toast.service';
 import { Paginacao } from '../../models/paginacao';
 import { Setor } from '../../models/setor';
 import { ErrorMessage, SetorService } from '../../services/setor.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-setor',
@@ -41,10 +42,15 @@ export class SetorComponent {
   setorService = inject(SetorService);
   modalService = inject(MdbModalService);
   toastService = inject(ToastService);
+  private authService = inject(AuthService);
 
   // Modais
   @ViewChild('modalSetorDetalhe') modalSetorDetalhe!: TemplateRef<any>;
   modalRef!: MdbModalRef<any>;
+
+  canDelete(): boolean {
+    return this.authService.getLoggedInRoles().includes('ADMIN');
+  }
 
   @ViewChild('modalConfirmacaoExclusao')
   modalConfirmacaoExclusao!: TemplateRef<any>;

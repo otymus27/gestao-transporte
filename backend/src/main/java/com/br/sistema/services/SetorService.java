@@ -60,7 +60,7 @@ public class SetorService {
 
         // 3️⃣ Verificar permissões (somente ADMIN pode cadastrar setor)
         boolean temPermissao = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> "ADMIN".equals(r.getNome()));
+                .anyMatch(r -> "ADMIN".equals(r.getNome()) || "SUPERVISOR".equals(r.getNome()));
         if (!temPermissao) {
             throw new AccessDeniedException("Usuário não tem permissão para cadastrar setor.");
         }
@@ -96,7 +96,7 @@ public class SetorService {
         }
 
         boolean temPermissao = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> "ADMIN".equals(r.getNome()));
+                .anyMatch(r -> "ADMIN".equals(r.getNome()) || "SUPERVISOR".equals(r.getNome()));
         if (!temPermissao) {
             throw new AccessDeniedException("Usuário não tem permissão para atualizar setor.");
         }

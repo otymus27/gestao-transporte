@@ -70,7 +70,7 @@ public class CarroService {
 
         // 3️⃣ Verificar permissões (somente ADMIN pode cadastrar carros)
         boolean temPermissao = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> "ADMIN".equals(r.getNome()));
+                .anyMatch(r -> "ADMIN".equals(r.getNome()) || "SUPERVISOR".equals(r.getNome()));
         if (!temPermissao) {
             throw new AccessDeniedException("Usuário não tem permissão para cadastrar carros.");
         }
@@ -123,7 +123,7 @@ public class CarroService {
 
         // 3️⃣ Verificar permissões (somente ADMIN pode atualizar carros)
         boolean temPermissao = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> "ADMIN".equals(r.getNome()));
+                .anyMatch(r -> "ADMIN".equals(r.getNome()) || "SUPERVISOR".equals(r.getNome()));
         if (!temPermissao) {
             throw new AccessDeniedException("Usuário não tem permissão para atualizar carros.");
         }

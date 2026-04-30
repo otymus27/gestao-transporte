@@ -17,6 +17,7 @@ import {
   ErrorMessage,
   MotoristaService,
 } from '../../services/motorista.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-motorista',
@@ -56,10 +57,15 @@ export class MotoristaComponent {
   motoristaService = inject(MotoristaService);
   modalService = inject(MdbModalService);
   toastService = inject(ToastService);
+  private authService = inject(AuthService);
 
   // Modais
   @ViewChild('modalMotoristaDetalhe') modalMotoristaDetalhe!: TemplateRef<any>;
   modalRef!: MdbModalRef<any>;
+
+  canDelete(): boolean {
+    return this.authService.getLoggedInRoles().includes('ADMIN');
+  }
 
   @ViewChild('modalConfirmacaoExclusao')
   modalConfirmacaoExclusao!: TemplateRef<any>;

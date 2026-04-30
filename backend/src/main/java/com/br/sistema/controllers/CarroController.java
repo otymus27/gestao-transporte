@@ -46,7 +46,7 @@ public class CarroController {
     // ✅ Cadastrar carro
     @PostMapping
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<?> cadastrar(
             @Valid @RequestBody CarroRequestDTO dto,
             Authentication authentication,
@@ -98,7 +98,7 @@ public class CarroController {
     // ✅ Atualizar carro
     @PutMapping("/{id}")
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<?> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody CarroRequestDTO dto,
@@ -141,7 +141,7 @@ public class CarroController {
 
     // ✅ Listar carros paginados (sem solicitações)
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<Page<CarroDetalhadoDTO>> listar(@RequestParam(required = false) String filtro,
                                                           Pageable pageable) {
         var carros = carroService.listar(filtro, pageable);
@@ -150,7 +150,7 @@ public class CarroController {
 
     // ✅ Buscar carro por ID (inclui solicitações)
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','BASIC')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE','SUPERVISOR','BASIC')")
     public ResponseEntity<?> buscarPorId(
             @PathVariable Long id,
             HttpServletRequest request

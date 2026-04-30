@@ -1,103 +1,336 @@
-Portal Fullstack (Backend + Frontend + MySQL)
-Este projeto é um monorepo que integra o backend (Spring Boot), o frontend (Angular + Nginx) e o MySQL usando Docker Compose.
+# Sistema de Gestao de Transporte
 
-🚀 Estrutura do projeto
-/portal-full/ ├── backend/ # API Spring Boot │ ├── src/ │ ├── Dockerfile │ └── .env # variáveis específicas do backend ├── frontend/ # Frontend Angular (serviço via Nginx) │ ├── src/ │ ├── Dockerfile │ └── nginx.conf ├── docker-compose.yml # orquestra os serviços ├── .env # variáveis globais (MySQL, volumes) └── README.md
+Sistema web fullstack para gestao de transporte institucional. O projeto reune backend Spring Boot, frontend Angular e banco MySQL, com autenticacao JWT, controle de perfis, cadastros operacionais, fichas de solicitacao, dashboard e relatorios em PDF/Excel.
 
-⚙️ Pré-requisitos
-Docker
-Docker Compose
-📌 Configuração de variáveis de ambiente
+## Visao Geral
 
-1. .env (na raiz)
-   Arquivo obrigatório para configurar banco de dados e storage.
+O sistema centraliza o fluxo de transporte da instituicao, permitindo administrar usuarios, veiculos, motoristas, setores, destinos, solicitacoes e fichas. Tambem oferece uma central de relatorios com filtros e exportacao.
 
-# ======================
+Principais recursos:
 
-# Configurações globais
+- Autenticacao e autorizacao com JWT.
+- Perfis de acesso: `ADMIN`, `SUPERVISOR`, `GERENTE` e `BASIC`.
+- CRUD de usuarios, carros, motoristas, setores e destinos.
+- Gestao de solicitacoes e fichas com multiplas solicitacoes.
+- Dashboard administrativo com indicadores.
+- Relatorios de solicitacoes, motoristas, carros, setores e destinos.
+- Exportacao de relatorios em PDF e Excel.
+- Frontend Angular servido por Nginx em producao.
+- Backend Spring Boot com Flyway e MySQL.
 
-# ======================
+## Stack
 
-# MySQL
+Backend:
 
-DB_NAME=portal_db
-DB_USER=portal_user
-DB_PASSWORD=portal_secret
+- Java 21
+- Spring Boot 3.5.x
+- Spring Security
+- Spring Data JPA / Hibernate
+- Flyway
+- MySQL
+- JasperReports 7
+- Maven
 
-# Caminho para volume de storage do backend
+Frontend:
 
-STORAGE_PATH=/app/storage
+- Angular 20
+- TypeScript
+- SCSS
+- Bootstrap / Bootstrap Icons
+- Angular Material
+- ApexCharts / Chart.js
+- Nginx
 
-2. backend/.env
+Infra:
 
-Arquivo usado pelo Spring Boot.
+- Docker
+- Docker Compose
+- Rede Docker externa `otymus_net`
 
-# ======================
+## Estrutura do Projeto
 
-# Configurações do backend
+```text
+gestao-transporte/
+|-- backend/
+|   |-- src/main/java/com/br/sistema/
+|   |   |-- autenticacao/
+|   |   |-- controllers/
+|   |   |-- entities/
+|   |   |-- exceptions/
+|   |   |-- relatorio/
+|   |   |-- repositories/
+|   |   |-- services/
+|   |   `-- utils/
+|   |-- src/main/resources/
+|   |   |-- db/migration/
+|   |   |-- reports/
+|   |   |-- application.properties
+|   |   `-- application-prod.properties
+|   |-- Dockerfile
+|   `-- pom.xml
+|-- frontend/
+|   |-- src/
+|   |-- Dockerfile
+|   |-- nginx.conf
+|   |-- package.json
+|   `-- angular.json
+|-- docker-compose.yml
+|-- docker-compose.dev.yml
+`-- README.md
+```
 
-# ======================
+## Modulos
 
-# Datasource
+- Dashboard: indicadores, cards de resumo e atalhos.
+- Usuarios: cadastro, edicao, perfis e credenciais.
+- Carros: cadastro e consulta de veiculos.
+- Motoristas: cadastro, consulta e relatorios.
+- Setores: cadastro, consulta e relatorios.
+- Destinos: cadastro, consulta e relatorios.
+- Solicitacoes: acompanhamento, status, motorista, setor, destino e quilometragem.
+- Fichas de solicitacao: agrupamento de multiplas solicitacoes em uma ficha.
+- Relatorios: filtros e exportacao em PDF/Excel.
+- Sobre: informacoes institucionais e tecnicas do sistema.
 
-SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${DB_NAME}
-SPRING_DATASOURCE_USERNAME=${DB_USER}
-SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+## Configuracao
 
-# Storage interno (montado pelo docker-compose)
+Crie ou ajuste o arquivo `.env` na raiz do projeto. Exemplo:
 
-STORAGE_PATH=/app/storage
-
-# Perfil ativo
-
+```env
+# Backend
+APP_NAME=sistema
+SERVER_PORT=8080
 SPRING_PROFILES_ACTIVE=prod
+JWT_SECRET=troque-esta-chave-por-uma-chave-segura
 
-▶️ Como rodar
+# Database
+DB_HOST=mysql_server
+DB_PORT=3306
+DB_NAME=db_nutran
+DB_USER=root
+DB_PASSWORD=root
 
-Na raiz do projeto, execute:
+# JPA / Flyway
+JPA_DDL_AUTO=none
+SHOW_SQL=false
+FLYWAY_ENABLED=true
+LOG_LEVEL=INFO
+SECURITY_LOG_LEVEL=INFO
+BEAN_LOG_LEVEL=INFO
+```
 
-docker-compose build
-docker-compose up -d
+Observacoes:
 
-🌍 Endpoints
+- Em producao, troque `JWT_SECRET` por uma chave forte.
+- O `docker-compose.yml` espera que exista uma rede Docker externa chamada `otymus_net`.
+- O banco MySQL usado em Docker deve estar acessivel pelo host configurado em `DB_HOST`, por exemplo `mysql_server`.
 
-Frontend (Angular + Nginx):
-👉 http://localhost:86
+## Executando com Docker
 
-Backend (Spring Boot):
-👉 http://localhost:8082
+1. Crie a rede externa, se ela ainda nao existir:
 
-Banco MySQL:
-👉 localhost:3307 (usuário/senha conforme .env)
+```bash
+docker network create otymus_net
+```
 
-🔗 Integração
+2. Suba os servicos:
 
-O frontend está configurado para usar environment.apiUrl = '/api'.
+```bash
+docker compose up --build -d
+```
 
-O Nginx redireciona chamadas /api/... para o backend (http://api:8082).
+3. Acesse:
 
-O backend se conecta ao MySQL pelo host mysql na rede interna do Docker Compose.
+- Frontend: `http://localhost:85`
+- Backend pela rede interna: `api:8080`
+- Backend exposto localmente, usando o compose dev: `http://localhost:8080`
 
-🛠️ Comandos úteis
+Para expor tambem a API localmente, use:
 
-Ver logs dos containers:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
+```
 
-docker-compose logs -f
+Comandos uteis:
 
-Reconstruir tudo do zero:
+```bash
+docker compose logs -f
+docker compose logs -f api
+docker compose logs -f frontend
+docker compose down
+docker compose up --build -d
+```
 
-docker-compose down -v
-docker-compose build --no-cache
-docker-compose up -d
+## Executando Localmente
 
-Acessar o MySQL dentro do container:
+### Backend
 
-docker exec -it mysql mysql -uportal_user -pportal_secret portal_db
+Requisitos:
 
-📌 Observações
+- JDK 21
+- Maven
+- MySQL
 
-Todos os serviços compartilham a mesma rede app-network.
+Comandos:
 
-Se precisar expor em outro host/IP, basta ajustar o docker-compose.yml (port mapping).
+```bash
+cd backend
+mvn spring-boot:run
+```
 
-O backend roda sempre no perfil prod (--spring.profiles.active=prod).
+Configuracao local padrao em `backend/src/main/resources/application.properties`:
+
+- Porta: `8080`
+- Banco: `jdbc:mysql://localhost:3306/db_nutran`
+- Usuario: `root`
+- Senha: `root`
+
+### Frontend
+
+Requisitos:
+
+- Node.js 20 ou superior
+- npm
+
+Comandos:
+
+```bash
+cd frontend
+npm install --legacy-peer-deps
+npm start
+```
+
+O Angular sobe por padrao em:
+
+```text
+http://localhost:4200
+```
+
+Build de producao:
+
+```bash
+cd frontend
+npm run build
+```
+
+## Relatorios
+
+Os relatorios ficam em:
+
+```text
+backend/src/main/resources/reports/
+```
+
+O projeto usa JasperReports. Os relatorios de solicitacoes sao carregados a partir dos arquivos `.jrxml`, para garantir que alteracoes de layout sejam refletidas sem depender de arquivos `.jasper` antigos.
+
+Configuracoes importantes:
+
+```properties
+net.sf.jasperreports.compiler.class=net.sf.jasperreports.jdt.JRJdtCompiler
+net.sf.jasperreports.compiler.java=net.sf.jasperreports.jdt.JRJdtCompiler
+```
+
+Isso permite compilar `.jrxml` usando o compilador JDT do Jasper, sem depender de um executavel `javac` disponivel no container em runtime.
+
+Padroes atuais dos relatorios de solicitacoes:
+
+- Cabecalho principal e titulos de colunas aparecem somente na primeira pagina.
+- Datas das tabelas aparecem no formato `dd-MM-yyyy`, exemplo `01-01-2025`.
+- Relatorios disponiveis: simples, por setor, por motorista, por carro e por destino.
+
+## Banco de Dados
+
+As migrations ficam em:
+
+```text
+backend/src/main/resources/db/migration/
+```
+
+O Flyway esta habilitado por padrao. Em producao, a flag pode ser controlada por:
+
+```env
+FLYWAY_ENABLED=true
+```
+
+## Seguranca
+
+- Autenticacao baseada em JWT.
+- Controle de rotas e endpoints por perfil.
+- Token enviado pelo frontend nas chamadas autenticadas.
+- Nginx encaminha chamadas `/api/` para o backend no container `api`.
+
+Perfis principais:
+
+- `ADMIN`: acesso completo, incluindo usuarios, roles, redefinicao administrativa de senha e exclusoes.
+- `SUPERVISOR`: acesso operacional equivalente ao ADMIN, exceto usuarios, roles, redefinicao administrativa de senha e exclusoes.
+- `GERENTE`: acesso aos modulos operacionais permitidos e relatorios.
+- `BASIC`: acesso operacional restrito.
+
+## Endpoints e Proxy
+
+Em Docker, o frontend e servido pelo Nginx na porta `85`.
+
+Chamadas iniciadas pelo frontend para:
+
+```text
+/api/
+```
+
+sao redirecionadas pelo Nginx para:
+
+```text
+http://api:8080
+```
+
+## Testes e Validacao
+
+Backend:
+
+```bash
+cd backend
+mvn test
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm test
+```
+
+Builds:
+
+```bash
+cd backend
+mvn clean package -DskipTests
+
+cd ../frontend
+npm run build
+```
+
+## Problemas Comuns
+
+### `Cannot run program "javac"` ao gerar relatorio
+
+Verifique se a dependencia `jasperreports-jdt` esta instalada e se as properties do Jasper apontam para:
+
+```properties
+net.sf.jasperreports.jdt.JRJdtCompiler
+```
+
+### Backend nao conecta no MySQL em Docker
+
+Confira:
+
+- A rede `otymus_net` existe.
+- O container do MySQL esta na mesma rede.
+- `DB_HOST` aponta para o nome correto do container MySQL.
+- Usuario, senha e banco existem.
+
+### API nao acessa pelo navegador em Docker
+
+O `docker-compose.yml` principal expoe somente o frontend. Para expor o backend em `localhost:8080`, use tambem `docker-compose.dev.yml`.
+
+## Autor
+
+Fabio de Alencar Rocha

@@ -48,7 +48,7 @@ public class DestinoController {
     // ✅ Cadastrar destino
     @PostMapping
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<?> cadastrar(@Valid @RequestBody DestinoRequestDTO dto,
                                        Authentication authentication,
                                        HttpServletRequest request) {
@@ -83,7 +83,7 @@ public class DestinoController {
     // ✅ Atualizar destino
     @PatchMapping("/{id}")
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<?> atualizar(@PathVariable Long id,
                                        @Valid @RequestBody DestinoRequestDTO dto,
                                        Authentication authentication,

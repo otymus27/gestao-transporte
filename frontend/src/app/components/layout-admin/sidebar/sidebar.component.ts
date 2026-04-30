@@ -29,6 +29,11 @@ export class SidebarComponent {
     return roles.includes('GERENTE');
   }
 
+  isSupervisor(): boolean {
+    const roles = this.authService.getLoggedInRoles();
+    return roles.includes('SUPERVISOR');
+  }
+
   isBasic(): boolean {
     const roles = this.authService.getLoggedInRoles();
     return roles.includes('BASIC');

@@ -1,4 +1,4 @@
-<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+﻿<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
 <jasperReport name="solicitacoes_por_setor" language="java" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9b85b3f1-1b8f-4b2a-9c61-7bde19a5b9a1">
 	<parameter name="LOGO" class="java.io.InputStream"/>
 	<field name="id" class="java.lang.Long"/>
@@ -50,7 +50,7 @@
 			</band>
 		</groupFooter>
 	</group>
-	<title height="60">
+	<title height="117">
 		<element kind="image" uuid="0d5cba9b-8a67-4b0a-b4d0-4a6a4ce1c2a1" x="0" y="0" width="90" height="40">
 			<expression><![CDATA[$P{LOGO}]]></expression>
 		</element>
@@ -58,48 +58,49 @@
 			<text><![CDATA[Sistema de Controle de Requisição]]></text>
 		</element>
 		<element kind="line" uuid="e1b6b5f1-6c47-4b1d-9f45-5f4d5e1b1c11" x="0" y="52" width="802" height="1"/>
-	</title>
-	<pageHeader height="35">
-		<element kind="textField" uuid="4b025f5e-93f6-4785-85c9-88891cd482b2" x="636" y="0" width="155" height="18" hTextAlign="Right">
+		<element kind="textField" uuid="4b025f5e-93f6-4785-85c9-88891cd482b2" x="636" y="60" width="155" height="18" hTextAlign="Right">
 			<expression><![CDATA["Impresso em: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new Date())]]></expression>
 		</element>
-		<element kind="staticText" uuid="e55d5e79-4a82-45f9-bc3a-56fbde936988" stretchType="NoStretch" x="-1" y="5" width="340" height="24" fontSize="12.0" bold="false" italic="false" hTextAlign="Left" vTextAlign="Top">
+		<element kind="staticText" uuid="e55d5e79-4a82-45f9-bc3a-56fbde936988" stretchType="NoStretch" x="-1" y="65" width="340" height="24" fontSize="12.0" bold="false" italic="false" hTextAlign="Left" vTextAlign="Top">
 			<text><![CDATA[Relatório de Solicitações - Agrupado por Setor]]></text>
 		</element>
-	</pageHeader>
-	<columnHeader height="22">
-		<element kind="staticText" uuid="f2f9e45b-7fd0-4d85-b7b2-3ce8a0c5e1f1" x="0" y="0" width="40" height="18" bold="true">
+		<element kind="staticText" uuid="f2f9e45b-7fd0-4d85-b7b2-3ce8a0c5e1f1" x="0" y="95" width="40" height="18" bold="true">
 			<text><![CDATA[ID]]></text>
 		</element>
-		<element kind="staticText" uuid="5a1e01d5-5f61-4a42-9f9a-7c9b7de2b0d8" x="45" y="0" width="80" height="18" bold="true">
+		<element kind="staticText" uuid="5a1e01d5-5f61-4a42-9f9a-7c9b7de2b0d8" x="45" y="95" width="80" height="18" bold="true">
 			<text><![CDATA[Data]]></text>
 		</element>
-		<element kind="staticText" uuid="7bd0f9cd-74e2-4f05-9c8f-1f5c6b3f65d8" x="130" y="0" width="90" height="18" bold="true">
+		<element kind="staticText" uuid="7bd0f9cd-74e2-4f05-9c8f-1f5c6b3f65d8" x="130" y="95" width="90" height="18" bold="true">
 			<text><![CDATA[Status]]></text>
 		</element>
-		<element kind="staticText" uuid="a3b0f9d8-2c2c-4c6a-8f8b-9ed7cdbd5c10" x="225" y="0" width="100" height="18" bold="true">
+		<element kind="staticText" uuid="a3b0f9d8-2c2c-4c6a-8f8b-9ed7cdbd5c10" x="225" y="95" width="100" height="18" bold="true">
 			<text><![CDATA[Carro]]></text>
 		</element>
-		<element kind="staticText" uuid="c9f1a5c7-62c0-4f1c-8c6b-1f9a9e8b2b21" x="330" y="0" width="160" height="18" bold="true">
+		<element kind="staticText" uuid="c9f1a5c7-62c0-4f1c-8c6b-1f9a9e8b2b21" x="330" y="95" width="160" height="18" bold="true">
 			<text><![CDATA[Motorista]]></text>
 		</element>
-		<element kind="staticText" uuid="7a2d3e48-7a4a-4b6c-9f26-7ce9efc8f5f3" x="495" y="0" width="190" height="18" bold="true">
+		<element kind="staticText" uuid="7a2d3e48-7a4a-4b6c-9f26-7ce9efc8f5f3" x="495" y="95" width="190" height="18" bold="true">
 			<text><![CDATA[Destino]]></text>
 		</element>
-		<element kind="staticText" uuid="e5b2c1d7-8d6e-4f0b-9e07-60c9dbb5cc0a" x="690" y="0" width="55" height="18" bold="true" hTextAlign="Right">
+		<element kind="staticText" uuid="e5b2c1d7-8d6e-4f0b-9e07-60c9dbb5cc0a" x="690" y="95" width="55" height="18" bold="true" hTextAlign="Right">
 			<text><![CDATA[KM]]></text>
 		</element>
-		<element kind="staticText" uuid="b31f3a9c-21d8-4e2c-98f5-6a8d0e2f0c37" x="750" y="0" width="52" height="18" bold="true" hTextAlign="Right">
+		<element kind="staticText" uuid="b31f3a9c-21d8-4e2c-98f5-6a8d0e2f0c37" x="750" y="95" width="52" height="18" bold="true" hTextAlign="Right">
 			<text><![CDATA[KM Tot]]></text>
 		</element>
-	</columnHeader>
+	</title>
+	<pageHeader height="0"/>
+	<columnHeader height="0"/>
 	<detail>
 		<band height="18">
 			<element kind="textField" uuid="4b1f4d7d-03dd-4d6c-96a8-4b5d7c8d9e01" x="0" y="0" width="40" height="18">
 				<expression><![CDATA[$F{id}]]></expression>
 			</element>
 			<element kind="textField" uuid="2e0d3a5f-0a4f-4d7a-9b33-09f7b2b1c2d2" x="45" y="0" width="80" height="18">
-				<expression><![CDATA[$F{dataSolicitacao}]]></expression>
+				<expression><![CDATA[
+					$F{dataSolicitacao} == null ? "" :
+					$F{dataSolicitacao}.format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+				]]></expression>
 			</element>
 			<element kind="textField" uuid="9e8a1b0c-6c14-4f7d-8a45-7b3b2f1c0a99" x="130" y="0" width="90" height="18">
 				<expression><![CDATA[$F{status}]]></expression>
@@ -130,7 +131,7 @@
 			<expression><![CDATA[$V{KM_TOTAL_GERAL}]]></expression>
 		</element>
 		<element kind="staticText" uuid="818512db-5c61-48d5-846b-634afa1a8979" x="0" y="23" width="120" height="30">
-			<text><![CDATA[Total de solicitações:]]></text>
+			<text><![CDATA[Total de solicitaÃ§Ãµes:]]></text>
 		</element>
 		<element kind="textField" uuid="f1e5f011-54dd-4fa1-9d48-a10068c3368e" x="130" y="23" width="60" height="30" fontSize="10.0" bold="true" hTextAlign="Left">
 			<expression><![CDATA[$V{TOTAL_SOLICITACOES}]]></expression>

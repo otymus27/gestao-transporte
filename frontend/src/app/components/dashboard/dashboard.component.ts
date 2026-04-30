@@ -100,6 +100,10 @@ export class DashboardComponent implements OnInit {
     return this.authService.getLoggedInRoles().includes('GERENTE');
   }
 
+  isSupervisor(): boolean {
+    return this.authService.getLoggedInRoles().includes('SUPERVISOR');
+  }
+
   isBasic(): boolean {
     return this.authService.getLoggedInRoles().includes('BASIC');
   }

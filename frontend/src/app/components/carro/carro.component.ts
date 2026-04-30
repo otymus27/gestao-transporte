@@ -13,6 +13,7 @@ import { Paginacao } from '../../models/paginacao';
 import { Carro } from '../../models/carro';
 import { ErrorMessage, CarroService } from '../../services/carro.service';
 import { TipoCarro } from './../../enums/tipo_carro.enum';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-carro',
@@ -73,10 +74,15 @@ export class CarroComponent {
   carroService = inject(CarroService);
   modalService = inject(MdbModalService);
   toastService = inject(ToastService);
+  private authService = inject(AuthService);
 
   // Modais
   @ViewChild('modalCarroDetalhe') modalCarroDetalhe!: TemplateRef<any>;
   modalRef!: MdbModalRef<any>;
+
+  canDelete(): boolean {
+    return this.authService.getLoggedInRoles().includes('ADMIN');
+  }
 
   @ViewChild('modalConfirmacaoExclusao')
   modalConfirmacaoExclusao!: TemplateRef<any>;

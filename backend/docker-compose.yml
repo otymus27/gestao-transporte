@@ -2,10 +2,13 @@ services:
   api:
     build: .
     container_name: api-transporte
+    restart: unless-stopped
     env_file:
       - .env
+    environment:
+      - TZ=America/Sao_Paulo
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
     networks:
       - otymus_net
 

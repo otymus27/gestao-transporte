@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.design.JRCompiler;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
@@ -35,14 +36,15 @@ public class RelatorioSolicitacaoService {
     private static final TipoRelatorioSolicitacao TIPO_PADRAO = TipoRelatorioSolicitacao.SIMPLES;
 
     private static final Map<TipoRelatorioSolicitacao, String> RELATORIOS = Map.of(
-            TipoRelatorioSolicitacao.SIMPLES,        "reports/solicitacoes/rel_solicitacao.jasper",
-            TipoRelatorioSolicitacao.POR_SETOR,      "reports/solicitacoes/rel_solicitacao_agrupado_por_setor.jasper",
-            TipoRelatorioSolicitacao.POR_MOTORISTA,  "reports/solicitacoes/rel_solicitacao_agrupado_por_motorista.jasper",
-            TipoRelatorioSolicitacao.POR_CARRO,      "reports/solicitacoes/rel_solicitacao_agrupado_por_carro.jasper",
-            TipoRelatorioSolicitacao.POR_DESTINO,    "reports/solicitacoes/rel_solicitacao_agrupado_por_destino.jasper"
+            TipoRelatorioSolicitacao.SIMPLES,        "reports/solicitacoes/rel_solicitacao.jrxml",
+            TipoRelatorioSolicitacao.POR_SETOR,      "reports/solicitacoes/rel_solicitacao_agrupado_por_setor.jrxml",
+            TipoRelatorioSolicitacao.POR_MOTORISTA,  "reports/solicitacoes/rel_solicitacao_agrupado_por_motorista.jrxml",
+            TipoRelatorioSolicitacao.POR_CARRO,      "reports/solicitacoes/rel_solicitacao_agrupado_por_carro.jrxml",
+            TipoRelatorioSolicitacao.POR_DESTINO,    "reports/solicitacoes/rel_solicitacao_agrupado_por_destino.jrxml"
     );
 
     private static final String LOGO_PATH = "reports/images/logo_hrg.png";
+    private static final String JASPER_JDT_COMPILER = "net.sf.jasperreports.jdt.JRJdtCompiler";
 
     private final SolicitacaoRepository solicitacaoRepository;
 
@@ -162,12 +164,18 @@ public class RelatorioSolicitacaoService {
 
         try {
             ClassPathResource resource = new ClassPathResource(caminho);
-            if (!resource.exists()) throw new RuntimeException("Relatório .jasper não encontrado: " + caminho);
+            if (!resource.exists()) throw new RuntimeException("Relatório não encontrado: " + caminho);
             try (InputStream is = resource.getInputStream()) {
+                if (caminho.endsWith(".jrxml")) {
+                    DefaultJasperReportsContext context = DefaultJasperReportsContext.getInstance();
+                    context.setProperty(JRCompiler.COMPILER_CLASS, JASPER_JDT_COMPILER);
+                    context.setProperty(JRCompiler.COMPILER_PREFIX + "java", JASPER_JDT_COMPILER);
+                    return JasperCompileManager.getInstance(context).compile(is);
+                }
                 return (JasperReport) JRLoader.loadObject(is);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao carregar relatório .jasper: " + caminho + " - " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao carregar relatório: " + caminho + " - " + e.getMessage(), e);
         }
     }
 

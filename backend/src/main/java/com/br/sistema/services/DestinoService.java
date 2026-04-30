@@ -60,7 +60,7 @@ public class DestinoService {
 
         // 3️⃣ Verificar permissões (somente ADMIN pode cadastrar destino)
         boolean temPermissao = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> "ADMIN".equals(r.getNome()));
+                .anyMatch(r -> "ADMIN".equals(r.getNome()) || "SUPERVISOR".equals(r.getNome()));
         if (!temPermissao) {
             throw new AccessDeniedException("Usuário não tem permissão para cadastrar destino.");
         }
@@ -96,7 +96,7 @@ public class DestinoService {
         }
 
         boolean temPermissao = usuarioLogado.getRoles().stream()
-                .anyMatch(r -> "ADMIN".equals(r.getNome()));
+                .anyMatch(r -> "ADMIN".equals(r.getNome()) || "SUPERVISOR".equals(r.getNome()));
         if (!temPermissao) {
             throw new AccessDeniedException("Usuário não tem permissão para atualizar destino.");
         }
