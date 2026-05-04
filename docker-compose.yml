@@ -7,8 +7,8 @@ services:
             - .env
         environment:
             - TZ=America/Sao_Paulo
-        expose:
-            - "8080"
+        ports:
+            - "8084:8080"
         networks:
             - otymus_net
 
@@ -23,7 +23,11 @@ services:
         depends_on:
             - api
         healthcheck:
-            test: ["CMD-SHELL", "wget -qO- http://localhost/health >/dev/null 2>&1 || exit 1"]
+            test:
+                [
+                    "CMD-SHELL",
+                    "wget -qO- http://localhost/health >/dev/null 2>&1 || exit 1",
+                ]
             interval: 30s
             timeout: 5s
             retries: 3
