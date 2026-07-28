@@ -15,13 +15,15 @@ import { RelatorioMotoristaService } from '../../services/relatorios/relatorio-m
 import { RelatorioCarroService } from '../../services/relatorios/relatorio-carro.service';
 import { RelatorioSetorService } from '../../services/relatorios/relatorio-setor.service';
 import { RelatorioDestinoService } from '../../services/relatorios/relatorio-destino.service';
+import { RelatorioProducaoService } from '../../services/relatorios/relatorio-producao.service';
 
 export type ModuloRelatorio =
   | 'solicitacoes'
   | 'motoristas'
   | 'carros'
   | 'setores'
-  | 'destinos';
+  | 'destinos'
+  | 'producao';
 
 type ModuloCard = {
   key: ModuloRelatorio;
@@ -80,6 +82,12 @@ export class RelatorioCentralComponent implements OnInit {
       icon: 'bi-geo-alt-fill',
       cor: 'teal',
     },
+    {
+      key: 'producao',
+      label: 'Produção por Usuário',
+      icon: 'bi-person-check-fill',
+      cor: 'indigo',
+    },
   ];
 
   filtroSol = {
@@ -95,6 +103,7 @@ export class RelatorioCentralComponent implements OnInit {
     { value: 'POR_MOTORISTA', label: 'Por Motorista' },
     { value: 'POR_CARRO', label: 'Por Veículo' },
     { value: 'POR_DESTINO', label: 'Por Destino' },
+    { value: 'POR_USUARIO', label: 'Por Usuário' },
   ];
 
   filtroMot = { nome: '', matricula: '' };
@@ -122,6 +131,8 @@ export class RelatorioCentralComponent implements OnInit {
   filtroSet = { nome: '' };
   filtroDest = { nome: '' };
 
+  filtroProd = { nomeUsuario: '', dataInicio: '', dataFim: '' };
+
   colunas: { key: string; label: string; center?: boolean }[] = [];
 
   constructor(
@@ -135,7 +146,8 @@ export class RelatorioCentralComponent implements OnInit {
     private relMotService: RelatorioMotoristaService,
     private relCarService: RelatorioCarroService,
     private relSetService: RelatorioSetorService,
-    private relDestService: RelatorioDestinoService
+    private relDestService: RelatorioDestinoService,
+    private relProdService: RelatorioProducaoService
   ) {}
 
   ngOnInit(): void {
@@ -155,6 +167,8 @@ export class RelatorioCentralComponent implements OnInit {
         return `${this.totalSetores} cadastrados`;
       case 'destinos':
         return `${this.totalDestinos} cadastrados`;
+      case 'producao':
+        return 'fichas e solicitações';
     }
   }
 
@@ -223,6 +237,17 @@ export class RelatorioCentralComponent implements OnInit {
       destinos: [
         { key: 'id', label: 'ID', center: true },
         { key: 'nome', label: 'Nome' },
+      ],
+      producao: [
+        { key: 'usuarioNome', label: 'Usuário' },
+        { key: 'username', label: 'Login' },
+        { key: 'quantidadeFichas', label: 'Qtd. Fichas', center: true },
+        {
+          key: 'quantidadeSolicitacoes',
+          label: 'Qtd. Solicitações',
+          center: true,
+        },
+        { key: 'totalGeral', label: 'Total', center: true },
       ],
     };
 
@@ -314,6 +339,20 @@ export class RelatorioCentralComponent implements OnInit {
           )
           .subscribe({ next, error });
         break;
+
+      case 'producao':
+        this.relProdService
+          .consultar(
+            {
+              nomeUsuario: this.filtroProd.nomeUsuario?.trim() || undefined,
+              dataInicio: this.filtroProd.dataInicio || undefined,
+              dataFim: this.filtroProd.dataFim || undefined,
+            },
+            this.page,
+            this.size
+          )
+          .subscribe({ next, error });
+        break;
     }
   }
 
@@ -328,6 +367,7 @@ export class RelatorioCentralComponent implements OnInit {
     this.filtroCar = { placa: '', marca: '', modelo: '', tipo: '' };
     this.filtroSet = { nome: '' };
     this.filtroDest = { nome: '' };
+    this.filtroProd = { nomeUsuario: '', dataInicio: '', dataFim: '' };
     this.resultados = [];
     this.consultado = false;
     this.page = 0;
@@ -412,6 +452,21 @@ export class RelatorioCentralComponent implements OnInit {
               })
             : this.relDestService.exportarExcel({
                 nome: this.filtroDest.nome?.trim() || undefined,
+              });
+        break;
+
+      case 'producao':
+        obs$ =
+          tipo === 'pdf'
+            ? this.relProdService.exportarPdf({
+                nomeUsuario: this.filtroProd.nomeUsuario?.trim() || undefined,
+                dataInicio: this.filtroProd.dataInicio || undefined,
+                dataFim: this.filtroProd.dataFim || undefined,
+              })
+            : this.relProdService.exportarExcel({
+                nomeUsuario: this.filtroProd.nomeUsuario?.trim() || undefined,
+                dataInicio: this.filtroProd.dataInicio || undefined,
+                dataFim: this.filtroProd.dataFim || undefined,
               });
         break;
     }

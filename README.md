@@ -13,7 +13,8 @@ Principais recursos:
 - CRUD de usuarios, carros, motoristas, setores e destinos.
 - Gestao de solicitacoes e fichas com multiplas solicitacoes.
 - Dashboard administrativo com indicadores.
-- Relatorios de solicitacoes, motoristas, carros, setores e destinos.
+- Relatorios de solicitacoes (agrupados por setor, motorista, veiculo, destino ou usuario), motoristas, carros, setores e destinos.
+- Relatorio de producao por usuario: quantidade de fichas e de solicitacoes criadas por usuario em um periodo, para comprovacao de producao de quem digitou os registros.
 - Exportacao de relatorios em PDF e Excel.
 - Frontend Angular servido por Nginx em producao.
 - Backend Spring Boot com Flyway e MySQL.
@@ -89,7 +90,7 @@ gestao-transporte/
 - Destinos: cadastro, consulta e relatorios.
 - Solicitacoes: acompanhamento, status, motorista, setor, destino e quilometragem.
 - Fichas de solicitacao: agrupamento de multiplas solicitacoes em uma ficha.
-- Relatorios: filtros e exportacao em PDF/Excel.
+- Relatorios: filtros e exportacao em PDF/Excel, incluindo relatorio de producao por usuario (fichas e solicitacoes).
 - Sobre: informacoes institucionais e tecnicas do sistema.
 
 ## Configuracao

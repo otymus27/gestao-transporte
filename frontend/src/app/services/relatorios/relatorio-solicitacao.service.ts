@@ -11,7 +11,8 @@ export type TipoRelatorioSolicitacao =
   | 'POR_SETOR'
   | 'POR_MOTORISTA'
   | 'POR_CARRO'
-  | 'POR_DESTINO';
+  | 'POR_DESTINO'
+  | 'POR_USUARIO';
 
 /**
  * Filtros disponíveis para o relatório de Solicitações

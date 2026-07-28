@@ -1,0 +1,117 @@
+<!-- Created for o relatório de Produção por Usuário (fichas + solicitações por usuário) -->
+<jasperReport name="rel_producao_usuario" language="java" columnCount="1" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8b6f0c34-2b1a-4b4b-9a9e-9a2f7c9c1b31">
+	<parameter name="NOME_USUARIO" class="java.lang.String"/>
+	<parameter name="FILTRO_DESCRICAO" class="java.lang.String"/>
+	<parameter name="LOGO" class="java.io.InputStream"/>
+	<field name="usuarioId" class="java.lang.Long"/>
+	<field name="usuarioNome" class="java.lang.String"/>
+	<field name="username" class="java.lang.String"/>
+	<field name="quantidadeFichas" class="java.lang.Long"/>
+	<field name="quantidadeSolicitacoes" class="java.lang.Long"/>
+	<field name="totalGeral" class="java.lang.Long"/>
+	<variable name="TOTAL_USUARIOS" calculation="Count" class="java.lang.Integer">
+		<expression><![CDATA[$F{usuarioId}]]></expression>
+	</variable>
+	<variable name="TOTAL_FICHAS" calculation="Sum" class="java.lang.Long">
+		<expression><![CDATA[$F{quantidadeFichas}]]></expression>
+	</variable>
+	<variable name="TOTAL_SOLICITACOES" calculation="Sum" class="java.lang.Long">
+		<expression><![CDATA[$F{quantidadeSolicitacoes}]]></expression>
+	</variable>
+	<title height="116">
+		<element kind="staticText" uuid="1a2b3c4d-5e6f-4708-8a9b-0c1d2e3f4a5b" x="0" y="0" width="555" height="30" fontSize="18.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Sistema de Controle de Requisição]]></text>
+		</element>
+		<element kind="image" uuid="2b3c4d5e-6f70-4819-9a0b-1c2d3e4f5a6b" x="0" y="5" width="60" height="25">
+			<expression><![CDATA[$P{LOGO}]]></expression>
+		</element>
+		<element kind="textField" uuid="3c4d5e6f-7081-492a-ab1c-2d3e4f5a6b7c" x="400" y="42" width="155" height="18" hTextAlign="Right">
+			<expression><![CDATA[
+                "Impresso em: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date())
+            ]]></expression>
+		</element>
+		<element kind="staticText" uuid="4d5e6f70-8192-4a3b-bc2d-3e4f5a6b7c8d" x="0" y="43" width="400" height="15" fontSize="10.0">
+			<text><![CDATA[Relatório de Produção por Usuário (Fichas e Solicitações) - HRG]]></text>
+		</element>
+		<element kind="textField" uuid="5e6f7081-92a3-4b4c-cd3e-4f5a6b7c8d9e" x="0" y="58" width="280" height="14" fontSize="8.0">
+			<expression><![CDATA[
+                "Usuário: " + ($P{NOME_USUARIO} == null ? "" : $P{NOME_USUARIO})
+            ]]></expression>
+		</element>
+		<element kind="textField" uuid="6f708192-a3b4-4c5d-de4f-5a6b7c8d9e0f" x="0" y="72" width="555" height="14" fontSize="8.0" italic="true">
+			<expression><![CDATA[
+                $P{FILTRO_DESCRICAO} == null ? "" : $P{FILTRO_DESCRICAO}
+            ]]></expression>
+		</element>
+		<element kind="staticText" uuid="708192a3-b4c5-4d6e-ef50-6a7b8c9d0e1f" x="0" y="86" width="220" height="15" bold="true">
+			<text><![CDATA[Usuário]]></text>
+		</element>
+		<element kind="staticText" uuid="8192a3b4-c5d6-4e7f-f061-7b8c9d0e1f20" x="225" y="86" width="140" height="15" bold="true">
+			<text><![CDATA[Login]]></text>
+		</element>
+		<element kind="staticText" uuid="92a3b4c5-d6e7-4f80-0172-8c9d0e1f2031" x="380" y="86" width="120" height="15" bold="true" hTextAlign="Center">
+			<text><![CDATA[Qtd. Fichas]]></text>
+		</element>
+		<element kind="staticText" uuid="a3b4c5d6-e7f8-4091-1283-9d0e1f203142" x="510" y="86" width="150" height="15" bold="true" hTextAlign="Center">
+			<text><![CDATA[Qtd. Solicitações]]></text>
+		</element>
+		<element kind="staticText" uuid="b4c5d6e7-f809-40a2-2394-0e1f20314253" x="670" y="86" width="132" height="15" bold="true" hTextAlign="Center">
+			<text><![CDATA[Total]]></text>
+		</element>
+		<element kind="line" uuid="c5d6e7f8-0910-40b3-3405-1f2031425364" x="0" y="104" width="802" height="1"/>
+	</title>
+	<pageHeader height="0"/>
+	<columnHeader height="0"/>
+	<detail>
+		<band height="20">
+			<element kind="textField" uuid="d6e7f809-1021-40c4-4516-203142536475" x="0" y="0" width="220" height="18">
+				<expression><![CDATA[$F{usuarioNome}]]></expression>
+			</element>
+			<element kind="textField" uuid="e7f80910-2132-40d5-5627-314253647586" x="225" y="0" width="140" height="18">
+				<expression><![CDATA[$F{username}]]></expression>
+			</element>
+			<element kind="textField" uuid="f8091021-3243-40e6-6738-425364758697" x="380" y="0" width="120" height="18" hTextAlign="Center">
+				<expression><![CDATA[$F{quantidadeFichas}]]></expression>
+			</element>
+			<element kind="textField" uuid="09102132-4354-40f7-7849-536475869778" x="510" y="0" width="150" height="18" hTextAlign="Center">
+				<expression><![CDATA[$F{quantidadeSolicitacoes}]]></expression>
+			</element>
+			<element kind="textField" uuid="10213243-4465-4108-895a-647586977889" x="670" y="0" width="132" height="18" hTextAlign="Center" bold="true">
+				<expression><![CDATA[$F{totalGeral}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<pageFooter height="32">
+		<element kind="textField" uuid="21324354-5576-4219-9a6b-758697788990" x="200" y="8" width="110" height="20" fontSize="8.0" hTextAlign="Right">
+			<expression><![CDATA[
+                "Página " + $V{PAGE_NUMBER} + " de  "
+            ]]></expression>
+		</element>
+		<element kind="textField" uuid="32435465-6687-432a-ab7c-869778899001" x="317" y="8" width="45" height="20" fontSize="8.0" evaluationTime="Report" hTextAlign="Left">
+			<expression><![CDATA[
+                 $V{PAGE_NUMBER}
+            ]]></expression>
+		</element>
+	</pageFooter>
+	<summary height="90">
+		<element kind="line" uuid="43546576-7798-443b-bc8d-978899001122" x="0" y="5" width="802" height="1"/>
+		<element kind="staticText" uuid="54657687-8809-454c-cd9e-889900112233" x="0" y="15" width="200" height="20">
+			<text><![CDATA[Total de usuários:]]></text>
+		</element>
+		<element kind="textField" uuid="65768798-9910-465d-daf0-990011223344" x="210" y="15" width="60" height="20" fontSize="10.0" bold="true">
+			<expression><![CDATA[$V{TOTAL_USUARIOS}]]></expression>
+		</element>
+		<element kind="staticText" uuid="76879809-a021-476e-eb01-001122334455" x="0" y="40" width="200" height="20">
+			<text><![CDATA[Total geral de fichas:]]></text>
+		</element>
+		<element kind="textField" uuid="8798091a-b132-487f-fc12-112233445566" x="210" y="40" width="60" height="20" fontSize="10.0" bold="true">
+			<expression><![CDATA[$V{TOTAL_FICHAS}]]></expression>
+		</element>
+		<element kind="staticText" uuid="98091a2b-c243-4980-0d23-223344556677" x="0" y="65" width="200" height="20">
+			<text><![CDATA[Total geral de solicitações:]]></text>
+		</element>
+		<element kind="textField" uuid="a091a2b3-d354-4a91-1e34-334455667788" x="210" y="65" width="60" height="20" fontSize="10.0" bold="true">
+			<expression><![CDATA[$V{TOTAL_SOLICITACOES}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

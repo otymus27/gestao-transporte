@@ -5,5 +5,6 @@ public enum TipoRelatorioSolicitacao {
     POR_SETOR,
     POR_MOTORISTA,
     POR_CARRO,
-    POR_DESTINO
+    POR_DESTINO,
+    POR_USUARIO
 }

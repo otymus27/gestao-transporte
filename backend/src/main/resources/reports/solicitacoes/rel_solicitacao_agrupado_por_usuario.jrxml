@@ -1,0 +1,161 @@
+<!-- Created for o relatório de Solicitações agrupado por Usuário (produção por usuário) -->
+<jasperReport name="solicitacoes_por_usuario" language="java" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d4e5f607-1829-4a3b-8c5d-6e7f8091a2b3">
+	<parameter name="LOGO" class="java.io.InputStream"/>
+	<field name="id" class="java.lang.Long"/>
+	<field name="dataSolicitacao" class="java.time.LocalDate"/>
+	<field name="status" class="java.lang.String"/>
+	<field name="carro" class="java.lang.String"/>
+	<field name="motorista" class="java.lang.String"/>
+	<field name="usuario" class="java.lang.String"/>
+	<field name="setor" class="java.lang.String"/>
+	<field name="destino" class="java.lang.String"/>
+	<field name="kmInicial" class="java.lang.Integer"/>
+	<field name="kmFinal" class="java.lang.Integer"/>
+	<field name="horaSaida" class="java.time.LocalTime"/>
+	<field name="horaChegada" class="java.time.LocalTime"/>
+	<field name="kmTotal" class="java.lang.String"/>
+	<variable name="TOTAL_SOLICITACOES" calculation="Count" class="java.lang.Integer">
+		<expression><![CDATA[$F{id}]]></expression>
+	</variable>
+	<variable name="QTD_SOLICITACOES_USUARIO" resetType="Group" calculation="Count" resetGroup="grpUsuario" class="java.lang.Integer">
+		<expression><![CDATA[$F{id}]]></expression>
+	</variable>
+	<variable name="KM_TOTAL_USUARIO" resetType="Group" calculation="Sum" resetGroup="grpUsuario" class="java.lang.Integer">
+		<expression><![CDATA[
+			($F{kmTotal} == null || "-".equals($F{kmTotal}.trim())) ? 0 : Integer.valueOf($F{kmTotal}.trim())
+		]]></expression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="KM_TOTAL_GERAL" calculation="Sum" class="java.lang.Integer">
+		<expression><![CDATA[
+			($F{kmTotal} == null || "-".equals($F{kmTotal}.trim())) ? 0 : Integer.valueOf($F{kmTotal}.trim())
+		]]></expression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<group name="grpUsuario">
+		<expression><![CDATA[$F{usuario}]]></expression>
+		<groupHeader>
+			<band height="28">
+				<element kind="staticText" uuid="a1b2c3d4-5e6f-4708-8a9b-0c1d2e3f4a51" x="0" y="0" width="80" height="18" fontSize="12.0" bold="true">
+					<text><![CDATA[Usuário:]]></text>
+				</element>
+				<element kind="textField" uuid="b2c3d4e5-6f70-4819-9a0b-1c2d3e4f5a62" x="80" y="0" width="722" height="18" fontSize="12.0" bold="true">
+					<expression><![CDATA[$F{usuario}]]></expression>
+				</element>
+				<element kind="line" uuid="c3d4e5f6-7081-492a-ab1c-2d3e4f5a6b73" x="0" y="22" width="802" height="1"/>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="26">
+				<element kind="line" uuid="d4e5f607-8192-4a3b-bc2d-3e4f5a6b7c84" x="0" y="0" width="802" height="1"/>
+				<element kind="staticText" uuid="e5f60718-92a3-4b4c-cd3e-4f5a6b7c8d95" x="330" y="6" width="180" height="18" bold="true" hTextAlign="Right">
+					<text><![CDATA[Qtd. Solicitações do Usuário:]]></text>
+				</element>
+				<element kind="textField" uuid="f6071829-a3b4-4c5d-de4f-5a6b7c8d9ea6" x="510" y="6" width="60" height="18" pattern="#,##0" bold="true" hTextAlign="Right">
+					<expression><![CDATA[$V{QTD_SOLICITACOES_USUARIO}]]></expression>
+				</element>
+				<element kind="staticText" uuid="07182930-b4c5-4d6e-ef50-6a7b8c9d0eb7" x="580" y="6" width="120" height="18" bold="true" hTextAlign="Right">
+					<text><![CDATA[KM Total do Usuário:]]></text>
+				</element>
+				<element kind="textField" uuid="18293041-c5d6-4e7f-f061-7b8c9d0e1fc8" x="700" y="6" width="102" height="18" pattern="#,##0" bold="true" hTextAlign="Right">
+					<expression><![CDATA[$V{KM_TOTAL_USUARIO}]]></expression>
+				</element>
+			</band>
+		</groupFooter>
+	</group>
+	<title height="132">
+		<element kind="image" uuid="29304152-d6e7-4f80-0172-8c9d0e1f20d9" x="0" y="0" width="90" height="40">
+			<expression><![CDATA[$P{LOGO}]]></expression>
+		</element>
+		<element kind="staticText" uuid="3a415263-e7f8-4091-1283-9d0e1f2031ea" x="100" y="0" width="702" height="24" fontSize="16.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Sistema de Controle de Requisição]]></text>
+		</element>
+		<element kind="line" uuid="d2dd9cf2-a931-9f32-4f13-c5b74dfc2690" x="0" y="52" width="802" height="1"/>
+		<element kind="textField" uuid="f64de348-73cc-0834-1c2c-449f483d7918" x="636" y="60" width="155" height="18" hTextAlign="Right">
+			<expression><![CDATA["Impresso em: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(new Date())]]></expression>
+		</element>
+		<element kind="staticText" uuid="77d9ef27-3e3c-179e-6b28-f1d0872536b3" stretchType="NoStretch" x="-1" y="65" width="340" height="15" fontSize="10.0" bold="true" italic="false" hTextAlign="Left" vTextAlign="Top">
+			<text><![CDATA[Relatório de Solicitações - Agrupado por Usuário]]></text>
+		</element>
+		<element kind="staticText" uuid="ef5d6acd-e44d-9362-7b9a-9f85ab7f69bb" x="0" y="110" width="40" height="18" bold="true">
+			<text><![CDATA[ID]]></text>
+		</element>
+		<element kind="staticText" uuid="6bb7a2e6-bf31-3706-008e-e38864f227e5" x="45" y="110" width="35" height="18" bold="true">
+			<text><![CDATA[Data]]></text>
+		</element>
+		<element kind="staticText" uuid="e78c97c9-818e-1382-3eae-93b71401f2d2" x="110" y="110" width="35" height="18" bold="true">
+			<text><![CDATA[Carro]]></text>
+		</element>
+		<element kind="staticText" uuid="a19224fc-7ffb-8802-4f3e-680cf363ecb7" x="235" y="110" width="40" height="18" bold="true">
+			<text><![CDATA[Setor]]></text>
+		</element>
+		<element kind="staticText" uuid="0c5b0611-0dbf-7874-a345-3114100abd26" x="380" y="112" width="64" height="18" bold="true">
+			<text><![CDATA[Destino]]></text>
+		</element>
+		<element kind="staticText" uuid="d0faf3ed-826f-17ef-21d2-104e566c0e41" x="580" y="110" width="50" height="18" bold="true" hTextAlign="Right">
+			<text><![CDATA[KM Inicial]]></text>
+		</element>
+		<element kind="staticText" uuid="aaa653f2-1220-c980-c92a-504d2641fce9" x="678" y="110" width="62" height="18" bold="true" hTextAlign="Right">
+			<text><![CDATA[KM Final]]></text>
+		</element>
+		<element kind="staticText" uuid="c62ef887-33ee-a02f-0eee-3d52cfb0ec99" x="760" y="110" width="42" height="18" bold="true" hTextAlign="Right">
+			<text><![CDATA[KM Total]]></text>
+		</element>
+	</title>
+	<pageHeader height="0"/>
+	<columnHeader height="0"/>
+	<detail>
+		<band height="18">
+			<element kind="textField" uuid="c624468b-4be1-c226-423c-4aae1aef63e5" x="0" y="0" width="40" height="18">
+				<expression><![CDATA[$F{id}]]></expression>
+			</element>
+			<element kind="textField" uuid="ead89357-edde-2150-d45e-e0c20497517b" x="45" y="0" width="55" height="18">
+				<expression><![CDATA[
+					$F{dataSolicitacao} == null ? "" :
+					$F{dataSolicitacao}.format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+				]]></expression>
+			</element>
+			<element kind="textField" uuid="9eadf486-5827-7ccb-178d-b92a2aa40c3a" x="110" y="0" width="95" height="18">
+				<expression><![CDATA[$F{carro}]]></expression>
+			</element>
+			<element kind="textField" uuid="261c2f2d-c719-c1f3-d5ae-caab5b568088" x="235" y="0" width="135" height="18">
+				<expression><![CDATA[$F{setor}]]></expression>
+			</element>
+			<element kind="textField" uuid="0053fb45-8b7c-fd79-e8af-cc5c0ade78f5" x="384" y="0" width="135" height="18">
+				<expression><![CDATA[$F{destino}]]></expression>
+			</element>
+			<element kind="textField" uuid="12afdd3e-4fab-9f4c-e80a-bd039355f2e6" x="556" y="0" width="80" height="18" hTextAlign="Right">
+				<expression><![CDATA[$F{kmInicial}]]></expression>
+			</element>
+			<element kind="textField" uuid="32b9ba0a-efa6-9d41-be14-fcc02471a1e5" x="650" y="0" width="80" height="18" hTextAlign="Right">
+				<expression><![CDATA[$F{kmFinal}]]></expression>
+			</element>
+			<element kind="textField" uuid="69587607-e391-64ff-8f2d-14695561c3e3" x="760" y="0" width="42" height="18" hTextAlign="Right">
+				<expression><![CDATA[$F{kmTotal}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<pageFooter height="50">
+		<element kind="textField" uuid="c47482e6-a9f4-68d3-7ff7-69f9644ede0a" x="330" y="0" width="100" height="30" hTextAlign="Right">
+			<expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+		<element kind="textField" uuid="04b27e54-494e-2a62-9f1c-c95b03cdc96e" x="440" y="0" width="100" height="30" evaluationTime="Report" hTextAlign="Left">
+			<expression><![CDATA[" de " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+	</pageFooter>
+	<summary height="53">
+		<element kind="line" uuid="e94564dc-a319-76be-081a-f12148a73d88" x="0" y="0" width="802" height="1"/>
+		<element kind="staticText" uuid="a7ff14cb-c58a-cb53-a083-8f22c0537577" x="520" y="6" width="180" height="18" fontSize="12.0" bold="true" hTextAlign="Right">
+			<text><![CDATA[KM Total Geral:]]></text>
+		</element>
+		<element kind="textField" uuid="2005804f-94b0-89c0-eb1e-621ef8fde76c" x="700" y="6" width="102" height="18" fontSize="12.0" pattern="#,##0" bold="true" hTextAlign="Right">
+			<expression><![CDATA[$V{KM_TOTAL_GERAL}]]></expression>
+		</element>
+		<element kind="staticText" uuid="bbeb1309-d626-1913-ef15-e217602fa489" x="0" y="23" width="120" height="30">
+			<text><![CDATA[Total de solicitações:]]></text>
+		</element>
+		<element kind="textField" uuid="da8af54f-336d-99c0-41a7-06881ae917e1" x="130" y="23" width="60" height="30" fontSize="10.0" bold="true" hTextAlign="Left">
+			<expression><![CDATA[$V{TOTAL_SOLICITACOES}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

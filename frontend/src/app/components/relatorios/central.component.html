@@ -58,7 +58,7 @@
           <input
             type="text"
             class="form-control form-control-sm"
-            placeholder="Motorista, setor, destino..."
+            placeholder="Motorista, usuário, setor, destino..."
             [(ngModel)]="filtroSol.filtro"
             (keyup.enter)="consultar(0)"
           />
@@ -183,6 +183,38 @@
             placeholder="Nome do destino"
             [(ngModel)]="filtroDest.nome"
             (keyup.enter)="consultar(0)"
+          />
+        </div>
+      </ng-container>
+
+      <!-- === PRODUÇÃO POR USUÁRIO === -->
+      <ng-container *ngIf="moduloAtivo === 'producao'">
+        <div class="filtro-grupo">
+          <label>Usuário</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Nome do usuário"
+            [(ngModel)]="filtroProd.nomeUsuario"
+            (keyup.enter)="consultar(0)"
+          />
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Data Início</label>
+          <input
+            type="date"
+            class="form-control form-control-sm"
+            [(ngModel)]="filtroProd.dataInicio"
+          />
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Data Fim</label>
+          <input
+            type="date"
+            class="form-control form-control-sm"
+            [(ngModel)]="filtroProd.dataFim"
           />
         </div>
       </ng-container>

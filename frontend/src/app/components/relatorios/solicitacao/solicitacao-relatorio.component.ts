@@ -37,6 +37,7 @@ export class SolicitacaoRelatorioComponent implements OnInit {
     { value: 'POR_MOTORISTA', label: 'Agrupado por Motorista' },
     { value: 'POR_CARRO', label: 'Agrupado por Veículo' },
     { value: 'POR_DESTINO', label: 'Agrupado por Destino' },
+    { value: 'POR_USUARIO', label: 'Agrupado por Usuário' },
   ];
 
   filtros = {

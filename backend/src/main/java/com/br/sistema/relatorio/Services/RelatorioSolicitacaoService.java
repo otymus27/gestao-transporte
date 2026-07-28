@@ -40,7 +40,8 @@ public class RelatorioSolicitacaoService {
             TipoRelatorioSolicitacao.POR_SETOR,      "reports/solicitacoes/rel_solicitacao_agrupado_por_setor.jrxml",
             TipoRelatorioSolicitacao.POR_MOTORISTA,  "reports/solicitacoes/rel_solicitacao_agrupado_por_motorista.jrxml",
             TipoRelatorioSolicitacao.POR_CARRO,      "reports/solicitacoes/rel_solicitacao_agrupado_por_carro.jrxml",
-            TipoRelatorioSolicitacao.POR_DESTINO,    "reports/solicitacoes/rel_solicitacao_agrupado_por_destino.jrxml"
+            TipoRelatorioSolicitacao.POR_DESTINO,    "reports/solicitacoes/rel_solicitacao_agrupado_por_destino.jrxml",
+            TipoRelatorioSolicitacao.POR_USUARIO,    "reports/solicitacoes/rel_solicitacao_agrupado_por_usuario.jrxml"
     );
 
     private static final String LOGO_PATH = "reports/images/logo_hrg.png";
@@ -246,6 +247,8 @@ public class RelatorioSolicitacaoService {
             case POR_CARRO     -> Comparator.comparing(SolicitacaoRelatorioDTO::getCarro,
                     Comparator.nullsLast(String::compareToIgnoreCase));
             case POR_DESTINO   -> Comparator.comparing(SolicitacaoRelatorioDTO::getDestino,
+                    Comparator.nullsLast(String::compareToIgnoreCase));
+            case POR_USUARIO   -> Comparator.comparing(SolicitacaoRelatorioDTO::getUsuario,
                     Comparator.nullsLast(String::compareToIgnoreCase));
             default            -> Comparator.comparing(SolicitacaoRelatorioDTO::getId);
         };
